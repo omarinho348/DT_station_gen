@@ -1,0 +1,21 @@
+node_modules/
+dist/
+
+# secrets (never commit)
+.env
+.env.*
+!.env.example
+
+# LLM budget ledger and response cache
+.agent-cache/
+
+# draft previews written by the Builder agent
+generated/_draft/
+
+# screenshots from local runs (goldens live in tests/golden/)
+screenshots/
+
+*.log
+.DS_Store
+Thumbs.db
+__pycache__/
