@@ -155,7 +155,7 @@ function connectCdp(wsUrl) {
   });
 }
 
-async function startVite() {
+export async function startVite() {
   const { createServer } = await import('vite');
   const server = await createServer({
     root: ROOT,

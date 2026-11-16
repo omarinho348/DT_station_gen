@@ -72,7 +72,7 @@ describe('materials', () => {
   it('builds headless, with every material named after its key', () => {
     const m = createMaterials();
     const keys = Object.keys(m);
-    expect(keys.length).toBe(23);
+    expect(keys.length).toBe(28);
     for (const key of keys) {
       expect(m[key].isMaterial).toBe(true);
       expect(m[key].name).toBe(key);

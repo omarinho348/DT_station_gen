@@ -26,6 +26,7 @@ export function SetupPage(outlet, route) {
         <span class="chip" data-placeholder title="${PLACEHOLDER_TIP}">
           ${icon('Wallet', { size: 14 })} <b>$4.50</b> left
         </span>
+        <a class="icon-btn" href="${href('gallery')}" title="Component gallery" aria-label="Component gallery">${icon('LayoutGrid', { size: 16 })}</a>
         <button class="icon-btn theme-toggle" type="button"></button>
       </div>
     </header>

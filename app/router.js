@@ -1,7 +1,7 @@
 // Tiny hash router: #/setup[/<step>] and #/twin. Hash routing keeps the whole app in one
 // page, so setup state (crew, brief, docs) is still in memory when the twin page opens.
 
-export const PAGES = ['setup', 'twin'];
+export const PAGES = ['setup', 'twin', 'gallery'];
 
 /**
  * "#/setup/brief?theme=dark" -> { page: 'setup', sub: 'brief', query: { theme: 'dark' } }.

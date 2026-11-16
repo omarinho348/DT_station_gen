@@ -17,6 +17,11 @@ describe('hash router', () => {
     expect(resolveRoute('#/setup/crew?theme=dark')).toEqual({ page: 'setup', sub: 'crew', query: { theme: 'dark' } });
   });
 
+  it('routes the component gallery', () => {
+    expect(resolveRoute('#/gallery')).toMatchObject({ page: 'gallery', sub: null });
+    expect(resolveRoute('#/gallery/someType?golden=1')).toEqual({ page: 'gallery', sub: 'someType', query: { golden: '1' } });
+  });
+
   it('falls back to setup for unknown routes', () => {
     expect(resolveRoute('#/nope/brief')).toMatchObject({ page: 'setup', sub: null });
   });
