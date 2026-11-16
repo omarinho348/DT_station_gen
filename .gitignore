@@ -19,3 +19,6 @@ screenshots/
 .DS_Store
 Thumbs.db
 __pycache__/
+
+# local copies of reference-repo files (read-only source material, never committed)
+reference/
