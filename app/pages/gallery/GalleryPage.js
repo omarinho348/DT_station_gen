@@ -1,7 +1,8 @@
-// Component gallery (dark): every registered component with live parameter sliders and motion
-// controls. #/gallery/<type>; add ?golden=1 for a clean, UI-free golden screenshot.
+// Component gallery (dark): every registered component (and product) with live parameter sliders
+// and motion controls; a product's build stages show as a 'stage' motion. #/gallery/<type>; add ?golden=1 for a clean, UI-free golden screenshot.
 // Everything here is generic: it reads the registry, never a component by name (rule 6).
 import { Box3, Box3Helper, Color, Vector3, Mesh, SphereGeometry, MeshBasicMaterial, Group } from 'three';
+import '../../../lib/products/index.js';
 import { Viewer } from '../../viewer/Viewer.js';
 import { icon } from '../../ui/icon.js';
 import { href } from '../../router.js';
@@ -13,7 +14,7 @@ import { smoother } from '../../../lib/core/motion.js';
 
 const CATEGORY_LABELS = {
   conveyor: 'Conveyors', robot: 'Robots', machine: 'Machines', fixture: 'Fixtures', station: 'Station furniture',
-  frame: 'Frames', axis: 'Axes', tool: 'Tools', transport: 'Transport', buffer: 'Buffers',
+  frame: 'Frames', axis: 'Axes', tool: 'Tools', transport: 'Transport', buffer: 'Buffers', product: 'Products',
 };
 const PLAY_SECONDS = 1.6;
 const PORT_GEOMETRY = new SphereGeometry(0.035, 16, 12);
@@ -25,7 +26,11 @@ const PORT_MATERIALS = {
 
 export function GalleryPage(outlet, route) {
   const golden = route.query?.golden === '1';
-  const defs = registry.components();
+  const defs = [
+    ...registry.components(),
+    ...registry.products().map((p) => ({ ...p, category: 'product', mount: 'carrier', ops: [], isProduct: true })),
+  ];
+  const getDef = (type) => defs.find((d) => d.type === type);
   const root = document.createElement('div');
   root.className = `gallery theme-dark${golden ? ' is-golden' : ''}`;
   root.innerHTML = `
@@ -68,11 +73,11 @@ export function GalleryPage(outlet, route) {
     if (slider) slider.value = v;
   });
 
-  function select(type) {
+  function select(type, query = {}) {
     const def = defs.find((d) => d.type === type) ?? defs[0];
     if (!def) return;
     document.title = `${def.type} · Gallery · ${APP_NAME}`;
-    params = {};
+    params = paramsFromQuery(def, query);
     renderList(def.type);
     rebuild(def, true);
   }
@@ -81,13 +86,13 @@ export function GalleryPage(outlet, route) {
     play = null;
     let next;
     try {
-      next = registry.buildComponent(def.type, params, { materials });
+      next = def.isProduct ? productView(def, params) : registry.buildComponent(def.type, params, { materials });
     } catch (e) {
       // e.g. a parameter combination the component's schema rejects: keep the last valid build.
       showError(e.message.replace(/^Invalid params for "[^"]+": /, ''));
       if (inst) {
         params = { ...inst.params };
-        renderPanel(registry.getComponent(inst.type)); // put the slider back
+        renderPanel(getDef(inst.type)); // put the slider back
       }
       return;
     }
@@ -137,10 +142,10 @@ export function GalleryPage(outlet, route) {
   }
 
   function frameCamera() {
-    const box = new Box3().setFromObject(inst.root);
+    const box = visibleBounds(inst.root);
     const size = box.getSize(new Vector3());
     const center = box.getCenter(new Vector3());
-    const radius = Math.max(size.length() / 2, 0.3);
+    const radius = Math.max(size.length() / 2, 0.05); // small parts (a 5 cm lamp) still fill the view
     const dist = radius / Math.sin((viewer.camera.fov * Math.PI) / 360) * 1.05;
     const dir = new Vector3(0.75, 0.42, 1).normalize();
     viewer.camera.position.copy(center).addScaledVector(dir, dist);
@@ -209,6 +214,10 @@ export function GalleryPage(outlet, route) {
       return `<label class="gal-field"><span>${f.label}</span>
         <input type="text" value="${escapeAttr(value)}" ${f.maxLength ? `maxlength="${f.maxLength}"` : ''} data-param="${f.key}" data-kind="string" /></label>`;
     }
+    if (f.kind === 'numberList') {
+      return `<label class="gal-field"><span>${f.label}</span>
+        <input type="text" value="${escapeAttr(value.join(', '))}" data-param="${f.key}" data-kind="numberList" /></label>`;
+    }
     if (f.kind === 'enum') {
       return `<label class="gal-field"><span>${f.label}</span>
         <select data-param="${f.key}">${f.options.map((o) => `<option ${o === value ? 'selected' : ''}>${o}</option>`).join('')}</select></label>`;
@@ -236,15 +245,16 @@ export function GalleryPage(outlet, route) {
   // Text fields rebuild when the edit is committed (Enter / blur), not on every keystroke.
   panel.addEventListener('change', (e) => {
     const t = e.target;
-    if (t.dataset.kind !== 'string') return;
-    params[t.dataset.param] = t.value;
-    rebuild(registry.getComponent(inst.type));
+    if (t.dataset.kind === 'string') params[t.dataset.param] = t.value;
+    else if (t.dataset.kind === 'numberList') params[t.dataset.param] = parseList(t.value);
+    else return;
+    rebuild(getDef(inst.type));
   });
 
   panel.addEventListener('input', (e) => {
     const t = e.target;
-    const def = registry.getComponent(inst.type);
-    if (t.dataset.kind === 'string') return;
+    const def = getDef(inst.type);
+    if (t.dataset.kind === 'string' || t.dataset.kind === 'numberList') return;
     if (t.dataset.param) {
       const f = paramFields(def.params).find((x) => x.key === t.dataset.param);
       params[f.key] = t.type === 'checkbox' ? t.checked : f.kind === 'enum' ? t.value : Number(t.value);
@@ -263,7 +273,7 @@ export function GalleryPage(outlet, route) {
   panel.addEventListener('click', (e) => {
     const b = e.target.closest('button');
     if (!b) return;
-    const def = registry.getComponent(inst.type);
+    const def = getDef(inst.type);
     if (b.dataset.motionValue) {
       inst.set(b.dataset.motionValue, b.value);
       b.parentElement.querySelectorAll('button').forEach((x) => x.classList.toggle('is-on', x === b));
@@ -275,7 +285,33 @@ export function GalleryPage(outlet, route) {
     }
   });
 
-  select(route.sub);
+  /**
+   * A product shown like a component: its stages as a 'stage' motion (one button each), its
+   * footprint from the visible meshes at the last stage. Starts at the last (complete) stage.
+   */
+  function productView(def, productParams) {
+    const p = registry.buildProduct(def.type, productParams, { materials });
+    const last = def.stages.at(-1);
+    p.setStage(last);
+    const b = visibleBounds(p.root);
+    const view = {
+      type: def.type,
+      params: p.params,
+      footprint: { x: [b.min.x, b.max.x], z: [b.min.z, b.max.z], height: b.max.y },
+      ports: {},
+      motions: { stage: { values: def.stages, default: last } },
+      state: { stage: last },
+      root: p.root,
+      set(name, value) {
+        p.setStage(value);
+        view.state[name] = value;
+      },
+      dispose: () => p.dispose(),
+    };
+    return view;
+  }
+
+  select(route.sub, route.query);
   applyMotionQuery(route.query);
 
   /** URL query sets motions, e.g. #/gallery/<type>?<motion>=<value> (for screenshots of a state). */
@@ -286,14 +322,14 @@ export function GalleryPage(outlet, route) {
       if (!spec) continue;
       inst.set(name, spec.range ? Number(raw) : raw);
     }
-    renderPanel(registry.getComponent(inst.type));
+    renderPanel(getDef(inst.type));
   }
   // Golden shots show every lamp/motion at its default; ready once the first frames are drawn.
   requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
 
   return {
     update(r) {
-      if (r.sub !== inst?.type) select(r.sub);
+      if (r.sub !== inst?.type) select(r.sub, r.query);
       applyMotionQuery(r.query);
     },
     unmount() {
@@ -305,6 +341,37 @@ export function GalleryPage(outlet, route) {
       root.remove();
     },
   };
+}
+
+/** URL query sets start params as p.<param>=<value>, e.g. #/gallery/<type>?p.length=3 (screenshots). */
+function paramsFromQuery(def, query) {
+  const params = {};
+  for (const f of paramFields(def.params)) {
+    const raw = query[`p.${f.key}`];
+    if (raw === undefined) continue;
+    if (f.kind === 'boolean') params[f.key] = raw === 'true' || raw === '1';
+    else if (f.kind === 'number' || f.kind === 'integer') params[f.key] = Number(raw);
+    else if (f.kind === 'numberList') params[f.key] = parseList(raw);
+    else params[f.key] = raw;
+  }
+  return params;
+}
+
+/** "0.1, -0.2 0.3" → [0.1, -0.2, 0.3] (the schema rejects anything that isn't a number). */
+function parseList(text) {
+  return String(text).split(/[\s,;]+/).filter(Boolean).map(Number);
+}
+
+/** Bounds of the visible meshes only (hidden parts of a product still sit somewhere). */
+function visibleBounds(root) {
+  root.updateMatrixWorld(true);
+  const box = new Box3();
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    for (let n = o; n; n = n.parent) if (!n.visible) return;
+    box.union(new Box3().setFromObject(o, true));
+  });
+  return box;
 }
 
 function escapeAttr(v) {
