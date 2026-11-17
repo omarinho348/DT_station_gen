@@ -467,4 +467,80 @@ Reference file received: `common/PrinterModel.js` (saved in `reference/printer-l
 
 **Phase 2 done-criteria:** every component passes its tests ✓ (32 components + the printer product, generic §9 checks on all of them); looks right in the gallery ✓ (golden images checked by eye). Side-by-side comparison with reference screenshots: I have no reference screenshots, only the code, so the visual check was against the reference geometry. The owner can compare the gallery with the old repo.
 
-**Next:** Phase 3: ops, station and line runtime. First step: basic ops (`move, rotate, grip, release, toolOn, transform, transfer, wait, decide`) on `defineOp`, with durations from the trapezoid / quintic profiles, and `PickPlace.js` / `AssemblyCycle.js` (already here) as the reference for the named ops.
+## Phase 3: Ops, station and line runtime
+
+### Step 1: Basic ops (done)
+
+Phase 2 approved by silence (owner rule). No new reference files needed: `AssemblyCycle.js` and `PickPlace.js` were already here.
+
+**Changed**
+- Registry contract:
+  - Range motions may declare `wrap` (the range is one period: yaw, belt / roller / wheel phase, bit spin; moves take the short way and relative moves may go round many times) and `travel` (metres of surface per full range, so a conveyor op scrolls any belt or roller without knowing the component).
+  - Components may declare `anchors` (fixed list or a function of params): named Object3D frames that move with the motions and can carry things. `build()` returns them, the registry checks declared = provided, `instance.anchor(name)`.
+  - `componentSpec(type, params, ctx)`: motions, ports, anchors, footprint **without building geometry** (for dry runs / timing); `buildComponent` now uses it.
+  - Op `duration` is optional: when absent, an op's duration is the sum of the steps its `expand()` queues. No basic op defines one, so durations always add up from the steps (Claude.md §6.3).
+- Components updated for the contract: `cartesianGantry` and `scara` (`yaw` wraps; anchor `tool` at the tool point), `palletConveyor` (`belt` wraps, travel 0.5 m; anchor `carrier` = locating plate when there is a work stop), `rollerConveyor` / `crossTransfer` (roller / wheel phase wraps, travel = circumference), `screwdriver` (`driverSpin` wraps). No geometry changes; goldens unaffected.
+- `lib/ops/OpCycle.js`: what ops expand into. **Run** mode queues steps on a `StepSequencer` and drives real instances; **dry** mode only records steps (timing, takt, SimPy later). Same expansion code for both. Keeps the *planned* state (each motion's value and each item's location once the queued steps have run) for distances and durations; at run time each step still starts from the actual state. Carrying: an item attached to an anchor keeps its exact pose relative to it whenever that machine's motions change. Errors name the op and its position, nested through decisions (`op #3 (decide) › case "fail" › op #1 (move): machine "robot".x must stay in [-0.6, 0.6], got 7`). `dryRun(registry, ops, { equipment: { id: { type, params } } })` gives durations from the catalog alone.
+- `lib/ops/basic/` (one file per op, loaded by `lib/ops/index.js`), all with zod args and common `label` / `state` / `status`:
+  - `move`: several axes of one machine together; `to` (absolute) and/or `by` (relative) in one step (e.g. a bit running down while it turns); `seconds` or `speed`; profiles smooth (quintic, as `queueToolMove`), linear, trapezoid.
+  - `rotate`: one axis `to` a value (short way) or `by` an amount (many turns on periodic axes).
+  - `grip`: attach an item to a machine anchor, close the grip motion, switch `holding` on if the machine has it. A locating plate is a grip too (`motion: locate, anchor: carrier`): the carrier rises onto the pins with the plate.
+  - `release`: open, `holding` off, let go; the item stays where it is. `onto`: put it onto another item (part on a carrier) and it moves with it from then on. Released by the same machine that picked it from a port (a locating plate), the item is back at that port.
+  - `toolOn`: switch a value motion, optionally hold it and switch to `then`.
+  - `transform`: product stage change at the start or end of a timed step.
+  - `transfer`: convey an item between two ports of a conveyor with the line trapezoid (same durations as the reference `queueTravel`); every `travel` motion scrolls with it; the start port defaults to where the item is.
+  - `wait`.
+  - `decide`: branch on a fact (e.g. `quality`, deterministic per serial). Decided when the cycle is planned; **every branch is validated whatever the fact**, so an error never depends on the serial. Dry runs take the longest branch and mark motions the branches disagree on as UNKNOWN (a later speed-based move from there is planned at its worst case, the whole range).
+- Dev check scene `#/twin?demo=ops` (`?t=<s>` freezes it at a moment for screenshots): `app/dev/opsDemo.json` (equipment by catalog type, box items, a process written only with basic ops; a small preview of factory.json) played by the generic `app/dev/opsDemo.js` in a loop. Infeed, locate, pick from a bench, carry with a 90° wrist turn, place onto the carrier, a quality decision (every 3rd unit takes the reject branch), release, outfeed. The HUD caption shows unit, state and step. The JS knows no component by name (rule 6), the names are in the JSON.
+- Tests: `tests/ops/basic-ops.test.js` (27): quintic / speed / trapezoid / linear timing and positions; short-way yaw; many-turn wrap; combined to + by; 12 bad-input cases with located messages; carried part stays exactly on the tool point and turns with the wrist, stays put after release; locate rises 30 mm and returns; `onto` carries the part out with the carrier; toolOn / wait / transform (with the printer product); transfer duration = reference trapezoid, ends exactly on the port in a rotated and offset cell, belt phase advanced by distance / tile; decide picks by fact, validates all branches, `otherwise`, dry longest-branch and UNKNOWN merging; **dry run steps = played steps** for an 11-op program; dry runs check names without geometry; anchors contract; `componentSpec` = built instance for every component; robot tool anchors exactly at the commanded tool point; demo JSON dry-runs.
+
+**Design notes**
+- Ops are sequential (like the reference cycles). Two machines moving at the same time (robot works while the conveyor indexes) is not covered yet; a `parallel` op can come with `StationCycle` if the printer stations need it.
+- The reference pick-and-place "swing" (part turned about the finger axis during transfer) is part-specific and goes into the named `pickPlace` / `installPart` ops (next step), not the basic ops.
+- `decide` is taken at planning time. That is enough for facts that are deterministic per serial (rule 5). A fact only known mid-cycle would need lazy expansion; none is needed so far.
+
+**Problem found and fixed:** the first demo JSON gave the bench a 0.3 m width (minimum 0.4); the registry refused it in the browser. A test now dry-runs the demo data, so this kind of slip fails `npm test`.
+
+**Results**
+- `npm test`: 18 files, 786 tests passed.
+- Screenshots checked: `screenshots/ops-carry.png` (part in the gripper mid-transfer, turned with the wrist), `screenshots/ops-outfeed.png` (part riding out on the carrier), `screenshots/ops-placed.png` (part set down on the located carrier).
+
+### Step 2: Named ops (done)
+
+Step 1 approved by the owner on 2026-11-17. Ported from `PickPlace.js` (already here).
+
+**Changed**
+- Registry contract:
+  - Periodic motions may declare `angle` (radians per full range), so an op can ask for whole turns without knowing a component's units. Set on the bit spin (60° per range), roller and wheel phases (360°).
+  - **Assembly interface for products with parts** (`ASSEMBLY_API`, checked by `buildProduct`): `origin()`, `grip(part, mode)` → tool point and heading, `pose(part, mode)` → Matrix4, `object(part)`, `setPart(part, mode)` (incl. `carried`), `screws(part)`, `screwSeat(id)`, `setScrew(id, driven)`, all in the product frame. The assembly ops use only this, so they work for any assembled product. Product instances also expose `refs` and `assembly`.
+- Components: robots with the screwdriver fitted (and the screwdriver component) have a `bit` anchor at the extended bit tip, the seat of a driven screw. No geometry changes.
+- `printer` product: implements the assembly interface (thin adapter over its existing part poses, screws and grasp points).
+- `OpCycle`:
+  - targets given as functions are resolved when their step starts (positions on the located product); their planned value is UNKNOWN in both modes, so dry = run still holds; such steps need a fixed time.
+  - per-motion easing; attachment offsets that can change while carried (`setAttachmentOffset`); frame helpers (`machineFrom`, `toMachine`, `directionToMachine`, `yawToMachine`, `anchorInMachine`); `assembly(part)` checks part names (dry too).
+  - `dryRun(…, { product: type })` checks stages / refs / parts from the product definition without building it.
+  - Out of reach at run time stops with `step "Moving to Motor_Z": machine "gantry" cannot reach x = … (range […])`.
+- `lib/ops/sequences.js`: the reference pick-and-place sequence (clear up → approach → descend → grip → lift → transfer → place or lower + slide in → release) with the reference labels, statuses and ST2 default times, shared by both pick ops. A part's way of sitting in the gripper blends during the transfer, so it arrives exactly in its target pose (this replaces the reference's per-part `swing`/`carry` and works for any re-orientation).
+- Named ops (`lib/ops/named/`), no `duration` of their own (sum of their steps):
+  - `installPart`: part from its kit pose into its assembled pose; `clearance`, `clearAbove` (above the assembly origin), `insert` (product-frame slide-in vector), `spinTurns` (threading), gripper gap / open gap / timing.
+  - `pickPlace`: any item between places; a place is a machine port or a product ref, plus offset and heading; `clearance` or `clearY`; `onto`.
+  - `driveScrew`: screw id `Part:index`; feed + travel (rising first, never dipping), driver down, drive (slide + bit turns), torque OK; wrist turned round beyond `centerX`; bit geometry from the `tool` / `bit` anchors; motion names are arguments (defaults = the screwdriver's).
+- Basic `rotate` takes `turns` too.
+- Dev scenes: `#/twin?demo=ops&scene=assembly`, the ST2 frame build on the real printer (8 parts, 10 screws, reference ST2 values), next to `scene=basic` (step 1). Scenes moved to `app/dev/ops-scenes/*.json`; each can set its camera.
+- Tests: `tests/ops/named-ops.test.js` (19): assembly contract; printer adapter = its parts; reference labels / times; part exactly in its kit pose when gripped and **exactly in its assembled pose before release** (plain, re-oriented upright, threaded lead screw, slid in along `insert`); **the whole ST2 part list in order**; bad parts / gaps / no parts; out of reach at run time; driveScrew bit tip exactly on the seat, screw head shown, reference times, wrist turned beyond `centerX`, never dips, bad ids, no screwdriver; pickPlace port → product ref with `onto`, ref / port checks; **dry = run** for a mixed program (from the catalog alone); dry name checks; worst case after a named op; rotate by turns. The demo test now plays every scene for two full units headless (so a reach error in scene data fails `npm test`).
+
+**Changes vs the reference (deliberate)**
+1. During the approach the gripper opens with the move (eased) instead of jumping open on the first frame.
+2. The driveScrew wrist turn takes the short way (the reference lerped the angle; for 0 ↔ π it is the same move).
+3. Status key `driver` instead of `screwdriver` on the step status (the rule-6 guard flags component names in generic code; the HMI text "Screwdriver down" is unchanged).
+
+**Limitations (noted for later steps)**
+- After a named op, the robot's planned pose is UNKNOWN: a following relative move (`by`) is refused, and a speed-based move is planned at its worst case (identically in dry and run, so timings still match). Use fixed times, as the reference does.
+- `driveScrew` drives screws of the product only; a screw into a fixture would need a seat given another way.
+- Not ported yet: `inspect`, `palletize`, the ST3 cable routing, the ST4 test steps. They need the station cycle files (see below); `fill` / `cap` come with the lubricant line (Phase 5).
+
+**Results**
+- `npm test`: 19 files, 805 tests passed.
+- Screenshots checked: `screenshots/named-upright.png` (left upright mid-transfer, turning from lying to upright), `screenshots/named-screw.png` (upright placed, vertical in the gripper), `screenshots/named-framed.png` (frame complete, last top-bar screw being driven).
+
+**Next:** Phase 3 step 3: `StationCycle` with typed ports (from `AssemblyCycle.js`). Needs the reference station cycle files (the six `st*/…` files that extend `AssemblyCycle` and implement `planWork`).

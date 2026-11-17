@@ -1,0 +1,38 @@
+{
+  "about": "Dev check scene for the named ops (#/twin?demo=ops&scene=assembly): the ST2 frame build on the real printer product, written with installPart / driveScrew plus basic ops. Not the final ST2 (that comes from factory.json in Phase 4); the order and values follow the reference FrameAssemblyDefinition.",
+  "workState": "FRAME_ASSEMBLY",
+  "camera": { "position": [3.2, 2.6, 3.9], "target": [-0.2, 1.1, 0] },
+  "equipment": [
+    { "id": "line", "type": "palletConveyor", "params": {}, "position": [0, 0, 0] },
+    { "id": "gantry", "type": "cartesianGantry", "params": { "spanX": 1.5, "spanZ": 0.9, "beamY": 2.3, "maxGap": 0.26, "screwdriver": true }, "position": [0, 0, 0] }
+  ],
+  "product": { "type": "printer", "stage": "kitted", "at": [-1.6, 0.85, 0] },
+  "items": {},
+  "start": { "product": { "machine": "line", "port": "input" } },
+  "process": [
+    { "op": "transfer", "conveyor": "line", "from": "input", "to": "work", "label": "Carrier transport to work position", "state": "INFEED" },
+    { "op": "grip", "machine": "line", "item": "product", "motion": "locate", "to": 1, "anchor": "carrier", "seconds": 0.4, "label": "Lift & locate carrier", "state": "INFEED" },
+    { "op": "installPart", "machine": "gantry", "part": "Motor_Z", "name": "Z motor", "gap": 0.047, "openGap": 0.26, "clearAbove": 0.22 },
+    { "op": "driveScrew", "machine": "gantry", "screw": "Motor_Z:0", "name": "Z motor M4 1", "state": "FASTENING" },
+    { "op": "driveScrew", "machine": "gantry", "screw": "Motor_Z:1", "name": "Z motor M4 2", "state": "FASTENING" },
+    { "op": "installPart", "machine": "gantry", "part": "Motor_Y", "name": "Y motor", "gap": 0.047, "openGap": 0.26, "clearAbove": 0.22 },
+    { "op": "driveScrew", "machine": "gantry", "screw": "Motor_Y:0", "name": "Y motor M4 1", "state": "FASTENING" },
+    { "op": "driveScrew", "machine": "gantry", "screw": "Motor_Y:1", "name": "Y motor M4 2", "state": "FASTENING" },
+    { "op": "installPart", "machine": "gantry", "part": "Bed", "name": "bed", "gap": 0.24, "openGap": 0.26, "clearAbove": 0.3 },
+    { "op": "installPart", "machine": "gantry", "part": "Upright_L", "name": "left upright", "gap": 0.045, "openGap": 0.26, "clearAbove": 0.53 },
+    { "op": "driveScrew", "machine": "gantry", "screw": "Upright_L:0", "name": "left upright M5 1", "state": "FASTENING" },
+    { "op": "driveScrew", "machine": "gantry", "screw": "Upright_L:1", "name": "left upright M5 2", "state": "FASTENING" },
+    { "op": "installPart", "machine": "gantry", "part": "Upright_R", "name": "right upright", "gap": 0.045, "openGap": 0.26, "clearAbove": 0.53 },
+    { "op": "driveScrew", "machine": "gantry", "screw": "Upright_R:0", "name": "right upright M5 1", "state": "FASTENING" },
+    { "op": "driveScrew", "machine": "gantry", "screw": "Upright_R:1", "name": "right upright M5 2", "state": "FASTENING" },
+    { "op": "installPart", "machine": "gantry", "part": "XGantry", "name": "X axis", "gap": 0.025, "openGap": 0.26, "clearAbove": 0.56 },
+    { "op": "installPart", "machine": "gantry", "part": "LeadScrew", "name": "lead screw", "gap": 0.012, "openGap": 0.26, "clearAbove": 0.62, "spinTurns": 5 },
+    { "op": "installPart", "machine": "gantry", "part": "TopBar", "name": "top bar", "gap": 0.025, "openGap": 0.26, "clearAbove": 0.55 },
+    { "op": "driveScrew", "machine": "gantry", "screw": "TopBar:0", "name": "top bar M5 1", "state": "FASTENING" },
+    { "op": "driveScrew", "machine": "gantry", "screw": "TopBar:1", "name": "top bar M5 2", "state": "FASTENING" },
+    { "op": "move", "machine": "gantry", "to": { "x": 0, "y": 1.75, "z": 0, "yaw": 0 }, "seconds": 0.7, "label": "Gantry home" },
+    { "op": "transform", "stage": "framed", "label": "Frame complete" },
+    { "op": "release", "machine": "line", "item": "product", "motion": "locate", "to": 0, "seconds": 0.35, "label": "Releasing carrier", "state": "OUTPUT" },
+    { "op": "transfer", "conveyor": "line", "to": "output", "label": "Transport to output port", "state": "OUTPUT" }
+  ]
+}

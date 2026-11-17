@@ -34,6 +34,21 @@ export function TwinPage(outlet, route) {
   // Dev check scenes, e.g. #/twin?demo=core
   let demo = null;
   let alive = true;
+  const hint = root.querySelector('.hud-hint');
+  if (route?.query?.demo === 'ops') {
+    import('../../dev/opsDemo.js').then(({ createDemo }) => {
+      if (!alive) return;
+      demo = createDemo({ scene: route.query.scene ?? 'basic', onStep: (text) => { hint.textContent = text; } });
+      viewer.content.add(demo.root);
+      // ?t=<seconds>: frozen at that moment (screenshots); otherwise it plays.
+      if (route.query.t) demo.skip(Number(route.query.t));
+      else viewer.onFrame(demo.update);
+      const view = demo.camera ?? { position: [4.2, 3.4, 5.4], target: [0, 1.0, -0.2] };
+      viewer.camera.position.fromArray(view.position);
+      viewer.controls.target.fromArray(view.target);
+      requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
+    });
+  }
   if (route?.query?.demo === 'core') {
     import('../../dev/coreDemo.js').then(({ createCoreDemo }) => {
       if (!alive) return;
