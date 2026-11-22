@@ -35,8 +35,9 @@ describe('rule 6: generic code', () => {
 });
 
 describe('rule 5: deterministic behaviour', () => {
-  it('no Math.random anywhere in the library, compiler, agents or app', () => {
-    const offenders = ['lib', 'compiler', 'agents', 'app', 'spec']
+  it('no Math.random anywhere in the library, compiler, agents, app or compiled lines', () => {
+    const offenders = ['lib', 'compiler', 'agents', 'app', 'spec', 'generated']
+      .filter((dir) => { try { return statSync(join(ROOT, dir)).isDirectory(); } catch { return false; } })
       .flatMap(sourceFiles)
       .filter((file) => /Math\s*\.\s*random/.test(readFileSync(join(ROOT, file), 'utf8')));
     expect(offenders).toEqual([]);
@@ -48,7 +49,7 @@ describe('source hygiene', () => {
   // through (it happened once in Phase 4 step 5). Caught here instead.
   it('no module imports the same binding twice', () => {
     const offenders = [];
-    const dirs = ['lib', 'compiler', 'agents', 'app', 'spec', 'server', 'scripts']
+    const dirs = ['lib', 'compiler', 'agents', 'app', 'spec', 'server', 'scripts', 'generated']
       .filter((dir) => { try { return statSync(join(ROOT, dir)).isDirectory(); } catch { return false; } });
     for (const file of dirs.flatMap(sourceFiles)) {
       const text = readFileSync(join(ROOT, file), 'utf8');

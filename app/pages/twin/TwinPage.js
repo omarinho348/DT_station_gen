@@ -23,7 +23,8 @@ export function TwinPage(outlet, route) {
 
   const viewer = new Viewer(root.querySelector('.viewport'), {
     onFirstFrame: () => {
-      if (!route?.query?.demo) window.__appReady = true;
+      // A demo or a compiled line says it is ready itself, once it has been drawn.
+      if (!route?.query?.demo && !route?.query?.line) window.__appReady = true;
     },
   });
   if (import.meta.env.DEV) window.viewer = viewer;
@@ -63,26 +64,37 @@ export function TwinPage(outlet, route) {
       requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
     });
   }
+  // A playing line: the dev demo (IR played directly) or a compiled line (#/twin?line=printer-line).
+  const showLine = (player) => {
+    if (!alive) { player.dispose(); return; }
+    demo = player;
+    viewer.content.add(demo.root);
+    // ?t=<seconds>: frozen at that moment (screenshots); otherwise it plays.
+    if (route.query.t) demo.skip(Number(route.query.t));
+    else viewer.onFrame(demo.update);
+    const cam = route.query.cam?.split(',').map(Number);
+    const view = cam?.length === 6 && cam.every(Number.isFinite)
+      ? { position: cam.slice(0, 3), target: cam.slice(3) }
+      : demo.camera ?? { position: [0.5, 9.5, 15.5], target: [0, 0.9, -0.3] };
+    viewer.camera.position.fromArray(view.position);
+    viewer.controls.target.fromArray(view.target);
+    requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
+  };
+  const lineOptions = { speed: Number(route?.query?.speed ?? 1), onStatus: (text) => { hint.textContent = text; } };
   if (route?.query?.demo === 'line') {
     import('../../dev/lineDemo.js').then(({ createLineDemo }) => {
-      if (!alive) return;
-      demo = createLineDemo({
-        line: route.query.line ?? 'printer',
-        speed: Number(route.query.speed ?? 1),
-        onStatus: (text) => { hint.textContent = text; },
-      });
-      viewer.content.add(demo.root);
-      // ?t=<seconds>: frozen at that moment (screenshots); otherwise it plays.
-      if (route.query.t) demo.skip(Number(route.query.t));
-      else viewer.onFrame(demo.update);
-      const cam = route.query.cam?.split(',').map(Number);
-      const view = cam?.length === 6 && cam.every(Number.isFinite)
-        ? { position: cam.slice(0, 3), target: cam.slice(3) }
-        : demo.camera ?? { position: [0.5, 9.5, 15.5], target: [0, 0.9, -0.3] };
-      viewer.camera.position.fromArray(view.position);
-      viewer.controls.target.fromArray(view.target);
-      requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
+      if (alive) showLine(createLineDemo({ line: route.query.line ?? 'printer', ...lineOptions }));
     });
+  }
+  if (!route?.query?.demo && route?.query?.line) {
+    import('./compiledLines.js')
+      .then(({ loadCompiledLine }) => loadCompiledLine(route.query.line, lineOptions))
+      .then(showLine)
+      .catch((error) => {
+        console.error(error);
+        hint.textContent = error.message;
+        window.__appReady = true;
+      });
   }
   if (route?.query?.demo === 'core') {
     import('../../dev/coreDemo.js').then(({ createCoreDemo }) => {

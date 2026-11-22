@@ -50,12 +50,14 @@ function portInStation(equipmentEntry, portPosition) {
  * `facts`: { stationId: { fact: value } } plans those decisions one way (e.g. a reject path);
  * decisions on facts not given take their longest branch.
  * Returns { line, stations: [{ id, code, title, intake, process, output, cycleTime, rows }],
- * transfers: [{ from, to, distance, duration }], takt, bottleneck, leadTime, runSize, runTime }.
+ * transfers: [{ from, to, distance, duration }], takt, bottleneck, leadTime, runSize, runTime, layout }
+ * (layout: lib/line/layout.js's result for this line).
  */
 export function lineTiming(registry, lineData, { ctx = {}, conventions = CONVENTIONS, facts = {} } = {}) {
   const line = parseLine(lineData);
   const stations = line.stations.map((data) => {
-    const { equipment: list, ...stationData } = data;
+    const { equipment: list, build, ...stationData } = data;
+    if (!list) throw new Error(`station "${data.id}": no equipment list to time (a compiled station carries its timing in its line file)`);
     const station = parseStation(stationData);
     const entries = Object.fromEntries(list.map((e) => [e.id, e]));
     const specs = Object.fromEntries(list.map((e) => [e.id, registry.componentSpec(e.type, e.params ?? {}, e.beltHeight !== undefined ? { ...ctx, beltHeight: e.beltHeight } : ctx)]));
@@ -120,6 +122,7 @@ export function lineTiming(registry, lineData, { ctx = {}, conventions = CONVENT
     runSize: line.runSize,
     runTime: round(leadTime + (line.runSize - 1) * bottleneck.time),
     holdSeconds: conventions.holdSeconds,
+    layout,
   };
 }
 

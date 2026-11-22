@@ -918,3 +918,54 @@ The units leave ST6 about 5.1 s after the reference's "dispatched" counter only 
 **Phase 4 status:** the IR, the expander and the hand-written printer line are done, and **its timing matches the reference completely** (the timing half of the key acceptance test). Still to do for Phase 4: (1) the compiler templates that emit readable Three.js files per station plus a line file (`generated/printer-line/…`), loaded by the app; (2) the screenshot comparison with the reference repo (golden views of each station and the line, rendered from the reference app and from ours).
 
 **Next:** Phase 4 step 7: the compiler (`compiler/emit.js` + templates) writing `generated/printer-line/` (one readable JS file per station and a line file, built only from the IR and the catalog), loaded by dynamic import in the twin page, with a test that the compiled line plays exactly like the expanded IR.
+
+### Step 7: The compiler, `generated/printer-line/` (done)
+
+Step 6 approved by the owner moving on (2026-11-23).
+
+**Result first:** `npm run compile` turns `printer-line.factory.json` into **7 readable files** in `generated/printer-line/` (st1–st6 plus `line.js`, about 3,200 lines in total), written by fixed templates from the IR and the catalog only. **The compiled line plays exactly like the IR it came from.** A run of 8 was played update by update, side by side with the expanded IR: the line status was identical at every one of about 15,400 updates, the scene (every object's name, visibility and world position) was identical at checkpoints and at the end, and both lines finished. The twin page loads the compiled line by dynamic import (`#/twin?line=printer-line`). Its screenshot at t = 262.3 s is **byte-identical** to the IR demo's at the same moment.
+
+**Changed**
+- `compiler/emit.js`: `compileFactory(registry, data, { source, libPath })` → `{ line, folder, files, timing }`. It checks first (expand + dry timing; a bad factory.json throws `FactoryError` with paths). Deterministic, and it mentions no component by name: types are copied from the IR into the emitted calls.
+  - **`<station>.js`:**
+    - Header: title, source, cycle time (intake / process / output), step count, and an equipment table (id, type, from shell or station, position, turn).
+    - `export const station`: the expanded station data, with the shell's ports and signals already merged, so the files need no shells at run time.
+    - `export function build({ registry, ctx })`: one block per machine, with a comment from the catalog summary, then `registry.buildComponent('type', {params}, ctx)`, `position.set(…)` (only when not 0), `rotation.y` (exact multiples of π are written as `Math.PI / n`) and `root.add`. A machine with its own belt height gets `{ ...ctx, beltHeight }`.
+  - **`line.js`:**
+    - Header: stations in flow order with cycle, steps and layout x, the transfers, takt, lead time and run estimate.
+    - Exports: `id`, `title`, `runSize`, the merged `conventions`, `product`, `edges`, the dry `timing` and `stations`.
+    - `createLine({ materials, registry?, facts?, onUpdate? })`.
+    - Layout is still computed by `lib/line/layout.js` when the line is built (§6.5); the file only lists the positions as a comment.
+  - Folder = kebab-case line id (`printerLine` → `printer-line`). Station modules whose id is a reserved word or one of `line.js`'s own names are imported as `<id>Station`.
+- `compiler/jsLiteral.js`: `toJs(value, { indent, col, width })`, a deterministic JSON → JS literal printer. Unquoted keys where possible, single-quoted strings with escapes, short values on one line, long ones one entry per line within 100 columns. It refuses non-JSON values (NaN, functions, class instances, `__proto__`).
+- `compiler/write.js`: `writeCompiled(compiled, outRoot)` writes only files whose content changed (so Vite reloads only those, which Phase 10 will need). It removes stale generated `.js` files (those carrying the generator mark) and never touches files without the mark.
+- `scripts/compile.mjs` (`npm run compile [files…] [--draft]`): runs the compiler in a Vite SSR module graph, because the catalog loads through `import.meta.glob`; nothing is served. Default: every `spec/examples/*.factory.json`. `--draft` writes to `generated/_draft/<line>/` with the right `lib/` import path.
+- `lib/line/Line.js` / `lineSpec.js`: a line station may bring `build({ registry, ctx }) → { root, equipment }` instead of an equipment list (one or the other is required). Everything after building is unchanged. `lineTiming` now also returns the `layout`, and gives a clear message for a station that has no equipment list.
+- App:
+  - `app/pages/twin/compiledLines.js` loads `generated/*/line.js` lazily (`#/twin?line=<folder>`, with `?t`, `?speed`, `?cam` as for the demos). An unknown name shows the message in the HUD.
+  - `app/pages/twin/linePlayer.js`: the HUD status / skip / dispose code, now shared with `app/dev/lineDemo.js`.
+  - The twin page no longer reports itself ready before a compiled line is drawn.
+- Rules test: `generated/` is included in the no-`Math.random` and no-double-import checks. It is not in the rule-6 check, because compiled output names components by design.
+- Tests `tests/compiler/emit.test.js` (14):
+  - jsLiteral round trips (quotes, backslashes, control characters, U+2028, odd keys), line breaking, refusals, `angle()`
+  - deterministic output and file list; imports limited to three / lib / sibling stations; readable line lengths; shell origin noted; belt-height override emitted
+  - **`generated/printer-line/` on disk = what the compiler writes now** (otherwise: run `npm run compile`)
+  - each compiled station = the expanded station (data deep-equal; machines with the same ids, types, params, positions and turns)
+  - `line.js` conventions / product / edges / timing = expanded ones
+  - **run of 8 side by side, update by update** (status every update, scene at checkpoints and at the end, both FINISHED, 6 cartons on the pallet)
+  - a bad factory.json refused; `Line` refusing a station with neither equipment nor build, or a build with no machines
+  - `writeCompiled` (unchanged files left alone, stale generated files removed, foreign files kept)
+
+**Notes**
+- Shell-derived numbers keep their exact floating-point values (e.g. sign z `-1.9000000000000001`, fence length `4.1000000000000005`). Rounding them would make the compiled line differ from the IR, and exact equality is what the tests prove. The ST5 reject lane turn is `1.5708` because that is what factory.json says; it is not exactly π/2.
+- The timing in the line file times a decision on a fact that is only known as a unit plays (ST5's verdict) by its longest branch: ST5 shows 19.19 s / 11 steps and the run estimate is 813.5 s. The headers say so. The per-path reference comparison stays in `tests/spec/printer-line.test.js`.
+- `generated/printer-line/` is not git-ignored (only `_draft/` is). It is committed output, kept honest by the "on disk = compiler output" test, like `spec/factory.schema.json`.
+
+**Results**
+- `npm run compile`: `spec/examples/printer-line.factory.json → generated/printer-line/`: 7 files; takt 74.81 s.
+- `npm test`: 26 files, 932 tests passed.
+- Screenshots: `screenshots/compiled-line.png` (`#/twin?line=printer-line&t=262.3`) and `screenshots/ir-line.png` (`#/twin?demo=line&line=printer-line&t=262.3`) are byte-identical (same SHA-256). ST2 holding, ST3 handing over, ST6 packing.
+
+**Phase 4 status:** IR, expander, the hand-written printer line (timing = reference) and the compiler (compiled = IR, exactly) are done. Left for Phase 4: the **screenshot comparison with the reference repo**, i.e. golden views of each station and of the line rendered from the reference app and from ours.
+
+**Next:** Phase 4 step 8: the visual half of the acceptance test. Render fixed camera views (each station and the whole line, at set moments) from the reference app and from our compiled line, store them as goldens, and compare. This needs the reference app's scene entry for the printer line, beyond the `src/station` / `src/motion` export in `reference/_src`. If those files aren't there, I'll ask the owner for them.
