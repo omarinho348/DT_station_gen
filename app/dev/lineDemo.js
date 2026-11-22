@@ -1,6 +1,7 @@
-// Dev-only check scene for the line runtime: builds a factory.json (app/dev/lines/<name>.json,
-// under "factory") through compiler/expand.js and plays it with the generic Line (layout from lib/line/layout.js, stations chained through typed ports) and runs
-// it. Open with #/twin?demo=line (line "printer"); ?line=<name>, ?t=<s> frozen, ?speed=<n>.
+// Dev-only check scene for the line runtime: builds a factory.json (app/dev/lines/<name>.json under
+// "factory", or spec/examples/<name>.factory.json) through compiler/expand.js and plays it with the
+// generic Line (layout from lib/line/layout.js, stations chained through typed ports).
+// Open with #/twin?demo=line (line "printer"); ?line=<name>, ?t=<s> frozen, ?speed=<n>, ?cam=x,y,z,tx,ty,tz.
 // Nothing here knows a component or product by name (rule 6): it is all data.
 import * as THREE from 'three';
 import { registry } from '../../lib/components/index.js';
@@ -12,6 +13,10 @@ import { createMaterials, disposeMaterials } from '../../lib/core/materials.js';
 
 const LINES = Object.fromEntries(Object.entries(import.meta.glob('./lines/*.json', { eager: true, import: 'default' }))
   .map(([path, data]) => [path.match(/([^/]+)\.json$/)[1], data]));
+// The hand-written example factories play here too.
+for (const [path, factory] of Object.entries(import.meta.glob('../../spec/examples/*.factory.json', { eager: true, import: 'default' }))) {
+  LINES[path.match(/([^/]+)\.factory\.json$/)[1]] = { factory, camera: null };
+}
 
 export const lineNames = () => Object.keys(LINES);
 

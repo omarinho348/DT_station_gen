@@ -1,0 +1,4023 @@
+{
+  "$schema": "../factory.schema.json",
+  "version": 1,
+  "line": {
+    "id": "printerLine",
+    "title": "3D printer assembly line",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "catalog",
+    "type": "printer",
+    "params": {}
+  },
+  "stations": [
+    {
+      "id": "st1",
+      "code": "ST1",
+      "title": "Component Kitting",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Component Kitting",
+          "color": "#2c5d8f",
+          "minZ": -2.35
+        }
+      },
+      "equipment": [
+        {
+          "id": "scara",
+          "type": "scara",
+          "params": {
+            "link1": 0.55,
+            "link2": 0.5,
+            "armHeight": 1.3,
+            "maxGap": 0.26
+          },
+          "position": [
+            0.15,
+            0,
+            -0.62
+          ]
+        },
+        {
+          "id": "keepOut",
+          "type": "keepOutRing",
+          "params": {
+            "radius": 0.2,
+            "band": 0.2
+          },
+          "position": [
+            0.15,
+            0,
+            -0.62
+          ]
+        },
+        {
+          "id": "toteTable",
+          "type": "workTable",
+          "params": {
+            "length": 1.2,
+            "width": 0.5,
+            "height": 0.75
+          },
+          "position": [
+            0.25,
+            0,
+            -1.1
+          ]
+        },
+        {
+          "id": "cradle",
+          "type": "partCradle",
+          "params": {
+            "length": 0.6,
+            "width": 0.5,
+            "height": 0.75,
+            "lanes": [
+              -0.17,
+              -0.08,
+              0,
+              0.06,
+              0.15
+            ]
+          },
+          "position": [
+            -0.6,
+            0,
+            -1.16
+          ]
+        },
+        {
+          "id": "bedNest",
+          "type": "partNest",
+          "params": {
+            "height": 0.72,
+            "guides": "cornerPosts"
+          },
+          "position": [
+            0.8,
+            0,
+            -0.6
+          ]
+        },
+        {
+          "id": "frameNest",
+          "type": "partNest",
+          "params": {
+            "length": 0.56,
+            "width": 0.5,
+            "height": 0.72,
+            "guides": "locators",
+            "guideX": 0.16,
+            "guideZ": 0.18
+          },
+          "position": [
+            -0.72,
+            0,
+            -0.6
+          ]
+        },
+        {
+          "id": "flowRack",
+          "type": "flowRack",
+          "params": {
+            "length": 1.7
+          },
+          "position": [
+            0.2,
+            0,
+            -1.85
+          ]
+        },
+        {
+          "id": "toteMotorZ",
+          "type": "tote",
+          "params": {
+            "width": 0.2,
+            "depth": 0.11
+          },
+          "position": [
+            -0.25,
+            0.75,
+            -0.97
+          ]
+        },
+        {
+          "id": "lightMotorZ",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            -0.25,
+            0.775,
+            -0.897
+          ]
+        },
+        {
+          "id": "toteMotorY",
+          "type": "tote",
+          "params": {
+            "width": 0.22,
+            "depth": 0.1
+          },
+          "position": [
+            -0.03,
+            0.75,
+            -0.97
+          ]
+        },
+        {
+          "id": "lightMotorY",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            -0.03,
+            0.775,
+            -0.902
+          ]
+        },
+        {
+          "id": "totePrintHead",
+          "type": "tote",
+          "params": {
+            "width": 0.15,
+            "depth": 0.1
+          },
+          "position": [
+            0.17,
+            0.75,
+            -0.97
+          ]
+        },
+        {
+          "id": "lightPrintHead",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            0.17,
+            0.775,
+            -0.902
+          ]
+        },
+        {
+          "id": "toteDisplay",
+          "type": "tote",
+          "params": {
+            "width": 0.15,
+            "depth": 0.1
+          },
+          "position": [
+            0.35,
+            0.75,
+            -0.97
+          ]
+        },
+        {
+          "id": "lightDisplay",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            0.35,
+            0.775,
+            -0.902
+          ]
+        },
+        {
+          "id": "toteHarness",
+          "type": "tote",
+          "params": {
+            "width": 0.17,
+            "depth": 0.1
+          },
+          "position": [
+            0.53,
+            0.75,
+            -0.97
+          ]
+        },
+        {
+          "id": "lightHarness",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            0.53,
+            0.775,
+            -0.902
+          ]
+        },
+        {
+          "id": "toteElectronicsBox",
+          "type": "tote",
+          "params": {
+            "width": 0.2,
+            "depth": 0.2
+          },
+          "position": [
+            0.02,
+            0.75,
+            -1.21
+          ]
+        },
+        {
+          "id": "lightElectronicsBox",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            0.02,
+            0.775,
+            -1.092
+          ]
+        },
+        {
+          "id": "totePSU",
+          "type": "tote",
+          "params": {
+            "width": 0.24,
+            "depth": 0.24
+          },
+          "position": [
+            0.33,
+            0.75,
+            -1.21
+          ]
+        },
+        {
+          "id": "lightPSU",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            0.33,
+            0.775,
+            -1.072
+          ]
+        },
+        {
+          "id": "lightUprightL",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            -0.77,
+            0.721,
+            -0.905
+          ]
+        },
+        {
+          "id": "lightUprightR",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            -0.68,
+            0.721,
+            -0.905
+          ]
+        },
+        {
+          "id": "lightTopBar",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            -0.6,
+            0.721,
+            -0.905
+          ]
+        },
+        {
+          "id": "lightLeadScrew",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            -0.54,
+            0.721,
+            -0.905
+          ]
+        },
+        {
+          "id": "lightXGantry",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            -0.45,
+            0.721,
+            -0.905
+          ]
+        },
+        {
+          "id": "lightBed",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            0.8,
+            0.749,
+            -0.43
+          ]
+        },
+        {
+          "id": "lightBaseFrame",
+          "type": "pickToLight",
+          "params": {},
+          "position": [
+            -0.49,
+            0.729,
+            -0.35
+          ]
+        }
+      ],
+      "workState": "KITTING",
+      "inputStage": "empty",
+      "home": {
+        "scara": {
+          "x": 0,
+          "y": 1.12,
+          "z": 0.52,
+          "yaw": 0,
+          "grip": 0.26
+        }
+      },
+      "status": {
+        "robot": "HOME",
+        "gripper": "OPEN",
+        "picked": 0,
+        "total": 14,
+        "pickLight": "—"
+      },
+      "signals": {
+        "display": {
+          "rows": [
+            [
+              "Unit",
+              "unit"
+            ],
+            [
+              "SCARA robot",
+              "robot"
+            ],
+            [
+              "Gripper",
+              "gripper"
+            ],
+            [
+              "Pick light",
+              "pickLight"
+            ],
+            [
+              "Kitted units",
+              "completed"
+            ]
+          ],
+          "bar": {
+            "value": "picked",
+            "total": "total",
+            "label": "Kit {picked}/{total} parts   ·   Speed {speed}×"
+          }
+        }
+      },
+      "stock": {
+        "motorZA": {
+          "part": "Motor_Z",
+          "mode": "kit",
+          "at": {
+            "machine": "toteMotorZ",
+            "port": "inside",
+            "offset": [
+              -0.05,
+              0,
+              0
+            ]
+          }
+        },
+        "motorZB": {
+          "part": "Motor_Z",
+          "mode": "kit",
+          "at": {
+            "machine": "toteMotorZ",
+            "port": "inside",
+            "offset": [
+              0.05,
+              0,
+              0
+            ]
+          }
+        },
+        "motorYA": {
+          "part": "Motor_Y",
+          "mode": "kit",
+          "at": {
+            "machine": "toteMotorY",
+            "port": "inside",
+            "offset": [
+              -0.055,
+              0,
+              0
+            ]
+          }
+        },
+        "motorYB": {
+          "part": "Motor_Y",
+          "mode": "kit",
+          "at": {
+            "machine": "toteMotorY",
+            "port": "inside",
+            "offset": [
+              0.055,
+              0,
+              0
+            ]
+          }
+        },
+        "printHeadA": {
+          "part": "PrintHead",
+          "mode": "kit",
+          "at": {
+            "machine": "totePrintHead",
+            "port": "inside",
+            "offset": [
+              -0.0375,
+              0,
+              0
+            ]
+          }
+        },
+        "printHeadB": {
+          "part": "PrintHead",
+          "mode": "kit",
+          "at": {
+            "machine": "totePrintHead",
+            "port": "inside",
+            "offset": [
+              0.0375,
+              0,
+              0
+            ]
+          }
+        },
+        "displayA": {
+          "part": "Display",
+          "mode": "kit",
+          "at": {
+            "machine": "toteDisplay",
+            "port": "inside",
+            "offset": [
+              -0.0375,
+              0,
+              0
+            ]
+          }
+        },
+        "displayB": {
+          "part": "Display",
+          "mode": "kit",
+          "at": {
+            "machine": "toteDisplay",
+            "port": "inside",
+            "offset": [
+              0.0375,
+              0,
+              0
+            ]
+          }
+        },
+        "harnessA": {
+          "part": "Harness",
+          "mode": "kit",
+          "at": {
+            "machine": "toteHarness",
+            "port": "inside",
+            "offset": [
+              -0.0425,
+              0,
+              0
+            ]
+          }
+        },
+        "harnessB": {
+          "part": "Harness",
+          "mode": "kit",
+          "at": {
+            "machine": "toteHarness",
+            "port": "inside",
+            "offset": [
+              0.0425,
+              0,
+              0
+            ]
+          }
+        },
+        "electronicsBoxA": {
+          "part": "ElectronicsBox",
+          "mode": "kit",
+          "at": {
+            "machine": "toteElectronicsBox",
+            "port": "inside",
+            "offset": [
+              -0.05,
+              0,
+              0
+            ]
+          }
+        },
+        "electronicsBoxB": {
+          "part": "ElectronicsBox",
+          "mode": "kit",
+          "at": {
+            "machine": "toteElectronicsBox",
+            "port": "inside",
+            "offset": [
+              0.05,
+              0,
+              0
+            ]
+          }
+        },
+        "pSUA": {
+          "part": "PSU",
+          "mode": "kit",
+          "at": {
+            "machine": "totePSU",
+            "port": "inside",
+            "offset": [
+              -0.06,
+              0,
+              0
+            ]
+          }
+        },
+        "pSUB": {
+          "part": "PSU",
+          "mode": "kit",
+          "at": {
+            "machine": "totePSU",
+            "port": "inside",
+            "offset": [
+              0.06,
+              0,
+              0
+            ]
+          }
+        },
+        "uprightLA": {
+          "part": "Upright_L",
+          "mode": "kit",
+          "at": {
+            "machine": "cradle",
+            "port": "lane1"
+          }
+        },
+        "uprightRA": {
+          "part": "Upright_R",
+          "mode": "kit",
+          "at": {
+            "machine": "cradle",
+            "port": "lane2"
+          }
+        },
+        "topBarA": {
+          "part": "TopBar",
+          "mode": "kit",
+          "at": {
+            "machine": "cradle",
+            "port": "lane3"
+          }
+        },
+        "leadScrewA": {
+          "part": "LeadScrew",
+          "mode": "kit",
+          "at": {
+            "machine": "cradle",
+            "port": "lane4"
+          }
+        },
+        "xGantryA": {
+          "part": "XGantry",
+          "mode": "kit",
+          "at": {
+            "machine": "cradle",
+            "port": "lane5"
+          }
+        },
+        "bedA": {
+          "part": "Bed",
+          "mode": "kit",
+          "at": {
+            "machine": "bedNest",
+            "port": "seat",
+            "offset": [
+              0,
+              0.092,
+              0
+            ]
+          }
+        },
+        "bedB": {
+          "part": "Bed",
+          "mode": "kit",
+          "at": {
+            "machine": "bedNest",
+            "port": "seat"
+          }
+        },
+        "baseFrameA": {
+          "part": "BaseFrame",
+          "mode": "asm",
+          "at": {
+            "machine": "frameNest",
+            "port": "seat",
+            "offset": [
+              0,
+              -0.008,
+              0
+            ]
+          }
+        }
+      },
+      "process": [
+        {
+          "op": "wait",
+          "seconds": 0.35,
+          "label": "RFID read · kit list P1-KIT (14 positions)",
+          "status": {
+            "robot": "HOME",
+            "picked": 0
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightBaseFrame",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-100 base frame (Y-axis assy)",
+          "status": {
+            "pickLight": "P1-100"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "BaseFrame",
+          "from": "baseFrameA",
+          "mode": "asm",
+          "name": "P1-100 base frame (Y-axis assy)",
+          "gap": 0.025,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightBaseFrame",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-100",
+            "picked": 1
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightUprightL",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-110 left upright",
+          "status": {
+            "pickLight": "P1-110"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "Upright_L",
+          "from": "uprightLA",
+          "mode": "kit",
+          "name": "P1-110 left upright",
+          "gap": 0.045,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightUprightL",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-110",
+            "picked": 2
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightUprightR",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-111 right upright",
+          "status": {
+            "pickLight": "P1-111"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "Upright_R",
+          "from": "uprightRA",
+          "mode": "kit",
+          "name": "P1-111 right upright",
+          "gap": 0.045,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightUprightR",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-111",
+            "picked": 3
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightTopBar",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-120 top bar",
+          "status": {
+            "pickLight": "P1-120"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "TopBar",
+          "from": "topBarA",
+          "mode": "kit",
+          "name": "P1-120 top bar",
+          "gap": 0.025,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightTopBar",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-120",
+            "picked": 4
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightLeadScrew",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-230 Z lead screw",
+          "status": {
+            "pickLight": "P1-230"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "LeadScrew",
+          "from": "leadScrewA",
+          "mode": "kit",
+          "name": "P1-230 Z lead screw",
+          "gap": 0.012,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightLeadScrew",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-230",
+            "picked": 5
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightXGantry",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-300 X-axis assy",
+          "status": {
+            "pickLight": "P1-300"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "XGantry",
+          "from": "xGantryA",
+          "mode": "kit",
+          "name": "P1-300 X-axis assy",
+          "gap": 0.025,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightXGantry",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-300",
+            "picked": 6
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightBed",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-400 bed assy",
+          "status": {
+            "pickLight": "P1-400"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "Bed",
+          "from": "bedA",
+          "mode": "kit",
+          "name": "P1-400 bed assy",
+          "gap": 0.24,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightBed",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-400",
+            "picked": 7
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightMotorZ",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-210 Z motor assy",
+          "status": {
+            "pickLight": "P1-210"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "Motor_Z",
+          "from": "motorZA",
+          "mode": "kit",
+          "name": "P1-210 Z motor assy",
+          "gap": 0.047,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightMotorZ",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-210",
+            "picked": 8
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightMotorY",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-220 Y motor assy",
+          "status": {
+            "pickLight": "P1-220"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "Motor_Y",
+          "from": "motorYA",
+          "mode": "kit",
+          "name": "P1-220 Y motor assy",
+          "gap": 0.047,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightMotorY",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-220",
+            "picked": 9
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightPrintHead",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-600 hotend assy",
+          "status": {
+            "pickLight": "P1-600"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "PrintHead",
+          "from": "printHeadA",
+          "mode": "kit",
+          "name": "P1-600 hotend assy",
+          "gap": 0.04,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightPrintHead",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-600",
+            "picked": 10
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightElectronicsBox",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-500 mainboard enclosure",
+          "status": {
+            "pickLight": "P1-500"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "ElectronicsBox",
+          "from": "electronicsBoxA",
+          "mode": "kit",
+          "name": "P1-500 mainboard enclosure",
+          "gap": 0.165,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightElectronicsBox",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-500",
+            "picked": 11
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightPSU",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-510 power supply",
+          "status": {
+            "pickLight": "P1-510"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "PSU",
+          "from": "pSUA",
+          "mode": "kit",
+          "name": "P1-510 power supply",
+          "gap": 0.205,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightPSU",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-510",
+            "picked": 12
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightDisplay",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-520 LCD module",
+          "status": {
+            "pickLight": "P1-520"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "Display",
+          "from": "displayA",
+          "mode": "kit",
+          "name": "P1-520 LCD module",
+          "gap": 0.025,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightDisplay",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-520",
+            "picked": 13
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "lightHarness",
+          "motion": "lamp",
+          "value": "on",
+          "seconds": 0.12,
+          "label": "Pick light on · P1-530 cable harness",
+          "status": {
+            "pickLight": "P1-530"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "scara",
+          "part": "Harness",
+          "from": "harnessA",
+          "mode": "kit",
+          "name": "P1-530 cable harness",
+          "gap": 0.06,
+          "openGap": 0.26,
+          "clearance": 0.14,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.3,
+            "grip": 0.15,
+            "lift": 0.25,
+            "transfer": 0.7,
+            "place": 0.3,
+            "release": 0.15
+          },
+          "onPlaced": [
+            {
+              "machine": "lightHarness",
+              "motion": "lamp",
+              "to": "off"
+            }
+          ],
+          "status": {
+            "pickLight": "P1-530",
+            "picked": 14
+          }
+        },
+        {
+          "op": "wait",
+          "seconds": 0.3,
+          "label": "Kit complete · 14/14 confirmed",
+          "status": {
+            "pickLight": "—"
+          }
+        },
+        {
+          "op": "move",
+          "machine": "scara",
+          "to": {
+            "x": 0,
+            "y": 1.12,
+            "z": 0.52,
+            "yaw": 0
+          },
+          "seconds": 0.6,
+          "label": "Robot returning home",
+          "status": {
+            "robot": "HOME",
+            "gripper": "OPEN"
+          }
+        },
+        {
+          "op": "replenish",
+          "seconds": 1.2,
+          "label": "Kanban: supermarket replenished from flow rack",
+          "state": "REPLENISH"
+        }
+      ]
+    },
+    {
+      "id": "st2",
+      "code": "ST2",
+      "title": "Frame Assembly",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST2",
+          "title": "Frame Assembly",
+          "color": "#e0782a",
+          "minZ": -1.5
+        }
+      },
+      "equipment": [
+        {
+          "id": "gantry",
+          "type": "cartesianGantry",
+          "params": {
+            "spanX": 1.5,
+            "spanZ": 0.9,
+            "beamY": 2.3,
+            "maxGap": 0.26,
+            "screwdriver": true
+          }
+        },
+        {
+          "id": "presenter",
+          "type": "workTable",
+          "params": {
+            "length": 1.2,
+            "width": 0.5,
+            "height": 0.8
+          },
+          "position": [
+            1.15,
+            0,
+            -1.05
+          ]
+        },
+        {
+          "id": "feederM3",
+          "type": "vibratoryFeeder",
+          "params": {},
+          "position": [
+            0.77,
+            0.8,
+            -1.05
+          ]
+        },
+        {
+          "id": "feederM4",
+          "type": "vibratoryFeeder",
+          "params": {},
+          "position": [
+            1.15,
+            0.8,
+            -1.05
+          ]
+        },
+        {
+          "id": "feederM5",
+          "type": "vibratoryFeeder",
+          "params": {},
+          "position": [
+            1.53,
+            0.8,
+            -1.05
+          ]
+        }
+      ],
+      "workState": "FRAME_ASSEMBLY",
+      "inputStage": "kitted",
+      "home": {
+        "gantry": {
+          "x": 0,
+          "y": 1.75,
+          "z": 0,
+          "yaw": 0,
+          "grip": 0.26
+        }
+      },
+      "status": {
+        "robot": "HOME",
+        "gripper": "OPEN",
+        "installed": 0,
+        "total": 8,
+        "screws": "0 / 12",
+        "fastening": "IDLE"
+      },
+      "signals": {
+        "display": {
+          "rows": [
+            [
+              "Unit",
+              "unit"
+            ],
+            [
+              "Gantry",
+              "robot"
+            ],
+            [
+              "Gripper",
+              "gripper"
+            ],
+            [
+              "Screws driven",
+              "screws"
+            ],
+            [
+              "Frames built",
+              "completed"
+            ]
+          ],
+          "bar": {
+            "value": "installed",
+            "total": "total",
+            "label": "Frame {installed}/{total} parts   ·   Speed {speed}×"
+          }
+        }
+      },
+      "process": [
+        {
+          "op": "wait",
+          "seconds": 0.3,
+          "label": "RFID read · build order P1 frame",
+          "status": {
+            "installed": 0,
+            "screws": "0 / 12",
+            "fastening": "IDLE"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "Motor_Z",
+          "name": "Z motor assy",
+          "gap": 0.047,
+          "openGap": 0.26,
+          "clearance": 0.12,
+          "clearAbove": 0.22,
+          "status": {
+            "installed": 1
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Motor_Z:0",
+          "name": "Z motor assy 1/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "1 / 12"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Motor_Z:1",
+          "name": "Z motor assy 2/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "2 / 12"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "Motor_Y",
+          "name": "Y motor assy",
+          "gap": 0.047,
+          "openGap": 0.26,
+          "clearance": 0.12,
+          "clearAbove": 0.22,
+          "status": {
+            "installed": 2
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Motor_Y:0",
+          "name": "Y motor assy 1/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "3 / 12"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Motor_Y:1",
+          "name": "Y motor assy 2/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "4 / 12"
+          }
+        },
+        {
+          "op": "transform",
+          "set": {
+            "yBelt": "engaged"
+          },
+          "seconds": 0.6,
+          "label": "Y belt looped on motor pulley · tensioned",
+          "state": "ADJUSTING",
+          "status": {
+            "fastening": "BELT"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "Bed",
+          "name": "bed assy",
+          "gap": 0.24,
+          "openGap": 0.26,
+          "clearance": 0.12,
+          "clearAbove": 0.3,
+          "onPlaced": [
+            {
+              "feature": "bedCable",
+              "to": "stowed"
+            }
+          ],
+          "status": {
+            "installed": 3
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Bed:0",
+          "name": "bed assy 1/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "5 / 12"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Bed:1",
+          "name": "bed assy 2/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "6 / 12"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "Upright_L",
+          "name": "left upright",
+          "gap": 0.045,
+          "openGap": 0.26,
+          "clearance": 0.12,
+          "clearAbove": 0.53,
+          "status": {
+            "installed": 4
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Upright_L:0",
+          "name": "left upright 1/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "7 / 12"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Upright_L:1",
+          "name": "left upright 2/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "8 / 12"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "Upright_R",
+          "name": "right upright",
+          "gap": 0.045,
+          "openGap": 0.26,
+          "clearance": 0.12,
+          "clearAbove": 0.53,
+          "status": {
+            "installed": 5
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Upright_R:0",
+          "name": "right upright 1/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "9 / 12"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Upright_R:1",
+          "name": "right upright 2/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "10 / 12"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "XGantry",
+          "name": "X-axis assy",
+          "gap": 0.025,
+          "openGap": 0.26,
+          "clearance": 0.12,
+          "clearAbove": 0.56,
+          "status": {
+            "installed": 6
+          }
+        },
+        {
+          "op": "wait",
+          "seconds": 0.5,
+          "label": "Setting V-wheel eccentric nuts",
+          "state": "ADJUSTING",
+          "status": {
+            "fastening": "ECCENTRICS"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "LeadScrew",
+          "name": "Z lead screw",
+          "gap": 0.012,
+          "openGap": 0.26,
+          "clearance": 0.12,
+          "clearAbove": 0.62,
+          "spinTurns": 5,
+          "status": {
+            "installed": 7
+          }
+        },
+        {
+          "op": "wait",
+          "seconds": 0.4,
+          "label": "Tightening Z coupler set screws",
+          "state": "ADJUSTING",
+          "status": {
+            "fastening": "COUPLER"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "TopBar",
+          "name": "top bar",
+          "gap": 0.025,
+          "openGap": 0.26,
+          "clearance": 0.12,
+          "clearAbove": 0.55,
+          "status": {
+            "installed": 8
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "TopBar:0",
+          "name": "top bar 1/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "11 / 12"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "TopBar:1",
+          "name": "top bar 2/2",
+          "state": "FASTENING",
+          "status": {
+            "screws": "12 / 12"
+          }
+        },
+        {
+          "op": "wait",
+          "seconds": 0.5,
+          "label": "Frame squareness check · uprights 90°",
+          "state": "ADJUSTING",
+          "status": {
+            "fastening": "DONE"
+          }
+        },
+        {
+          "op": "move",
+          "machine": "gantry",
+          "to": {
+            "x": 0,
+            "y": 1.75,
+            "z": 0,
+            "yaw": 0
+          },
+          "seconds": 0.7,
+          "label": "Gantry returning home",
+          "status": {
+            "robot": "HOME",
+            "gripper": "OPEN"
+          }
+        }
+      ]
+    },
+    {
+      "id": "st3",
+      "code": "ST3",
+      "title": "Electronics Wiring",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST3",
+          "title": "Electronics Wiring",
+          "color": "#2f9a4a",
+          "minZ": -1.6
+        }
+      },
+      "equipment": [
+        {
+          "id": "gantry",
+          "type": "cartesianGantry",
+          "params": {
+            "spanX": 1.5,
+            "spanZ": 0.9,
+            "beamY": 2.3,
+            "maxGap": 0.22,
+            "frameColor": "machineBlue",
+            "screwdriver": true
+          }
+        },
+        {
+          "id": "harnessBoard",
+          "type": "harnessBoard",
+          "params": {},
+          "position": [
+            0.9,
+            0,
+            -1.1
+          ]
+        },
+        {
+          "id": "tester",
+          "type": "testCabinet",
+          "params": {},
+          "position": [
+            -1.2,
+            0,
+            -0.75
+          ]
+        }
+      ],
+      "workState": "WIRING",
+      "inputStage": "framed",
+      "home": {
+        "gantry": {
+          "x": 0,
+          "y": 1.75,
+          "z": 0,
+          "yaw": 0,
+          "grip": 0.22
+        },
+        "tester": {
+          "status": "idle"
+        }
+      },
+      "status": {
+        "robot": "HOME",
+        "gripper": "OPEN",
+        "modules": "0 / 4",
+        "cables": 0,
+        "cableTotal": 7,
+        "circuit": "—"
+      },
+      "signals": {
+        "display": {
+          "rows": [
+            [
+              "Unit",
+              "unit"
+            ],
+            [
+              "Gantry",
+              "robot"
+            ],
+            [
+              "Modules",
+              "modules"
+            ],
+            [
+              "Continuity",
+              "circuit"
+            ],
+            [
+              "Units wired",
+              "completed"
+            ]
+          ],
+          "bar": {
+            "value": "cables",
+            "total": "cableTotal",
+            "label": "Harness {cables}/{cableTotal} cables   ·   Speed {speed}×"
+          }
+        }
+      },
+      "process": [
+        {
+          "op": "wait",
+          "seconds": 0.3,
+          "label": "RFID read · wiring plan P1 (4 modules, 7 cables)",
+          "state": "INSTALL_ELECTRONICS",
+          "status": {
+            "modules": "0 / 4",
+            "cables": 0,
+            "circuit": "—"
+          }
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "ElectronicsBox",
+          "name": "mainboard enclosure",
+          "state": "INSTALL_ELECTRONICS",
+          "gap": 0.165,
+          "openGap": 0.22,
+          "clearance": 0.12,
+          "clearAbove": 0.2,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.35,
+            "grip": 0.18,
+            "lift": 0.3,
+            "transfer": 0.75,
+            "place": 0.4,
+            "release": 0.18
+          },
+          "status": {
+            "modules": "1 / 4"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "ElectronicsBox:0",
+          "name": "mainboard enclosure 1/2",
+          "state": "INSTALL_ELECTRONICS"
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "ElectronicsBox:1",
+          "name": "mainboard enclosure 2/2",
+          "state": "INSTALL_ELECTRONICS"
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "PSU",
+          "name": "power supply",
+          "state": "INSTALL_ELECTRONICS",
+          "gap": 0.205,
+          "openGap": 0.22,
+          "clearance": 0.12,
+          "clearAbove": 0.2,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.35,
+            "grip": 0.18,
+            "lift": 0.3,
+            "transfer": 0.75,
+            "place": 0.4,
+            "release": 0.18
+          },
+          "onPlaced": [
+            {
+              "feature": "powerCable",
+              "to": "stowed"
+            }
+          ],
+          "status": {
+            "modules": "2 / 4"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "PSU:0",
+          "name": "power supply 1/2",
+          "state": "INSTALL_ELECTRONICS"
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "PSU:1",
+          "name": "power supply 2/2",
+          "state": "INSTALL_ELECTRONICS"
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "PrintHead",
+          "name": "hotend assy",
+          "state": "INSTALL_ELECTRONICS",
+          "gap": 0.04,
+          "openGap": 0.22,
+          "clearance": 0.12,
+          "clearAbove": 0.62,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.35,
+            "grip": 0.18,
+            "lift": 0.3,
+            "transfer": 0.75,
+            "place": 0.4,
+            "release": 0.18
+          },
+          "insert": [
+            0,
+            0,
+            0.06
+          ],
+          "onPlaced": [
+            {
+              "feature": "hotendCable",
+              "to": "stowed"
+            }
+          ],
+          "status": {
+            "modules": "3 / 4"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "PrintHead:0",
+          "name": "hotend assy 1/2",
+          "state": "INSTALL_ELECTRONICS"
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "PrintHead:1",
+          "name": "hotend assy 2/2",
+          "state": "INSTALL_ELECTRONICS"
+        },
+        {
+          "op": "installPart",
+          "machine": "gantry",
+          "part": "Display",
+          "name": "LCD module",
+          "state": "INSTALL_ELECTRONICS",
+          "gap": 0.025,
+          "openGap": 0.22,
+          "clearance": 0.12,
+          "clearAbove": 0.2,
+          "timing": {
+            "approach": 0.55,
+            "descend": 0.35,
+            "grip": 0.18,
+            "lift": 0.3,
+            "transfer": 0.75,
+            "place": 0.4,
+            "release": 0.18
+          },
+          "status": {
+            "modules": "4 / 4"
+          }
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Display:0",
+          "name": "LCD module 1/2",
+          "state": "INSTALL_ELECTRONICS"
+        },
+        {
+          "op": "driveScrew",
+          "machine": "gantry",
+          "screw": "Display:1",
+          "name": "LCD module 2/2",
+          "state": "INSTALL_ELECTRONICS"
+        },
+        {
+          "op": "routeCable",
+          "machine": "gantry",
+          "cable": "Z motor",
+          "safeHeight": 0.58,
+          "state": "WIRING",
+          "doneStatus": {
+            "cables": 1
+          }
+        },
+        {
+          "op": "routeCable",
+          "machine": "gantry",
+          "cable": "Y motor",
+          "safeHeight": 0.58,
+          "state": "WIRING",
+          "doneStatus": {
+            "cables": 2
+          }
+        },
+        {
+          "op": "routeCable",
+          "machine": "gantry",
+          "cable": "X motor",
+          "safeHeight": 0.58,
+          "state": "WIRING",
+          "doneStatus": {
+            "cables": 3
+          }
+        },
+        {
+          "op": "routeCable",
+          "machine": "gantry",
+          "cable": "LCD",
+          "safeHeight": 0.58,
+          "state": "WIRING",
+          "doneStatus": {
+            "cables": 4
+          }
+        },
+        {
+          "op": "routeCable",
+          "machine": "gantry",
+          "cable": "Hotend",
+          "safeHeight": 0.58,
+          "state": "WIRING",
+          "doneStatus": {
+            "cables": 5
+          }
+        },
+        {
+          "op": "routeCable",
+          "machine": "gantry",
+          "cable": "Heated bed",
+          "safeHeight": 0.58,
+          "state": "WIRING",
+          "doneStatus": {
+            "cables": 6
+          }
+        },
+        {
+          "op": "routeCable",
+          "machine": "gantry",
+          "cable": "Power",
+          "safeHeight": 0.58,
+          "state": "WIRING",
+          "doneStatus": {
+            "cables": 7
+          }
+        },
+        {
+          "op": "move",
+          "machine": "gantry",
+          "to": {
+            "x": 0,
+            "y": 1.75,
+            "z": 0,
+            "yaw": 0
+          },
+          "seconds": 0.7,
+          "label": "Gantry returning home",
+          "state": "WIRING",
+          "status": {
+            "robot": "HOME",
+            "gripper": "OPEN"
+          }
+        },
+        {
+          "op": "connectLead",
+          "from": {
+            "machine": "tester",
+            "port": "testLead"
+          },
+          "to": {
+            "item": "product",
+            "ref": "dockPort",
+            "offset": [
+              0,
+              0,
+              -0.02
+            ]
+          },
+          "seconds": 0.4,
+          "label": "Test lead into dock port",
+          "state": "CONTINUITY_TEST",
+          "status": {
+            "circuit": "CONNECTING"
+          }
+        },
+        {
+          "op": "toolOn",
+          "machine": "tester",
+          "motion": "status",
+          "value": "testing",
+          "then": "pass",
+          "seconds": 1.2,
+          "label": "Continuity & insulation test · 7 circuits",
+          "state": "CONTINUITY_TEST",
+          "status": {
+            "circuit": "TESTING"
+          }
+        },
+        {
+          "op": "connectLead",
+          "from": {
+            "machine": "tester",
+            "port": "testLead"
+          },
+          "to": {
+            "item": "product",
+            "ref": "dockPort",
+            "offset": [
+              0,
+              0,
+              -0.02
+            ]
+          },
+          "connect": false,
+          "seconds": 0.3,
+          "label": "Test lead removed",
+          "state": "CONTINUITY_TEST",
+          "status": {
+            "circuit": "PASS 7/7"
+          }
+        }
+      ]
+    },
+    {
+      "id": "st4",
+      "code": "ST4",
+      "title": "Calibration & Testing",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST4",
+          "title": "Calibration & Testing",
+          "color": "#7a4fc4",
+          "minZ": -1.7
+        }
+      },
+      "equipment": [
+        {
+          "id": "enclosure",
+          "type": "shutterEnclosure",
+          "params": {}
+        },
+        {
+          "id": "dock",
+          "type": "dockingUnit",
+          "params": {
+            "axisHeight": 0.92,
+            "stroke": 0.37
+          },
+          "position": [
+            -0.086,
+            0,
+            -0.96
+          ]
+        },
+        {
+          "id": "monitor",
+          "type": "statusMonitor",
+          "params": {
+            "screenWidth": 0.8,
+            "screenHeight": 0.45
+          },
+          "position": [
+            1.25,
+            0,
+            0.95
+          ],
+          "rotationY": -0.35
+        },
+        {
+          "id": "rack",
+          "type": "equipmentRack",
+          "params": {
+            "width": 0.6,
+            "height": 1.8,
+            "depth": 0.5
+          },
+          "position": [
+            -0.3,
+            0,
+            -1.15
+          ]
+        }
+      ],
+      "workState": "TESTING",
+      "inputStage": "wired",
+      "home": {
+        "dock": {
+          "plug": 0
+        },
+        "enclosure": {
+          "entryShutter": 0,
+          "exitShutter": 0
+        }
+      },
+      "status": {
+        "test": "IDLE",
+        "hotend": 24,
+        "bed": 24,
+        "temps": "24 / 24 °C",
+        "probed": 0,
+        "flatness": "—",
+        "dimError": "—",
+        "print": 0,
+        "printTotal": 1,
+        "printPercent": 0,
+        "result": "—",
+        "dock": "RETRACTED",
+        "belts": "—",
+        "resonance": "—"
+      },
+      "signals": {
+        "display": {
+          "rows": [
+            [
+              "Unit",
+              "unit"
+            ],
+            [
+              "Test",
+              "test"
+            ],
+            [
+              "Hotend / bed",
+              "temps"
+            ],
+            [
+              "Bed flatness",
+              "flatness"
+            ],
+            [
+              "Units tested",
+              "completed"
+            ]
+          ],
+          "bar": {
+            "value": "print",
+            "total": "printTotal",
+            "label": "Test print {printPercent} %   ·   Speed {speed}×"
+          }
+        },
+        "dashboard": {
+          "machine": "monitor",
+          "title": "ST4 TEST BENCH · {unit}",
+          "gauges": [
+            {
+              "label": "Hotend",
+              "value": "hotend",
+              "target": 215,
+              "unit": "°C",
+              "color": "#e8661c"
+            },
+            {
+              "label": "Bed",
+              "value": "bed",
+              "target": 60,
+              "unit": "°C",
+              "color": "#e3a52b"
+            }
+          ],
+          "grid": {
+            "label": "Bed mesh (µm)",
+            "cols": 3,
+            "values": "mesh",
+            "range": [
+              -80,
+              80
+            ]
+          },
+          "footer": "Flatness {flatness}   ·   Cube error {dimError}   ·   Print {printPercent} %"
+        }
+      },
+      "intake": [
+        {
+          "op": "move",
+          "machine": "enclosure",
+          "to": {
+            "entryShutter": 1
+          },
+          "seconds": 0.5,
+          "label": "Opening entry shutter",
+          "state": "INFEED"
+        },
+        {
+          "op": "move",
+          "machine": "line",
+          "to": {
+            "stop": 1
+          },
+          "seconds": 0.3,
+          "label": "Stop raised · carrier indexing",
+          "state": "INFEED",
+          "status": {
+            "conveyor": "STARTING"
+          }
+        },
+        {
+          "op": "transfer",
+          "conveyor": "line",
+          "from": "input",
+          "to": "work",
+          "label": "Carrier transport to work position",
+          "state": "INFEED"
+        },
+        {
+          "op": "grip",
+          "machine": "line",
+          "item": "product",
+          "motion": "locate",
+          "to": 1,
+          "anchor": "carrier",
+          "seconds": 0.4,
+          "label": "Lift & locate carrier",
+          "state": "INFEED",
+          "status": {
+            "conveyor": "STOPPED"
+          }
+        },
+        {
+          "op": "move",
+          "machine": "enclosure",
+          "to": {
+            "entryShutter": 0
+          },
+          "seconds": 0.5,
+          "label": "Closing entry shutter",
+          "state": "TESTING"
+        }
+      ],
+      "process": [
+        {
+          "op": "move",
+          "machine": "dock",
+          "to": {
+            "plug": 0.366
+          },
+          "seconds": 0.55,
+          "label": "Docking power & data connector",
+          "state": "TESTING",
+          "status": {
+            "test": "DOCKING",
+            "dock": "EXTENDING"
+          },
+          "before": [
+            {
+              "routine": "resetTest"
+            }
+          ]
+        },
+        {
+          "op": "runRoutine",
+          "routine": "display",
+          "args": {
+            "lines": [
+              "SELF TEST",
+              "FW 2.4.1"
+            ]
+          },
+          "seconds": 0.8,
+          "label": "Power-on self test · firmware, thermistors, endstops",
+          "state": "TESTING",
+          "status": {
+            "test": "POST",
+            "dock": "DOCKED"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "fanSpin",
+          "args": {
+            "rate": 80
+          },
+          "seconds": 0.6,
+          "label": "Fan test · hotend fan spin-up",
+          "state": "TESTING",
+          "status": {
+            "test": "FANS"
+          },
+          "after": [
+            {
+              "routine": "display",
+              "args": {
+                "lines": [
+                  "P1 READY",
+                  "{label}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": -0.09
+          },
+          "seconds": 0.5,
+          "label": "Homing X axis",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "HOMING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "bed": 0.07
+          },
+          "seconds": 0.5,
+          "label": "Homing Y axis",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "nozzle": 0.012
+          },
+          "seconds": 0.5,
+          "label": "Homing Z axis",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": 0,
+            "bed": 0,
+            "nozzle": 0.06
+          },
+          "seconds": 0.3,
+          "label": "Z clear for axis tests",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "beltTest",
+          "args": {
+            "x": 92,
+            "y": 88
+          },
+          "seconds": 0.7,
+          "label": "Belt tension check · X / Y",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "BELTS"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "resonanceTest",
+          "args": {
+            "x": 47.2,
+            "y": 38.6
+          },
+          "seconds": 1.2,
+          "label": "Resonance test · input shaper X / Y",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "RESONANCE"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probe",
+          "args": {
+            "to": 1
+          },
+          "seconds": 0.25,
+          "label": "Deploying bed probe",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": -0.02,
+            "bed": 0.05,
+            "nozzle": 0.024
+          },
+          "seconds": 0.2,
+          "label": "Probing bed point 1/9",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probeDip",
+          "args": {
+            "index": 0,
+            "height": 0.012,
+            "depth": 0.012
+          },
+          "seconds": 0.16,
+          "label": "Probing bed point 1/9",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": 0.03,
+            "bed": 0.05,
+            "nozzle": 0.024
+          },
+          "seconds": 0.2,
+          "label": "Probing bed point 2/9",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probeDip",
+          "args": {
+            "index": 1,
+            "height": 0.012,
+            "depth": 0.012
+          },
+          "seconds": 0.16,
+          "label": "Probing bed point 2/9",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": 0.08,
+            "bed": 0.05,
+            "nozzle": 0.024
+          },
+          "seconds": 0.2,
+          "label": "Probing bed point 3/9",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probeDip",
+          "args": {
+            "index": 2,
+            "height": 0.012,
+            "depth": 0.012
+          },
+          "seconds": 0.16,
+          "label": "Probing bed point 3/9",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": -0.02,
+            "bed": 0,
+            "nozzle": 0.024
+          },
+          "seconds": 0.2,
+          "label": "Probing bed point 4/9",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probeDip",
+          "args": {
+            "index": 3,
+            "height": 0.012,
+            "depth": 0.012
+          },
+          "seconds": 0.16,
+          "label": "Probing bed point 4/9",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": 0.03,
+            "bed": 0,
+            "nozzle": 0.024
+          },
+          "seconds": 0.2,
+          "label": "Probing bed point 5/9",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probeDip",
+          "args": {
+            "index": 4,
+            "height": 0.012,
+            "depth": 0.012
+          },
+          "seconds": 0.16,
+          "label": "Probing bed point 5/9",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": 0.08,
+            "bed": 0,
+            "nozzle": 0.024
+          },
+          "seconds": 0.2,
+          "label": "Probing bed point 6/9",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probeDip",
+          "args": {
+            "index": 5,
+            "height": 0.012,
+            "depth": 0.012
+          },
+          "seconds": 0.16,
+          "label": "Probing bed point 6/9",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": -0.02,
+            "bed": -0.05,
+            "nozzle": 0.024
+          },
+          "seconds": 0.2,
+          "label": "Probing bed point 7/9",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probeDip",
+          "args": {
+            "index": 6,
+            "height": 0.012,
+            "depth": 0.012
+          },
+          "seconds": 0.16,
+          "label": "Probing bed point 7/9",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": 0.03,
+            "bed": -0.05,
+            "nozzle": 0.024
+          },
+          "seconds": 0.2,
+          "label": "Probing bed point 8/9",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probeDip",
+          "args": {
+            "index": 7,
+            "height": 0.012,
+            "depth": 0.012
+          },
+          "seconds": 0.16,
+          "label": "Probing bed point 8/9",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": 0.08,
+            "bed": -0.05,
+            "nozzle": 0.024
+          },
+          "seconds": 0.2,
+          "label": "Probing bed point 9/9",
+          "state": "CALIBRATING",
+          "status": {
+            "test": "PROBING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probeDip",
+          "args": {
+            "index": 8,
+            "height": 0.012,
+            "depth": 0.012
+          },
+          "seconds": 0.16,
+          "label": "Probing bed point 9/9",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "probe",
+          "args": {
+            "to": 0,
+            "reportFlatness": true
+          },
+          "seconds": 0.25,
+          "label": "Bed mesh stored · probe stowed",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": -0.09,
+            "bed": -0.06,
+            "nozzle": 0.01
+          },
+          "seconds": 0.4,
+          "label": "Moving to purge start",
+          "state": "CALIBRATING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "heat",
+          "args": {
+            "hotend": 215,
+            "bed": 60,
+            "ambient": 24
+          },
+          "seconds": 2,
+          "label": "Heating hotend 215 °C · bed 60 °C",
+          "state": "TESTING",
+          "status": {
+            "test": "HEATING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "purge",
+          "args": {
+            "from": -0.09,
+            "to": 0.09,
+            "bed": -0.06,
+            "nozzle": 0.002857142857142857
+          },
+          "seconds": 1.2,
+          "label": "First layer · purge line",
+          "state": "TEST_PRINT",
+          "status": {
+            "test": "FIRST LAYER"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": -0.02,
+            "bed": 0.02,
+            "nozzle": 0.002857142857142857
+          },
+          "seconds": 0.4,
+          "label": "Moving to cube start",
+          "state": "TEST_PRINT"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "printCube",
+          "args": {
+            "layers": 14,
+            "layerHeight": 0.002857142857142857,
+            "side": 0.04
+          },
+          "seconds": 6.4,
+          "label": "Printing 40 mm calibration cube",
+          "state": "TEST_PRINT",
+          "status": {
+            "test": "PRINTING"
+          },
+          "before": [
+            {
+              "routine": "display",
+              "args": {
+                "lines": [
+                  "PRINTING",
+                  "cal_cube.gcode"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "op": "runRoutine",
+          "routine": "cool",
+          "args": {
+            "hotend": 215,
+            "bed": 60,
+            "ambient": 24
+          },
+          "seconds": 1.2,
+          "label": "Cooling down · presenting print",
+          "state": "TESTING",
+          "status": {
+            "test": "COOLING"
+          },
+          "before": [
+            {
+              "routine": "display",
+              "args": {
+                "lines": [
+                  "PRINT DONE",
+                  "Cooling..."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "op": "runRoutine",
+          "routine": "axes",
+          "args": {
+            "head": 0,
+            "bed": 0,
+            "nozzle": 0.09200000000000001
+          },
+          "seconds": 0.6,
+          "label": "Parking axes",
+          "state": "TESTING"
+        },
+        {
+          "op": "runRoutine",
+          "routine": "record",
+          "seconds": 0.5,
+          "label": "Recording test results to unit record",
+          "state": "TESTING",
+          "status": {
+            "test": "RESULTS"
+          }
+        },
+        {
+          "op": "move",
+          "machine": "dock",
+          "to": {
+            "plug": 0
+          },
+          "seconds": 0.4,
+          "label": "Undocking connector",
+          "state": "TESTING",
+          "status": {
+            "dock": "RETRACTING"
+          },
+          "after": [
+            {
+              "routine": "display",
+              "args": {
+                "lines": [
+                  "READY",
+                  "Test print OK"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "output": [
+        {
+          "op": "move",
+          "machine": "enclosure",
+          "to": {
+            "exitShutter": 1
+          },
+          "seconds": 0.5,
+          "label": "Opening exit shutter",
+          "state": "INFEED"
+        },
+        {
+          "op": "release",
+          "machine": "line",
+          "item": "product",
+          "motion": "locate",
+          "to": 0,
+          "also": {
+            "stop": 0
+          },
+          "seconds": 0.35,
+          "label": "Releasing carrier",
+          "state": "OUTPUT",
+          "status": {
+            "conveyor": "STOPPED"
+          }
+        },
+        {
+          "op": "transfer",
+          "conveyor": "line",
+          "from": "work",
+          "to": "output",
+          "label": "Transport to output port",
+          "state": "OUTPUT"
+        },
+        {
+          "op": "move",
+          "machine": "enclosure",
+          "to": {
+            "exitShutter": 0
+          },
+          "seconds": 0.5,
+          "label": "Closing exit shutter",
+          "state": "TESTING"
+        }
+      ]
+    },
+    {
+      "id": "st5",
+      "code": "ST5",
+      "title": "Quality Inspection",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST5",
+          "title": "Quality Inspection",
+          "color": "#c8231d",
+          "minZ": -2.35
+        }
+      },
+      "equipment": [
+        {
+          "id": "scanner",
+          "type": "visionScanner",
+          "params": {}
+        },
+        {
+          "id": "labeller",
+          "type": "labelApplicator",
+          "params": {
+            "applyHeight": 1.264,
+            "stroke": 0.45
+          },
+          "position": [
+            -0.15,
+            0,
+            1.02
+          ]
+        },
+        {
+          "id": "diverter",
+          "type": "crossTransfer",
+          "params": {
+            "rise": 0.022
+          }
+        },
+        {
+          "id": "rejectLane",
+          "type": "rollerConveyor",
+          "params": {
+            "length": 1.82
+          },
+          "position": [
+            0,
+            0,
+            -1.29
+          ],
+          "rotationY": 1.5708
+        },
+        {
+          "id": "rejectSign",
+          "type": "stationSign",
+          "params": {
+            "code": "✕",
+            "title": "Reject bay",
+            "color": "#c8231d",
+            "height": 2.2,
+            "scale": 0.5
+          },
+          "position": [
+            0.85,
+            0,
+            -1.4
+          ],
+          "rotationY": -1.5708
+        },
+        {
+          "id": "monitor",
+          "type": "statusMonitor",
+          "params": {
+            "screenWidth": 0.8,
+            "screenHeight": 0.45
+          },
+          "position": [
+            1.3,
+            0,
+            1
+          ],
+          "rotationY": -0.35
+        }
+      ],
+      "workState": "INSPECTING",
+      "inputStage": "tested",
+      "ports": {
+        "reject": {
+          "machine": "rejectLane",
+          "port": "input",
+          "direction": "out",
+          "slots": 2
+        }
+      },
+      "home": {
+        "scanner": {
+          "x": -1.15,
+          "scan": "off"
+        },
+        "labeller": {
+          "tamp": 0
+        },
+        "diverter": {
+          "raise": 0
+        }
+      },
+      "status": {
+        "scan": "IDLE",
+        "checked": 0,
+        "features": 46,
+        "flatness": "—",
+        "verdict": "—",
+        "checks": "pending",
+        "cubeCheck": "pending"
+      },
+      "signals": {
+        "display": {
+          "rows": [
+            [
+              "Unit",
+              "unit"
+            ],
+            [
+              "Vision",
+              "scan"
+            ],
+            [
+              "Bed flatness",
+              "flatness"
+            ],
+            [
+              "Verdict",
+              "verdict"
+            ],
+            [
+              "Passed",
+              "completed"
+            ],
+            [
+              "Rejected",
+              "rejectCount"
+            ]
+          ],
+          "bar": {
+            "value": "checked",
+            "total": "features",
+            "label": "Features {checked}/{features}   ·   Speed {speed}×"
+          }
+        },
+        "dashboard": {
+          "machine": "monitor",
+          "title": "ST5 VISION · {unit}",
+          "checks": [
+            {
+              "label": "Fasteners present",
+              "value": "22/22",
+              "state": "{checks}"
+            },
+            {
+              "label": "Connectors seated & latched",
+              "value": "14/14",
+              "state": "{checks}"
+            },
+            {
+              "label": "Cables in clips, no pinch points",
+              "value": "7/7",
+              "state": "{checks}"
+            },
+            {
+              "label": "Frame square · belts seated",
+              "value": "OK",
+              "state": "{checks}"
+            },
+            {
+              "label": "Serial / CE / rating labels",
+              "value": "OK",
+              "state": "{checks}"
+            },
+            {
+              "label": "Cosmetic (scratches, dents)",
+              "value": "OK",
+              "state": "{checks}"
+            },
+            {
+              "label": "Test cube 40 mm · bed flatness",
+              "value": "{flatness}",
+              "state": "{cubeCheck}"
+            }
+          ],
+          "verdict": "verdict",
+          "footer": "Features {checked}/{features}"
+        }
+      },
+      "process": [
+        {
+          "op": "runRoutine",
+          "routine": "readRecord",
+          "seconds": 0.3,
+          "label": "RFID read · loading test record",
+          "state": "INSPECTING",
+          "status": {
+            "scan": "READY",
+            "checked": 0,
+            "verdict": "—",
+            "checks": "pending",
+            "cubeCheck": "pending"
+          }
+        },
+        {
+          "op": "move",
+          "machine": "scanner",
+          "to": {
+            "x": 0.75
+          },
+          "switches": {
+            "scan": "on"
+          },
+          "seconds": 2.2,
+          "label": "Vision scan · forward pass",
+          "state": "INSPECTING",
+          "status": {
+            "scan": "SCANNING"
+          }
+        },
+        {
+          "op": "move",
+          "machine": "scanner",
+          "to": {
+            "x": -0.85
+          },
+          "seconds": 1.5,
+          "label": "Vision scan · return pass",
+          "state": "INSPECTING",
+          "status": {
+            "checked": 27
+          }
+        },
+        {
+          "op": "move",
+          "machine": "scanner",
+          "to": {
+            "x": -1.15
+          },
+          "switches": {
+            "scan": "off"
+          },
+          "seconds": 0.8,
+          "label": "Analysing 46 features + test record",
+          "state": "INSPECTING",
+          "status": {
+            "scan": "ANALYSING",
+            "checked": 46
+          }
+        },
+        {
+          "op": "decide",
+          "on": "verdict",
+          "cases": {
+            "PASS": [
+              {
+                "op": "move",
+                "machine": "labeller",
+                "to": {
+                  "tamp": 0.425
+                },
+                "seconds": 0.45,
+                "label": "Applying QC PASS label",
+                "state": "LABELLING",
+                "status": {
+                  "scan": "PASS",
+                  "verdict": "PASS",
+                  "checks": "pass",
+                  "cubeCheck": "pass"
+                },
+                "after": [
+                  {
+                    "routine": "qcLabel",
+                    "args": {
+                      "verdict": "PASS"
+                    }
+                  }
+                ]
+              },
+              {
+                "op": "move",
+                "machine": "labeller",
+                "to": {
+                  "tamp": 0
+                },
+                "seconds": 0.35,
+                "label": "Labeller retracting",
+                "state": "LABELLING"
+              },
+              {
+                "op": "wait",
+                "seconds": 0,
+                "label": "Released to packaging",
+                "state": "LABELLING"
+              }
+            ],
+            "REJECT": [
+              {
+                "op": "move",
+                "machine": "labeller",
+                "to": {
+                  "tamp": 0.425
+                },
+                "seconds": 0.45,
+                "label": "Applying REJECT tag",
+                "state": "LABELLING",
+                "status": {
+                  "scan": "FAIL",
+                  "verdict": "REJECT",
+                  "checks": "pass",
+                  "cubeCheck": "fail",
+                  "alarm": "ON"
+                },
+                "after": [
+                  {
+                    "routine": "qcLabel",
+                    "args": {
+                      "verdict": "REJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "op": "move",
+                "machine": "labeller",
+                "to": {
+                  "tamp": 0
+                },
+                "seconds": 0.35,
+                "label": "Labeller retracting",
+                "state": "LABELLING"
+              },
+              {
+                "op": "decide",
+                "on": "rejectSlot",
+                "cases": {
+                  "0": [
+                    {
+                      "op": "grip",
+                      "machine": "diverter",
+                      "item": "product",
+                      "motion": "raise",
+                      "to": 1,
+                      "anchor": "carrier",
+                      "seconds": 0.3,
+                      "alongside": [
+                        {
+                          "machine": "line",
+                          "to": {
+                            "locate": 0,
+                            "stop": 0
+                          }
+                        }
+                      ],
+                      "label": "Cross transfer rising",
+                      "state": "REJECT",
+                      "status": {
+                        "conveyor": "STOPPED"
+                      }
+                    },
+                    {
+                      "op": "transfer",
+                      "conveyor": "rejectLane",
+                      "from": {
+                        "machine": "diverter",
+                        "port": "transfer",
+                        "offset": [
+                          0,
+                          0.022,
+                          0
+                        ]
+                      },
+                      "to": {
+                        "machine": "rejectLane",
+                        "port": "input",
+                        "offset": [
+                          0.67,
+                          0,
+                          0
+                        ]
+                      },
+                      "label": "Diverting to reject lane",
+                      "state": "REJECT",
+                      "status": {
+                        "conveyor": "DIVERT"
+                      }
+                    },
+                    {
+                      "op": "move",
+                      "machine": "diverter",
+                      "to": {
+                        "raise": 0
+                      },
+                      "seconds": 0.3,
+                      "label": "Cross transfer lowering",
+                      "state": "REJECT",
+                      "status": {
+                        "conveyor": "STOPPED"
+                      }
+                    }
+                  ],
+                  "1": [
+                    {
+                      "op": "grip",
+                      "machine": "diverter",
+                      "item": "product",
+                      "motion": "raise",
+                      "to": 1,
+                      "anchor": "carrier",
+                      "seconds": 0.3,
+                      "alongside": [
+                        {
+                          "machine": "line",
+                          "to": {
+                            "locate": 0,
+                            "stop": 0
+                          }
+                        }
+                      ],
+                      "label": "Cross transfer rising",
+                      "state": "REJECT",
+                      "status": {
+                        "conveyor": "STOPPED"
+                      }
+                    },
+                    {
+                      "op": "transfer",
+                      "conveyor": "rejectLane",
+                      "from": {
+                        "machine": "diverter",
+                        "port": "transfer",
+                        "offset": [
+                          0,
+                          0.022,
+                          0
+                        ]
+                      },
+                      "to": {
+                        "machine": "rejectLane",
+                        "port": "input",
+                        "offset": [
+                          1.32,
+                          0,
+                          0
+                        ]
+                      },
+                      "label": "Diverting to reject lane",
+                      "state": "REJECT",
+                      "status": {
+                        "conveyor": "DIVERT"
+                      }
+                    },
+                    {
+                      "op": "move",
+                      "machine": "diverter",
+                      "to": {
+                        "raise": 0
+                      },
+                      "seconds": 0.3,
+                      "label": "Cross transfer lowering",
+                      "state": "REJECT",
+                      "status": {
+                        "conveyor": "STOPPED"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "st6",
+      "code": "ST6",
+      "title": "Packaging & Dispatch",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST6",
+          "title": "Packaging & Dispatch",
+          "color": "#8a6a2c",
+          "minZ": -3
+        }
+      },
+      "equipment": [
+        {
+          "id": "gantry",
+          "type": "cartesianGantry",
+          "params": {
+            "spanX": 1.4,
+            "spanZ": 2.55,
+            "beamY": 2.7,
+            "maxGap": 0.64,
+            "fingerLength": 0.2,
+            "minToolY": 0.62
+          },
+          "position": [
+            0,
+            0,
+            -1.175
+          ]
+        },
+        {
+          "id": "cartonLine",
+          "type": "rollerConveyor",
+          "params": {
+            "length": 2.8,
+            "rollerPitch": 0.11,
+            "color": "machineGrey",
+            "endStop": false,
+            "bayMarking": false
+          },
+          "position": [
+            -0.9,
+            0,
+            -1.15
+          ],
+          "beltHeight": 0.55
+        },
+        {
+          "id": "erector",
+          "type": "caseErector",
+          "params": {},
+          "position": [
+            -1.85,
+            0,
+            -1.15
+          ],
+          "beltHeight": 0.55
+        },
+        {
+          "id": "foamTable",
+          "type": "workTable",
+          "params": {
+            "length": 0.62,
+            "width": 0.34,
+            "height": 0.75
+          },
+          "position": [
+            0.52,
+            0,
+            -0.62
+          ]
+        },
+        {
+          "id": "taper",
+          "type": "caseTaper",
+          "params": {
+            "topHeight": 1.24
+          },
+          "position": [
+            0,
+            0,
+            -1.15
+          ],
+          "beltHeight": 0.55
+        },
+        {
+          "id": "labeller",
+          "type": "labelApplicator",
+          "params": {
+            "applyHeight": 0.9295,
+            "stroke": 0.12,
+            "padWidth": 0.16
+          },
+          "position": [
+            -0.12,
+            0,
+            -0.49
+          ]
+        },
+        {
+          "id": "pallet",
+          "type": "blockPallet",
+          "params": {
+            "length": 1.25,
+            "width": 1.15,
+            "height": 0.144
+          },
+          "position": [
+            0,
+            0,
+            -2.15
+          ]
+        },
+        {
+          "id": "dispatchBay",
+          "type": "bayMarking",
+          "params": {},
+          "position": [
+            0,
+            0,
+            -2.15
+          ]
+        }
+      ],
+      "workState": "PACKING",
+      "inputStage": "inspected",
+      "stacks": {
+        "pallet": {
+          "machine": "pallet",
+          "port": "top",
+          "columns": [
+            -0.31,
+            0.31
+          ],
+          "rows": [
+            -0.28,
+            0.28
+          ],
+          "layers": 2,
+          "layerHeight": 0.69,
+          "gap": 0.002
+        }
+      },
+      "home": {
+        "gantry": {
+          "x": 0,
+          "y": 2.05,
+          "z": 0.575,
+          "yaw": 0,
+          "grip": 0.62
+        },
+        "taper": {
+          "x": 0.68,
+          "lower": 0
+        },
+        "labeller": {
+          "tamp": 0
+        }
+      },
+      "status": {
+        "robot": "HOME",
+        "gripper": "OPEN",
+        "carton": "NONE"
+      },
+      "signals": {
+        "display": {
+          "rows": [
+            [
+              "Unit",
+              "unit"
+            ],
+            [
+              "Gantry",
+              "robot"
+            ],
+            [
+              "Carton",
+              "carton"
+            ],
+            [
+              "Dispatched",
+              "completed"
+            ],
+            [
+              "Pallets shipped",
+              "palletShipped"
+            ]
+          ],
+          "bar": {
+            "value": "palletCount",
+            "total": "palletCapacity",
+            "label": "Pallet {palletCount}/{palletCapacity} cartons   ·   Speed {speed}×"
+          }
+        }
+      },
+      "process": [
+        {
+          "op": "spawn",
+          "items": [
+            {
+              "item": "carton",
+              "product": {
+                "type": "carton",
+                "params": {
+                  "length": 0.6,
+                  "width": 0.54,
+                  "height": 0.69,
+                  "wall": 0.006,
+                  "flap": 0.005,
+                  "foam": 0.035,
+                  "title": "TWINGEN P1 3D PRINTER",
+                  "code": "{label}"
+                }
+              },
+              "at": {
+                "machine": "cartonLine",
+                "port": "input",
+                "offset": [
+                  0.55,
+                  0,
+                  0
+                ]
+              },
+              "to": {
+                "machine": "cartonLine",
+                "port": "input",
+                "offset": [
+                  2.3,
+                  0,
+                  0
+                ]
+              },
+              "conveyor": "cartonLine"
+            },
+            {
+              "item": "foam",
+              "product": {
+                "type": "packingFoam",
+                "params": {}
+              },
+              "at": {
+                "machine": "foamTable",
+                "port": "top"
+              }
+            }
+          ],
+          "seconds": 1.5,
+          "label": "Carton infeed · bottom foam inserted",
+          "state": "PACKING",
+          "status": {
+            "carton": "INFEED"
+          }
+        },
+        {
+          "op": "pickPlace",
+          "machine": "gantry",
+          "openGap": 0.62,
+          "clearY": 2.2,
+          "timing": {
+            "approach": 0.7,
+            "descend": 0.55,
+            "grip": 0.25,
+            "lift": 0.6,
+            "transfer": 1.1,
+            "place": 0.6,
+            "release": 0.25
+          },
+          "item": "printer",
+          "name": "printer",
+          "gap": 0.025,
+          "onto": "carton",
+          "state": "PACKING",
+          "status": {
+            "carton": "PRINTER IN"
+          },
+          "from": {
+            "item": "product",
+            "ref": "printerOrigin",
+            "offset": [
+              0.09,
+              0.466,
+              -0.035
+            ]
+          },
+          "to": {
+            "item": "carton",
+            "ref": "bottom",
+            "offset": [
+              0.09,
+              0.466,
+              -0.052
+            ]
+          }
+        },
+        {
+          "op": "transform",
+          "item": "carton",
+          "set": {
+            "bag": "on"
+          },
+          "seconds": 0.5,
+          "label": "Dust-cover bag applied",
+          "state": "PACKING",
+          "status": {
+            "carton": "BAGGED"
+          }
+        },
+        {
+          "op": "pickPlace",
+          "machine": "gantry",
+          "openGap": 0.62,
+          "clearY": 2.2,
+          "timing": {
+            "approach": 0.7,
+            "descend": 0.55,
+            "grip": 0.25,
+            "lift": 0.6,
+            "transfer": 1.1,
+            "place": 0.6,
+            "release": 0.25
+          },
+          "item": "foam",
+          "name": "top foam",
+          "gap": 0.5,
+          "onto": "carton",
+          "state": "PACKING",
+          "status": {
+            "carton": "FOAM IN"
+          },
+          "from": {
+            "item": "foam",
+            "ref": "grasp"
+          },
+          "to": {
+            "item": "carton",
+            "ref": "bottom",
+            "offset": [
+              0,
+              0.585,
+              0
+            ]
+          }
+        },
+        {
+          "op": "move",
+          "machine": "gantry",
+          "to": {
+            "x": 0,
+            "y": 2.2,
+            "z": 0.725,
+            "yaw": 0
+          },
+          "seconds": 0.56,
+          "label": "Gantry clear of case closer",
+          "state": "PACKING",
+          "status": {
+            "robot": "CLEAR",
+            "gripper": "OPEN"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "item": "carton",
+          "routine": "foldMinor",
+          "seconds": 0.6,
+          "label": "Folding minor flaps",
+          "state": "CASE_CLOSING",
+          "status": {
+            "carton": "CLOSING"
+          }
+        },
+        {
+          "op": "runRoutine",
+          "item": "carton",
+          "routine": "foldMajor",
+          "seconds": 0.6,
+          "label": "Folding major flaps",
+          "state": "CASE_CLOSING"
+        },
+        {
+          "op": "move",
+          "machine": "taper",
+          "to": {
+            "x": 0.3,
+            "lower": 1
+          },
+          "seconds": 0.35,
+          "label": "Tape head lowering",
+          "state": "CASE_CLOSING"
+        },
+        {
+          "op": "move",
+          "machine": "taper",
+          "to": {
+            "x": -0.32
+          },
+          "seconds": 1.2,
+          "profile": "linear",
+          "label": "Taping case",
+          "state": "CASE_CLOSING",
+          "status": {
+            "carton": "TAPING"
+          },
+          "routine": {
+            "item": "carton",
+            "routine": "tape",
+            "args": {
+              "from": 0.35,
+              "to": -0.27
+            }
+          }
+        },
+        {
+          "op": "move",
+          "machine": "taper",
+          "to": {
+            "x": 0.68,
+            "lower": 0
+          },
+          "seconds": 0.45,
+          "label": "Tape head returning",
+          "state": "CASE_CLOSING",
+          "status": {
+            "carton": "TAPED"
+          }
+        },
+        {
+          "op": "wait",
+          "seconds": 0.4,
+          "label": "Printing shipping label",
+          "state": "CASE_CLOSING"
+        },
+        {
+          "op": "move",
+          "machine": "labeller",
+          "to": {
+            "tamp": 0.116
+          },
+          "seconds": 0.5,
+          "label": "Applying shipping label",
+          "state": "CASE_CLOSING",
+          "status": {
+            "carton": "LABELLED"
+          },
+          "after": [
+            {
+              "item": "carton",
+              "set": {
+                "label": "on"
+              }
+            }
+          ]
+        },
+        {
+          "op": "move",
+          "machine": "labeller",
+          "to": {
+            "tamp": 0
+          },
+          "seconds": 0.35,
+          "label": "Labeller retracting",
+          "state": "CASE_CLOSING"
+        },
+        {
+          "op": "palletize",
+          "machine": "gantry",
+          "openGap": 0.62,
+          "clearY": 2.2,
+          "timing": {
+            "approach": 0.7,
+            "descend": 0.55,
+            "grip": 0.25,
+            "lift": 0.6,
+            "transfer": 1.1,
+            "place": 0.6,
+            "release": 0.25
+          },
+          "item": "carton",
+          "name": "carton",
+          "gap": 0.54,
+          "from": {
+            "item": "carton",
+            "ref": "grasp"
+          },
+          "stack": "pallet",
+          "state": "PALLETIZING",
+          "status": {
+            "carton": "TO PALLET"
+          }
+        },
+        {
+          "op": "move",
+          "machine": "gantry",
+          "to": {
+            "x": 0,
+            "y": 2.05,
+            "z": 0.575,
+            "yaw": 0
+          },
+          "seconds": 0.8,
+          "label": "Gantry returning home",
+          "state": "PALLETIZING",
+          "status": {
+            "robot": "HOME",
+            "gripper": "OPEN",
+            "carton": "NONE"
+          }
+        },
+        {
+          "op": "decide",
+          "on": "palletFills",
+          "cases": {
+            "yes": [
+              {
+                "op": "dispatch",
+                "stack": "pallet",
+                "seconds": 1.6,
+                "label": "Pallet complete · wrapped & loaded for dispatch",
+                "state": "DISPATCH"
+              }
+            ],
+            "no": []
+          }
+        }
+      ]
+    }
+  ],
+  "graph": {
+    "edges": [
+      {
+        "from": "st1.output",
+        "to": "st2.input",
+        "carries": "pallet",
+        "transport": {
+          "type": "palletConveyor",
+          "params": {
+            "workStop": false,
+            "drive": true
+          }
+        }
+      },
+      {
+        "from": "st2.output",
+        "to": "st3.input",
+        "carries": "pallet",
+        "transport": {
+          "type": "palletConveyor",
+          "params": {
+            "workStop": false,
+            "drive": false
+          }
+        }
+      },
+      {
+        "from": "st3.output",
+        "to": "st4.input",
+        "carries": "pallet",
+        "transport": {
+          "type": "palletConveyor",
+          "params": {
+            "workStop": false,
+            "drive": true
+          }
+        }
+      },
+      {
+        "from": "st4.output",
+        "to": "st5.input",
+        "carries": "pallet",
+        "transport": {
+          "type": "palletConveyor",
+          "params": {
+            "workStop": false,
+            "drive": false
+          }
+        }
+      },
+      {
+        "from": "st5.output",
+        "to": "st6.input",
+        "carries": "pallet",
+        "transport": {
+          "type": "palletConveyor",
+          "params": {
+            "workStop": false,
+            "drive": true
+          }
+        }
+      }
+    ]
+  }
+}

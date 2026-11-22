@@ -47,17 +47,20 @@ function portInStation(equipmentEntry, portPosition) {
 
 /**
  * Timing of a whole line from its data. `registry` must have the components, ops and product.
+ * `facts`: { stationId: { fact: value } } plans those decisions one way (e.g. a reject path);
+ * decisions on facts not given take their longest branch.
  * Returns { line, stations: [{ id, code, title, intake, process, output, cycleTime, rows }],
  * transfers: [{ from, to, distance, duration }], takt, bottleneck, leadTime, runSize, runTime }.
  */
-export function lineTiming(registry, lineData, { ctx = {}, conventions = CONVENTIONS } = {}) {
+export function lineTiming(registry, lineData, { ctx = {}, conventions = CONVENTIONS, facts = {} } = {}) {
   const line = parseLine(lineData);
   const stations = line.stations.map((data) => {
     const { equipment: list, ...stationData } = data;
     const station = parseStation(stationData);
     const entries = Object.fromEntries(list.map((e) => [e.id, e]));
-    const specs = Object.fromEntries(list.map((e) => [e.id, registry.componentSpec(e.type, e.params ?? {}, ctx)]));
-    const plan = planStation(registry, stationData, { equipment: specs, product: line.product.type, ctx, conventions });
+    const specs = Object.fromEntries(list.map((e) => [e.id, registry.componentSpec(e.type, e.params ?? {}, e.beltHeight !== undefined ? { ...ctx, beltHeight: e.beltHeight } : ctx)]));
+    const placed = Object.fromEntries(list.map((e) => [e.id, { ...specs[e.id], placement: { position: e.position ?? [0, 0, 0], rotationY: e.rotationY ?? 0 } }]));
+    const plan = planStation(registry, stationData, { equipment: placed, product: line.product.type, ctx, conventions, facts: facts[station.id] ?? {} });
     const conveyor = entries[station.conveyor];
     const [lo, hi] = specs[station.conveyor].footprint.x;
     const x0 = conveyor.position?.[0] ?? 0;

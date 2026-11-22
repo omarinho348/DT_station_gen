@@ -42,3 +42,25 @@ describe('rule 5: deterministic behaviour', () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe('source hygiene', () => {
+  // A binding imported twice is a SyntaxError in the browser, but Vitest's transform lets it
+  // through (it happened once in Phase 4 step 5). Caught here instead.
+  it('no module imports the same binding twice', () => {
+    const offenders = [];
+    const dirs = ['lib', 'compiler', 'agents', 'app', 'spec', 'server', 'scripts']
+      .filter((dir) => { try { return statSync(join(ROOT, dir)).isDirectory(); } catch { return false; } });
+    for (const file of dirs.flatMap(sourceFiles)) {
+      const text = readFileSync(join(ROOT, file), 'utf8');
+      const seen = new Set();
+      for (const m of text.matchAll(/^import\s+(?:\*\s+as\s+(\w+)|\{([^}]*)\}|(\w+))[^;]*from\s+['"][^'"]+['"];?/gm)) {
+        const names = m[1] ? [m[1]] : m[3] ? [m[3]] : m[2].split(',').map((n) => n.trim().split(/\s+as\s+/).pop()).filter(Boolean);
+        for (const name of names) {
+          if (seen.has(name)) offenders.push(`${file}: ${name}`);
+          seen.add(name);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});

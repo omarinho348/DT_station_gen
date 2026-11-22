@@ -100,7 +100,7 @@ for (const [id, stationFile, buildName, cycleFile, cycleName] of STATIONS) {
     code: cycle.code,
     unitSteps: units[0].steps,
     unitTime: round(units[0].steps.reduce((sum, s) => sum + s.duration, 0)),
-    units: units.map((u) => ({ unit: u.unit, period: u.period, time: round(u.steps.reduce((sum, s) => sum + s.duration, 0)), stepCount: u.steps.length })),
+    units: units.map((u) => ({ unit: u.unit, period: u.period, time: round(u.steps.reduce((sum, s) => sum + s.duration, 0)), stepCount: u.steps.length, steps: u.steps })),
   };
   console.log(`${id} ${cycle.code}: unit 1 = ${result.stations[id].unitTime.toFixed(2)} s over ${units[0].steps.length} steps`);
 }

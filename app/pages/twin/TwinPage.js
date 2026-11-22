@@ -75,7 +75,10 @@ export function TwinPage(outlet, route) {
       // ?t=<seconds>: frozen at that moment (screenshots); otherwise it plays.
       if (route.query.t) demo.skip(Number(route.query.t));
       else viewer.onFrame(demo.update);
-      const view = demo.camera ?? { position: [0.5, 9.5, 15.5], target: [0, 0.9, -0.3] };
+      const cam = route.query.cam?.split(',').map(Number);
+      const view = cam?.length === 6 && cam.every(Number.isFinite)
+        ? { position: cam.slice(0, 3), target: cam.slice(3) }
+        : demo.camera ?? { position: [0.5, 9.5, 15.5], target: [0, 0.9, -0.3] };
       viewer.camera.position.fromArray(view.position);
       viewer.controls.target.fromArray(view.target);
       requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));

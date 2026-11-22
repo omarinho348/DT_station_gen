@@ -249,6 +249,12 @@
                   "type": "number",
                   "minimum": -6.283185307179586,
                   "maximum": 6.283185307179586
+                },
+                "beltHeight": {
+                  "description": "This machine's own belt / surface height when it differs from the line (a lower carton line)",
+                  "type": "number",
+                  "minimum": 0.2,
+                  "maximum": 1.5
                 }
               },
               "required": [
@@ -297,6 +303,12 @@
                     "in",
                     "out"
                   ]
+                },
+                "slots": {
+                  "description": "Extra output: places it holds, filled in turn (the oldest is cleared when full); the station offers the fact <port>Slot",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 20
                 },
                 "standalone": {
                   "description": "Machines that only serve this port when it is not connected",
@@ -381,6 +393,148 @@
               }
             }
           },
+          "stock": {
+            "default": {},
+            "description": "Stock items: copies of product parts presented at machine ports (a supermarket)",
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9]*$"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "part": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+                  "description": "Product part this is a copy of"
+                },
+                "mode": {
+                  "default": "kit",
+                  "description": "How it rests: as in the kit tray, or as assembled",
+                  "type": "string",
+                  "enum": [
+                    "kit",
+                    "asm"
+                  ]
+                },
+                "at": {
+                  "type": "object",
+                  "properties": {
+                    "machine": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-zA-Z0-9]*$",
+                      "description": "Machine holding it (a bin, saddle, nest…)"
+                    },
+                    "port": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-zA-Z0-9]*$",
+                      "description": "Port it rests on"
+                    },
+                    "offset": {
+                      "default": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "description": "From the port, machine frame (m)",
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "items": false,
+                      "minItems": 3,
+                      "maxItems": 3
+                    }
+                  },
+                  "required": [
+                    "machine",
+                    "port"
+                  ]
+                }
+              },
+              "required": [
+                "part",
+                "at"
+              ]
+            }
+          },
+          "stacks": {
+            "default": {},
+            "description": "Stacks the station builds across units (cases on a pallet); facts <stack>Slot and <stack>Fills",
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9]*$"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "machine": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$",
+                  "description": "Machine the stack is built on (a pallet)"
+                },
+                "port": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$",
+                  "description": "Its surface port"
+                },
+                "columns": {
+                  "minItems": 1,
+                  "maxItems": 10,
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "Spot offsets along the machine X (m)"
+                },
+                "rows": {
+                  "minItems": 1,
+                  "maxItems": 10,
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "Spot offsets along the machine Z (m)"
+                },
+                "layers": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                },
+                "layerHeight": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 2,
+                  "description": "Height of one layer (m)"
+                },
+                "gap": {
+                  "default": 0,
+                  "description": "Clearance above the surface / layer below (m)",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 0.05
+                }
+              },
+              "required": [
+                "machine",
+                "port",
+                "columns",
+                "rows",
+                "layers",
+                "layerHeight"
+              ]
+            }
+          },
           "status": {
             "default": {},
             "type": "object",
@@ -456,7 +610,7 @@
                       },
                       "label": {
                         "type": "string",
-                        "maxLength": 60
+                        "maxLength": 100
                       }
                     },
                     "required": [
@@ -466,6 +620,148 @@
                     ]
                   }
                 }
+              },
+              "dashboard": {
+                "description": "A structured status dashboard (gauges, heat-map grid, footer)",
+                "type": "object",
+                "properties": {
+                  "machine": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
+                  },
+                  "screen": {
+                    "default": "screen",
+                    "description": "Display name on that machine",
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
+                  },
+                  "title": {
+                    "default": "{unit}",
+                    "description": "Text with {statusKey} fields",
+                    "type": "string",
+                    "maxLength": 60
+                  },
+                  "gauges": {
+                    "default": [],
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "maxLength": 16
+                        },
+                        "value": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z][a-zA-Z0-9]*$",
+                          "description": "Status key with the value"
+                        },
+                        "target": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "unit": {
+                          "default": "",
+                          "type": "string",
+                          "maxLength": 6
+                        },
+                        "color": {
+                          "default": "#2fd0c6",
+                          "type": "string",
+                          "pattern": "^#[0-9a-fA-F]{6}$"
+                        }
+                      },
+                      "required": [
+                        "label",
+                        "value",
+                        "target"
+                      ]
+                    }
+                  },
+                  "grid": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string",
+                        "maxLength": 24
+                      },
+                      "cols": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "values": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9]*$",
+                        "description": "Status key holding a list of numbers (null = not yet)"
+                      },
+                      "range": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "items": false,
+                        "minItems": 2,
+                        "maxItems": 2
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "cols",
+                      "values",
+                      "range"
+                    ]
+                  },
+                  "checks": {
+                    "default": [],
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "maxLength": 40
+                        },
+                        "value": {
+                          "default": "",
+                          "description": "Text with {statusKey} fields",
+                          "type": "string",
+                          "maxLength": 40
+                        },
+                        "state": {
+                          "default": "pending",
+                          "description": "pending | pass | fail, or a {statusKey} holding one",
+                          "type": "string",
+                          "maxLength": 40
+                        }
+                      },
+                      "required": [
+                        "label"
+                      ]
+                    }
+                  },
+                  "verdict": {
+                    "description": "Status key holding PASS / REJECT (anything else: none yet)",
+                    "type": "string",
+                    "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
+                  },
+                  "footer": {
+                    "default": "",
+                    "description": "Text with {statusKey} fields",
+                    "type": "string",
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "machine"
+                ]
               }
             }
           },

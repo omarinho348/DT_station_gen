@@ -62,12 +62,14 @@ export const Equipment = z.object({
   params,
   position: vec3.default([0, 0, 0]).describe('Station-local position (m): flow +X, walkway +Z'),
   rotationY: z.number().min(-Math.PI * 2).max(Math.PI * 2).default(0).describe('Turn about the vertical axis (rad)'),
+  beltHeight: z.number().min(0.2).max(1.5).optional().describe('This machine\'s own belt / surface height when it differs from the line (a lower carton line)'),
 });
 
 export const PortRef = z.object({
   machine: id.optional().describe('Machine the port belongs to (default: the station conveyor)'),
   port: id.optional().describe('Port name on that machine (default: the station port name)'),
   direction: z.enum(['in', 'out']).optional(),
+  slots: z.number().int().min(1).max(20).optional().describe('Extra output: places it holds, filled in turn (the oldest is cleared when full); the station offers the fact <port>Slot'),
   standalone: z.array(id).optional().describe('Machines that only serve this port when it is not connected'),
 });
 
@@ -86,6 +88,24 @@ export const Station = z.object({
   process: z.array(opEntry).describe('The station\'s process as ops'),
   output: z.array(opEntry).optional().describe('Default: release, convey to output'),
   home: z.record(id, z.record(id, statusValue)).default({}),
+  stock: z.record(id, z.object({
+    part: z.string().regex(/^[A-Za-z][A-Za-z0-9_]*$/).describe('Product part this is a copy of'),
+    mode: z.enum(['kit', 'asm']).default('kit').describe('How it rests: as in the kit tray, or as assembled'),
+    at: z.object({
+      machine: id.describe('Machine holding it (a bin, saddle, nest…)'),
+      port: id.describe('Port it rests on'),
+      offset: z.tuple([z.number(), z.number(), z.number()]).default([0, 0, 0]).describe('From the port, machine frame (m)'),
+    }),
+  })).default({}).describe('Stock items: copies of product parts presented at machine ports (a supermarket)'),
+  stacks: z.record(id, z.object({
+    machine: id.describe('Machine the stack is built on (a pallet)'),
+    port: id.describe('Its surface port'),
+    columns: z.array(z.number()).min(1).max(10).describe('Spot offsets along the machine X (m)'),
+    rows: z.array(z.number()).min(1).max(10).describe('Spot offsets along the machine Z (m)'),
+    layers: z.number().int().min(1).max(10),
+    layerHeight: z.number().positive().max(2).describe('Height of one layer (m)'),
+    gap: z.number().min(0).max(0.05).default(0).describe('Clearance above the surface / layer below (m)'),
+  })).default({}).describe('Stacks the station builds across units (cases on a pallet); facts <stack>Slot and <stack>Fills'),
   status: z.record(statusKey, statusValue).default({}),
   signals: z.object({
     beacon: z.object({ machine: id.optional(), motion: id.optional() }).optional(),
@@ -93,8 +113,33 @@ export const Station = z.object({
       machine: id.optional(),
       screen: id.optional(),
       rows: z.array(z.tuple([z.string().max(24), statusKey])).max(6).optional(),
-      bar: z.object({ value: statusKey, total: statusKey, label: z.string().max(60) }).optional(),
+      bar: z.object({ value: statusKey, total: statusKey, label: z.string().max(100) }).optional(),
     }).optional(),
+    dashboard: z.object({
+      machine: id,
+      screen: id.default('screen').describe('Display name on that machine'),
+      title: z.string().max(60).default('{unit}').describe('Text with {statusKey} fields'),
+      gauges: z.array(z.object({
+        label: z.string().max(16),
+        value: statusKey.describe('Status key with the value'),
+        target: z.number().positive(),
+        unit: z.string().max(6).default(''),
+        color: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#2fd0c6'),
+      })).max(4).default([]),
+      grid: z.object({
+        label: z.string().max(24),
+        cols: z.number().int().min(1).max(5),
+        values: statusKey.describe('Status key holding a list of numbers (null = not yet)'),
+        range: z.tuple([z.number(), z.number()]),
+      }).optional(),
+      checks: z.array(z.object({
+        label: z.string().max(40),
+        value: z.string().max(40).default('').describe('Text with {statusKey} fields'),
+        state: z.string().max(40).default('pending').describe('pending | pass | fail, or a {statusKey} holding one'),
+      })).max(8).default([]),
+      verdict: statusKey.optional().describe('Status key holding PASS / REJECT (anything else: none yet)'),
+      footer: z.string().max(100).default('').describe('Text with {statusKey} fields'),
+    }).optional().describe('A structured status dashboard (gauges, heat-map grid, footer)'),
   }).default({}),
   feed: z.object({ fromLift: z.boolean().default(true) }).optional(),
 });

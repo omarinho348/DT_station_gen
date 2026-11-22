@@ -724,4 +724,197 @@ Phase 3 step 5 approved by the owner moving on (2026-11-22).
 - `npm test`: 23 files, 859 tests passed.
 - Screenshot `screenshots/factory-line.png` (t = 60 s): the dev line loaded from factory.json matches step 4's hand-written line at the same moment (ST1 HOLDING, ST2 fastening the top bar, ST3 waiting). The fence now sits at the reference z.
 
-**Next:** Phase 4 step 2: `printer-line.factory.json`, starting with ST1 (kitting) and ST2 (frame) written against the reference recording, with whatever ops they still need (pick lights and supermarket restock for ST1; the adjust steps and stowed cables for ST2). Target: `compareTiming` reports ST1 and ST2 as matching step for step.
+### Step 2: `printer-line.factory.json`, ST1 and ST2 (done)
+
+Step 1 approved by the owner moving on (2026-11-22).
+
+**Result first:** ST1 (kitting) and ST2 (frame) written as data in `spec/examples/printer-line.factory.json` **match the reference recording step for step**: ST1 136 steps and ST2 124 steps, every label, state and duration (Δ 0.00 s), and the transfer between them too. Cycles 49.39 s and 51.86 s are the reference unit times minus the stand-alone lift moves. Two units play headless through both stations to FINISHED with no error, in 161.6 s (estimate 160.6 s plus waiting re-checks).
+
+**Changed**
+- `spec/examples/printer-line.factory.json` (ST1, ST2, transfer; run of 8). Values come from the reference `KittingDefinition` / `FrameAssemblyDefinition` / `…Equipment.js` / `…Station.js` (HMI rows and bars). The part tables come from our printer product. I typed it through a one-off generator so no number was copied by hand; the JSON file is the source from now on.
+  - **ST1:** assemblyCell shell (minZ −2.35, blue sign) plus SCARA (links 0.55 / 0.5, arm 1.3), keep-out ring, tote table with 7 totes, long-part cradle, bed nest, frame nest, flow rack and 14 pick-to-lights at the reference spots. Stock is 22 part copies: 2 per tote, 1 per cradle lane, 2 beds stacked, the base frame on its locators. The process: RFID read → per part, pick light on, `installPart` from stock into the kit pose (base frame: assembled, onto the locators), light off as it is let go → kit complete → robot home → kanban replenish.
+  - **ST2:** shell (orange sign) plus gantry (1.5 × 0.9, beam 2.3, screwdriver) and the screw presenter (bench + M3 / M4 / M5 bowl feeders). The process: RFID read → 8 × `installPart` from the kit (reference clearances, grips, lead screw threaded with 5 turns) with their 20 screws (`driveScrew`, "Z motor assy 1/2"…) → the adjust steps (Y belt tensioned, V-wheel eccentrics, Z coupler, squareness check) → gantry home.
+- Contract additions (all generic; the printer specifics live in the product folder):
+  - **Product features** (registry): a product may declare single visual details an op can switch without a stage change, `features: { name: { values } }`, with `setFeature(name, value)` and `featureState` (reset by a stage change). The printer has `yBelt` (loose / engaged) and `bedCable`, `powerCable`, `hotendCable` (hidden / stowed).
+  - **Part copies** (registry `partCopy(type, part, mode)`; the product's optional static `copy()`): a free-standing copy of a part for a stock location. It rests on its origin as in the kit tray (or as assembled), with its grasp point and part frame. The printer implements it.
+  - **Station stock** (station spec + factory schema): `stock: { id: { part, mode, at: { machine, port, offset } } }`. The station builds the copies at their ports and refills them on reset; dry plans check machine, port and part.
+  - `transform` takes `set: { feature: value }` (instead of `stage`), checked in the dry plan.
+  - `installPart` takes `from` (a stock item), `mode: asm | kit`, and `onPlaced` (machine value motions or product features switched as the part is let go, with no step of its own: the reference does the same). A stock item holding the wrong part stops the station in ALARM.
+  - New named op **`replenish`**: a timed step that puts the stock items (all or some) back at their places.
+  - The pick-and-place travel height is **capped at the robot's y reach**. The reference let the ST1 SCARA quill rise past its travel (up to about 4 cm for the bed, hotend and X gantry); our component enforces its range. The steps have fixed times, so no duration changes.
+- Line demo: also plays `spec/examples/*.factory.json` (`#/twin?demo=line&line=printer-line`), and the twin page takes `?cam=x,y,z,tx,ty,tz` for screenshot framing.
+- Tests `tests/spec/printer-line.test.js` (10):
+  - the factory checks clean; **ST1 / ST2 / transfer match the reference with no mismatch**; cycle times = reference
+  - two units played: after ST1 the base frame is assembled and 13 parts are in kit pose, with the stock refilled; after ST2 the 8 frame parts are assembled with belt engaged and bed cable stowed; all 14 pick lights off; run time within the estimate + holds
+  - stock copies rest exactly on their ports, and a placed copy coincides with the product's own part
+  - features, part copies, `transform set`, `installPart` from stock (wrong copy → ALARM; kit mode needs `from`), stock errors, travel height cap
+
+**Known differences / notes**
+- The HMI `picked` / `installed` counters update when a part's pick starts; the reference updated them when the part was placed. Status changes are tied to step starts in our runtime. Timing is unaffected.
+- The product's stage label stays `empty` after ST1 and `kitted` after ST2. The reference has no stage change inside the line either (stages only seed stand-alone stations); what is shown is set per part. ST4 / ST5 need `quality` / `verdict`, which read the stage, so those stations will set it (an ending `transform` the reference recording allows, or a feature).
+- Stock copy geometry is not freed on dispose (printer part geometry is cached and shared); removing them from the scene is enough for now.
+
+**Results**
+- `npm test`: 24 files, 869 tests passed.
+- Screenshots checked:
+  - `screenshots/printer-st1-supermarket.png` (t = 9 s): the cradle with the long parts, totes with the small parts, two beds in the nest, the base frame already on the carrier's locators, SCARA moving to the left upright
+  - `screenshots/printer-st1.png` (t = 18 s): SCARA gripping the lead screw from the cradle, the first parts in the kit tray
+  - `screenshots/printer-st2.png` (t = 85 s): gantry descending to the right upright; motors and bed fitted, the rest waiting in the tray; HMI FRAME ASSEMBLY; feeders behind; ST1 kitting the second unit
+
+### Step 3: ST3 (wiring) in `printer-line.factory.json` (done)
+
+Step 2 approved by the owner moving on (2026-11-22).
+
+**Result first:** ST3 written as data **matches the reference step for step: 286 steps, Δ 0.00 s**. That includes the clip-to-clip cable moves (their times come from the route distances) and the 50 zero-length clip marks the reference records. ST1–ST3 and both transfers now match; the line takt is ST3's 74.81 s, the reference bottleneck. One unit plays through all three stations to FINISHED in 189.5 s (estimate 189.23 s); two units in the test, with no error.
+
+**Changed**
+- `spec/examples/printer-line.factory.json`: ST3 and the ST2 → ST3 transfer (drive alternating as in the reference). ST1 / ST2 regenerate byte-identical.
+  - Equipment: assemblyCell shell (minZ −1.6, green sign), blue gantry (maxGap 0.22, screwdriver), harness board at (0.9, −1.1), tester at (−1.2, −0.75).
+  - Process: RFID read → 4 modules with `installPart` (reference clearances and grips; the hotend slides 6 cm in under its shelf; the PSU and hotend cables are stowed as the part is placed) and their screws → 7 × `routeCable` in the reference order → gantry home → test lead in → continuity test (tester testing → pass) → lead out.
+  - HMI rows and bar as the reference `WiringStation`.
+- **Product cables** (registry contract): a product may declare `cables`, a static `cableRoute(name)` in the product frame (socket A with plug direction, coil, clips, socket B), and `harness.setCable(name, { mode, grip, passed })`, with modes hidden / stowed / carryA / pluggedA / routing / done. Instances expose `cables`, `cableRoute`, `setCable` (names and modes checked); dry plans get the routes from the product definition.
+  - Printer: the route code moved from the built printer into `parts.js` as a static `cableRoute(index)`; the printer's own method now delegates to it (same result, tested), so routes are known without building a printer.
+- New named op **`routeCable`**: generic port of the reference `planCable`.
+  - Loose cables: end A out of the harness bag → carried, aligned and plugged at the device socket → latch.
+  - Every cable: end B taken → laid to the first clip → clip by clip (over each clip, pressed in; a zero-length mark after each) → board socket entry → plugged → seated.
+  - All times fixed (reference cable timing as defaults) except the clip-to-clip moves: distance × 1.8 s/m, at least 0.18 s, from the static route, so dry = run.
+  - The cable follows the tool point while held; the travel height is a `safeHeight` above the product's assembly origin; `doneStatus` is set on the seated step.
+- New named op **`connectLead`**: a flexible lead (test lead, hose) plugged from a machine port into a product ref or another port at the end of a timed step, or unplugged. Drawn as a sagging tube with a plug, as the reference test lead. While plugged into the product it hangs from the product, so clearing a unit (reset, retire) takes it away too. This replaces the "runtime cable helper" I deferred in Phase 2 step 6c.
+- Tests (`tests/spec/printer-line.test.js`, now 15):
+  - **ST3 matches with no mismatch**; 50 zero-length clip marks as recorded; ST3 is the bottleneck; ST3 cycle = reference
+  - the 3-station run: modules fitted, all 7 cables `done`, power / hotend cables stowed, the lead present during the test and gone after, tester on pass
+  - static routes = the built printer's own (+ carrier origin); cable name / mode errors
+  - `routeCable` dry errors, a loose cable through a station (dry = played, ends done, done status); `connectLead` in / out timing and errors
+
+**Results**
+- `npm test`: 24 files, 874 tests passed.
+- Screenshots checked (moments taken from the timing table):
+  - `screenshots/printer-st3-cable.png` (t = 159.3 s, laying the X-motor cable): modules fitted, the blue Z-motor cable laid along the base clips, the bed cable coiled behind, the hotend cable coiled on the bed until routed
+  - `screenshots/printer-st3-test.png` (t = 183.2 s): HMI CONTINUITY TEST (modules 4 / 4, harness 7/7 cables, TESTING), the yellow test lead from the tester to the printer's rear dock port, the next carrier waiting at ST3's input
+
+### Step 4: ST4 (calibration and testing) in `printer-line.factory.json` (done)
+
+Step 3 approved by the owner moving on (2026-11-22).
+
+**Result first:** ST4 written as data **matches the reference step for step: 48 steps (the 50 recorded minus the two stand-alone lift moves), Δ 0.00 s**. That includes the shutters around intake and output and the reference quirk of showing "Opening exit shutter" under the INFEED state. ST1–ST4 and all three transfers match. One unit plays through four stations in 228.6 s (estimate 228.26 s); two units in the test. The recorded results for serial 1 are the reference's: flatness 0.08 mm, cube error 0.08 mm, a 3 × 3 mesh whose peak-to-valley is the flatness, belts 92 / 88 Hz, resonance 47.2 / 38.6 Hz, IN SPEC.
+
+**Changed**
+- `spec/examples/printer-line.factory.json`: ST4 and the ST3 → ST4 transfer. ST1–ST3 regenerate byte-identical.
+  - Equipment: assemblyCell shell (minZ −1.7, purple sign), `shutterEnclosure` (reference size), `dockingUnit` in line with the dock port of a located carrier (axis 0.92 m, x −0.086; retracted tip at the reference z −0.48; stroke 0.37 m, plugging 0.366 m to the mainboard enclosure's rear face), `statusMonitor` (0.8 × 0.45 at the reference spot) and `equipmentRack`.
+  - `intake` / `output` written out: the default steps with the entry / exit shutter opening before and closing after.
+  - Process: dock (clears the previous unit's results) → power-on self test → fan test → homing X / Y / Z → Z clear → belt test → resonance test → probe deploy → 9 × (move over the point, dip) → probe stowed (flatness reported) → purge start → heat → purge line → cube start → print the cube → cool → park → record results → undock (LCD "READY / Test print OK").
+  - HMI rows / bar as the reference `CalibrationStation`; the test monitor shows the reference `drawTestMonitor` content through the generic dashboard: title, hotend / bed gauges, bed-mesh heat map, flatness / cube error / print footer.
+- **Product routines** (registry contract): things a product does by itself while a station drives it, i.e. a test printer's firmware. Declared as `routines: { name: { summary, args } }`; a unit returns a handler per run (`start`, `update(progress, previous)`, `end`); `update` / `end` may return status values. Args are checked in the dry plan.
+  - Printer (`lib/products/printer/routines.js`): `display` (LCD lines with `{label}` / `{serial}` / `{flatness}`), `resetTest`, `axes`, `fanSpin`, `beltTest`, `resonanceTest`, `probe`, `probeDip` (records the mesh point), `heat`, `purge`, `printCube`, `cool`, `record` (marks the unit tested, so `quality()` answers without a stage change). The curves and constants are the reference `CalibrationCycle`'s (pluck, rising-frequency shake, probe dip, heat-up and cool-down curves, square perimeter per layer, `meshFor`).
+- New named op **`runRoutine`**: one routine for a fixed time; its status values go to the HMI live. `before` / `after`: instant routine calls at the start / end of the step. `move` takes `before` / `after` too (the dock clears the previous results as it docks; the LCD changes as it undocks).
+- **Live status**: an OpCycle passes routine status values to its station (`setStatus`). Status values may be lists at run time (the mesh).
+- **Dashboard signal** (station spec + factory schema): `signals.dashboard { machine, screen, title, gauges [{ label, value: key, target, unit, color }], grid { label, cols, values: key, range }, footer }`. Text fields take `{statusKey}`; refreshed with the HMI.
+- **Hand-over when the unit reaches the output port**: the station hands a unit on as soon as an output op leaves it at the output port, and steps after that (ST4's exit shutter closing) still play. This is what the reference does; before, ours waited for the whole output phase, which would have delayed the next station by 0.5 s behind ST4.
+- Tests (`tests/spec/printer-line.test.js`, now 21):
+  - **ST4 matches with no mismatch**; three transfers; ST4 cycle = reference
+  - the 4-station run: ST4 docked (0.366 m), probed 9 points, printed, results recorded per serial, undocked, shutters closed
+  - routine checks (unknown routine / bad args / unknown `after` routine fail in the dry plan); heat feeding the HMI live with rising temperatures to 215 °C; `move` before / after; dashboard data (gauges, grid list, footer templates) and display check; hand-over during "Transport to output" with a trailing step still played
+
+**Results**
+- `npm test`: 24 files, 880 tests passed.
+- Screenshots checked:
+  - `screenshots/printer-st4-print.png` (t = 216.5 s, printing the cube): the orange cube half-printed on the glowing bed, purge line along the front edge, dock rod plugged into the mainboard enclosure's rear, shutters closed
+  - `screenshots/printer-st4-heat.png` (t = 210.8 s, heating): test monitor "ST4 TEST BENCH · P1-0001" with gauges at 181 / 215 °C and 54 / 60 °C, the bed-mesh heat map with values, the flatness footer; HMI TESTING
+
+### Step 5: ST5 (inspection, reject branch) in `printer-line.factory.json` (done)
+
+Step 4 approved by the owner moving on (2026-11-23).
+
+**Result first:** ST5 written as data **matches the reference step for step on all three paths**: a passing unit (P1-0001, 13 steps), a reject to the first bay place (P1-0005, 13 steps, divert 2.683 s) and a reject to the second place (P1-0008, 13 steps, divert 4.128 s), each Δ 0.00 s. ST1–ST5 and all four transfers match. **A whole run of 8 plays through the five stations**: units 5 and 8 fail inspection (deterministic per serial) and wait in the reject bay at the reference places (station z −1.05 / −1.7), the other 6 pass. The run finishes at 771.6 s; the reference run of 8 also ends with unit 8 rejected at ST5, at 771.1 s.
+
+**Changed**
+- Reference recording: the recorder now keeps every unit's steps (needed for the reject units). Re-recorded; everything else is identical to before (checked).
+- `spec/examples/printer-line.factory.json`: ST5 and the ST4 → ST5 transfer. ST1–ST4 regenerate byte-identical.
+  - Equipment: assemblyCell shell (minZ −2.35, red sign); vision scanner (reference size, arch parked at −1.15); label applicator in line with the printer's right upright (pad retracted at z 0.42, tamping 0.425 m); pop-up cross transfer at the work position (lift 0.022 m as in the reference definition); reject lane (roller conveyor 1.82 m along −Z from z −0.38, turned 90°); half-size "Reject bay" sign; vision monitor.
+  - Process: RFID read (test record) → forward scan (lights + laser on) → return scan → analyse (lights off, arch parked) → **decide on the verdict**: PASS → QC PASS label, retract, "Released to packaging"; REJECT → REJECT tag, retract, **decide on the next bay place** → cross transfer rising (the locating plate and stop pin go down in the same step) → diverting onto the lane → cross transfer lowering. A rejected unit leaves through the station's `reject` port (2 places); a passing one runs the normal output.
+  - HMI rows / bar as the reference `InspectionStation` (passed and rejected on two rows); the vision monitor shows the reference's seven checks and the PASS / REJECT banner through the dashboard.
+- **Product facts** (registry contract): what is known about a unit that a station decides on, `facts: { name: { values } }`, `unit.facts.name()`. The printer has `verdict` (PASS / REJECT, deterministic per serial: 5 and 8 fail in a run of 8). Stations pass product facts to `decide`.
+- **Bay ports**: an extra output port may have `slots` (places filled in turn; the oldest is cleared when full, as the reference reject bay). The station offers the fact `<port>Slot`, the place the next unit goes to.
+- **`decide` with a known fact plans its branch** step by step in dry plans too (an unknown fact still gives one summary step of the longest branch). `planStation` / `lineTiming` take `facts` (per station), so the pass and reject paths can each be planned and compared with the matching recorded unit. A dry plan whose process leaves the unit at an extra output port has no output phase, as when it plays.
+- **`transfer` between machines**: the start and end may be ports of any machine with an offset (cross transfer → a place on the reject lane); distances run along the floor (so a 22 mm step down onto the lane does not lengthen the move: exactly the reference times). Dry plans place machines by their IR position / rotation (`placement`), so dry = played still holds.
+- **Several machines in one step**: `queueMotions` takes `alongside` (absolute moves of other machines, same ease); `grip` / `release` expose it (the carrier goes onto the rising transfer wheels as the locating plate lowers). `crossTransfer` got a `carrier` anchor on its lifting frame.
+- `move` takes `switches` (value motions of the same machine switched as the move starts: the scanner's lights).
+- Printer routines `readRecord` (test record → flatness / cube error on the HMI) and `qcLabel` (PASS sticker / REJECT tag).
+- Dashboard: `checks` (label, value, state with `{statusKey}` fields) and `verdict` (a status key holding PASS / REJECT).
+- The station clears an alarm raised for the previous unit (a reject) when the next unit comes in.
+- **Bug found by the browser, not the tests:** my patch imported `UNKNOWN` twice in `decide.js`; Vitest's transform accepted it, the browser refused the module. Fixed, and a new rule test fails on any module that imports the same binding twice.
+- Tests (`tests/spec/printer-line.test.js`, now 28; rules +1):
+  - **ST5 pass / reject 1 / reject 2 match with no mismatch**; ST5 pass cycle = reference
+  - **a whole run of 8**: passed 6, rejected 2 (labels PASS / REJECT per serial), rejects resting at the reference bay places, finish within 1.5 s of the reference run
+  - the printer's verdicts for serials 1–8; known vs unknown facts in dry plans; reject exit (no output phase, floor distance), bay places in turn with the oldest cleared; `alongside` and `switches`; dashboard checks / verdict
+
+**Results**
+- `npm test`: 24 files, 888 tests passed.
+- Screenshots checked:
+  - `screenshots/printer-st5-scan.png` (t = 239 s): the arch travelling over P1-0001 with lights and laser on; vision monitor with the seven checks pending; HMI INSPECTING
+  - `screenshots/printer-st5-reject.png` (t = 544.6 s): P1-0005's carrier moving sideways onto the red reject lane towards the "Reject bay" sign; monitor REJECT banner; HMI REJECT; stack light red
+
+### Step 6: ST6 (packaging and dispatch): the printer line complete as data (done)
+
+Step 5 approved by the owner moving on (2026-11-23).
+
+**Result first:** ST6 written as data matches the reference on both its paths: an ordinary unit (42 steps) and the unit that fills and ships the pallet (P1-0008 of a stand-alone run, 43 steps), Δ 0.00 s. **All six stations and all five transfers of `printer-line.factory.json` now match the reference recording step for step** (ST5 / ST6 on every recorded path). The whole line plays a run of 8 to FINISHED at **771.4 s; the reference run of 8 finished at 771.14 s.**
+- Units 5 and 8 wait in the reject bay; the other six are packed, closed, taped, labelled and stacked on the pallet in the reference pattern (4 below, 2 above).
+- The pallet is not full in the line run, so it is not shipped, as in the reference.
+- Stand-alone, ST6 fills the pallet with 8 cartons, ships it once, and frees everything it made.
+
+| Station | Cycle s | Reference s | Steps match |
+|---|---:|---:|:---:|
+| ST1 Component Kitting | 49.39 | 49.39 | yes |
+| ST2 Frame Assembly | 51.86 | 51.86 | yes |
+| ST3 Electronics Wiring | 74.81 | 74.81 | yes (bottleneck) |
+| ST4 Calibration & Testing | 33.35 | 33.35 | yes |
+| ST5 Quality Inspection (pass / reject 1 / reject 2) | 14.46 | 14.46 | yes, all three |
+| ST6 Packaging & Dispatch (ordinary / ships) | 29.42 | 29.42 | yes, both |
+| 5 transfers | 5.68 | 5.68 | yes |
+
+The units leave ST6 about 5.1 s after the reference's "dispatched" counter only because that counter counted when the carton was put on the pallet; ours counts when the empty carrier leaves. The gaps between units are the same.
+
+**Changed**
+- `spec/examples/printer-line.factory.json`: ST6 and the ST5 → ST6 transfer. ST1–ST5 regenerate byte-identical.
+  - Equipment: assemblyCell shell (minZ −3.0); gantry (1.4 × 2.55 m, beam 2.7, 0.64 m gripper), centred at z −1.175 as Phase 2 noted; carton line (roller conveyor 2.8 m at its own 0.55 m belt height); case erector; foam magazine table; case taper; carton labeller; block pallet in the dispatch bay.
+  - Process: infeed (carton made at the erector end and conveyed to the packing spot; top foam made on the magazine) → printer lifted off its carrier into the carton → dust bag → top foam → gantry clear → minor / major flaps → tape head down → taping (the tape is laid as the head runs) → head back → print and apply the shipping label → **palletize** onto the next spot → gantry home → **if this carton fills the pallet: dispatch** (wrapped and shipped).
+- **New products** (Claude.md lists `carton` as a product):
+  - **`carton`**, a port of the reference `CardboardCase` (same hinge lines, open angle and tape logic) plus bottom foam, dust bag and shipping label (title and code lines, e.g. the unit's serial). Refs `bottom` and `grasp`; features `bag` and `label`; routines `foldMinor`, `foldMajor`, `tape`.
+  - **`packingFoam`**: top foam with an optional accessory box; ref `grasp`.
+- **New component `blockPallet`**, from the reference `ProceduralPallet`. There the top deck floated 3 mm above the blocks; here the deck boards rest on stringers that rest on the blocks (the generic "nothing floats" check caught a first attempt without stringers). Port `top` carries `case`. It's named `blockPallet` because `pallet` is already a flow type (what conveyors carry), which the rule-6 guard flagged. Shared materials: `wood`, `woodDark`, `woodEnd` (now 42).
+- **Items made during the process**, new named op **`spawn`**: catalog products made at machine places in the step they belong to, optionally conveyed during it (surfaces scroll). Params take unit facts (`{label}` → "P1-0001"); before it plays they are checked with placeholders of the right kind. The station keeps what it makes; ops refer to these items by name (pick, place onto, features, routines, refs).
+- **Payloads** (product contract): parts of a unit that can be taken off it as items of their own. The printer is lifted off its carrier into the carton; the empty carrier goes on. Ownership follows parenthood: the carrier no longer frees a printer packed in a carton; the carton's holder does.
+- **Stacks** (station spec + factory schema): `stacks: { name: { machine, port, columns, rows, layers, layerHeight, gap } }`, built across units.
+  - The station offers the facts `<stack>Slot` and `<stack>Fills` (yes when the next item fills it), and keeps `<stack>Count / Capacity / Shipped` in the status for the HMI.
+  - New named op **`palletize`**: pick an item and set it on the next free spot (column, then row, then layer); a full stack stops the station with a clear message.
+  - New named op **`dispatch`**: at the end of a timed step everything on the stack is freed (with the printers packed in the cartons).
+  - A station reset frees everything it made.
+- Smaller additions:
+  - `pickPlace` takes refs on any product item (the carton's `bottom`)
+  - instant calls (`before` / `after`) may switch features (`set`)
+  - `move` takes a `routine` driven by its own progress (the tape laid as the taper head runs)
+  - equipment may set its own `beltHeight` (the lower carton line)
+  - `workTable` minimum width 0.3 m (the reference foam magazine is 0.34 m)
+  - HMI bar text templates up to 100 characters (the shown text is still cut to the screen)
+- Tests: `tests/products/packaging.test.js` (10, new); `tests/spec/printer-line.test.js` (now 30):
+  - ST6 ordinary / ships match; **the whole line matches station by station**
+  - the run of 8 with six packed cartons at the reference pallet spots, closed, taped and labelled
+  - carton and foam products; block pallet; spawn (label filled in, carried on the lower line, rollers turning, checks before it plays); the printer packed in the carton; the pallet filled spot by spot and shipped by the unit that fills it; the shipping branch planned only when told; a full stack refusing a ninth carton; reset freeing cartons and packed printers
+- Golden images: `blockPallet`, `carton-erected`, `packingFoam-ready`.
+
+**Fixes / differences vs the reference (deliberate)**
+1. **The reference carton was too small for its contents.** Printer 0.548 m + bottom foam + top foam + accessory box need about 0.68 m; the reference carton is 0.62 m, so the top foam and accessory box stuck through the closed flaps (the first stacked-pallet screenshot showed open-looking cartons). Ours is 0.69 m, so everything sits under the flaps. As a result the second pallet layer is higher (1.53 m), so cartons travel at 2.2 m instead of 2.1 m to clear it. Every step has a fixed time, so the timings are unaffected.
+2. **Carton labeller:** our label applicator is deeper than the reference's (its tamp cylinder holds the whole stroke), so with the reference's retracted pad (z −0.62) its column stood on the main conveyor. It retracts to z −0.76 with a 0.12 m stroke instead; same labelling spot, same time.
+3. The reference foam magazine showed a stack of three spare foams under the one picked. They are left out, so the picked foam rests on the table rather than floating 16 cm above it.
+
+**Results**
+- `npm test`: 25 files, 918 tests passed.
+- `npm run golden blockPallet carton packingFoam`: 3 written.
+- Screenshots checked:
+  - `screenshots/printer-st6-pack.png` (t = 262.3 s): the gantry carrying the printer off its carrier to the open carton on the carton line; top foam with the accessory box on the magazine; erector, taper, labeller, pallet
+  - `screenshots/printer-st6-pallet.png` (t = 760 s): six closed, taped and labelled cartons on the pallet, four below and two above
+
+**Phase 4 status:** the IR, the expander and the hand-written printer line are done, and **its timing matches the reference completely** (the timing half of the key acceptance test). Still to do for Phase 4: (1) the compiler templates that emit readable Three.js files per station plus a line file (`generated/printer-line/…`), loaded by the app; (2) the screenshot comparison with the reference repo (golden views of each station and the line, rendered from the reference app and from ours).
+
+**Next:** Phase 4 step 7: the compiler (`compiler/emit.js` + templates) writing `generated/printer-line/` (one readable JS file per station and a line file, built only from the IR and the catalog), loaded by dynamic import in the twin page, with a test that the compiled line plays exactly like the expanded IR.

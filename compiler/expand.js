@@ -62,7 +62,7 @@ export function expandStation(registry, station, ctx = {}) {
   for (const [name, p] of Object.entries(station.ports)) ports[name] = { ...ports[name], ...defined(p) };
   // Signals: same, per signal.
   const signals = {};
-  for (const key of ['beacon', 'display']) {
+  for (const key of ['beacon', 'display', 'dashboard']) {
     const merged = { ...(shell?.station.signals?.[key] ?? {}), ...defined(station.signals?.[key] ?? {}) };
     if (Object.keys(merged).length) signals[key] = merged;
   }
@@ -79,6 +79,8 @@ export function expandStation(registry, station, ctx = {}) {
     process: station.process,
     output: station.output,
     home: station.home,
+    stock: station.stock,
+    stacks: station.stacks,
     status: station.status,
     signals,
     feed: station.feed,
