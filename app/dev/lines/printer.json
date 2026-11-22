@@ -1,0 +1,488 @@
+{
+  "about": "Dev check line (#/twin?demo=line) as a factory.json: three stations on the assemblyCell shell, chained by the generic Line. ST2 is the frame build from the named-ops scene; ST1 and ST3 are short stand-ins until the printer line is written in Phase 4.",
+  "camera": {
+    "position": [
+      0.5,
+      9.5,
+      15.5
+    ],
+    "target": [
+      0,
+      0.9,
+      -0.3
+    ]
+  },
+  "factory": {
+    "version": 1,
+    "line": {
+      "id": "printerPreview",
+      "title": "Printer line preview",
+      "runSize": 3
+    },
+    "product": {
+      "kind": "catalog",
+      "type": "printer",
+      "params": {}
+    },
+    "stations": [
+      {
+        "id": "st1",
+        "code": "ST1",
+        "title": "Kitting (stand-in)",
+        "shell": {
+          "type": "assemblyCell",
+          "params": {
+            "code": "ST1",
+            "title": "Kitting (stand-in)",
+            "color": "#2c8f5d"
+          }
+        },
+        "equipment": [
+          {
+            "id": "gantry",
+            "type": "cartesianGantry",
+            "params": {
+              "spanX": 1.5,
+              "spanZ": 0.9,
+              "beamY": 2.3,
+              "maxGap": 0.26,
+              "screwdriver": true
+            }
+          }
+        ],
+        "workState": "WORKING",
+        "inputStage": "kitted",
+        "home": {
+          "gantry": {
+            "x": 0,
+            "y": 1.75,
+            "z": 0
+          }
+        },
+        "status": {
+          "robot": "HOME"
+        },
+        "signals": {
+          "display": {
+            "rows": [
+              [
+                "Unit",
+                "unit"
+              ],
+              [
+                "Conveyor",
+                "conveyor"
+              ],
+              [
+                "Robot",
+                "robot"
+              ],
+              [
+                "Completed",
+                "completed"
+              ]
+            ]
+          }
+        },
+        "process": [
+          {
+            "op": "wait",
+            "seconds": 0.3,
+            "label": "RFID read",
+            "status": {
+              "robot": "WORK"
+            }
+          },
+          {
+            "op": "move",
+            "machine": "gantry",
+            "to": {
+              "x": 0,
+              "y": 1.45,
+              "z": -0.1
+            },
+            "seconds": 1.2,
+            "label": "Kit check"
+          },
+          {
+            "op": "wait",
+            "seconds": 1.5,
+            "label": "Kit check · checking"
+          },
+          {
+            "op": "move",
+            "machine": "gantry",
+            "to": {
+              "x": 0,
+              "y": 1.75,
+              "z": 0
+            },
+            "seconds": 0.8,
+            "label": "Gantry home",
+            "status": {
+              "robot": "HOME"
+            }
+          }
+        ]
+      },
+      {
+        "id": "st2",
+        "code": "ST2",
+        "title": "Frame Assembly",
+        "shell": {
+          "type": "assemblyCell",
+          "params": {
+            "code": "ST2",
+            "title": "Frame Assembly",
+            "color": "#e0782a"
+          }
+        },
+        "equipment": [
+          {
+            "id": "gantry",
+            "type": "cartesianGantry",
+            "params": {
+              "spanX": 1.5,
+              "spanZ": 0.9,
+              "beamY": 2.3,
+              "maxGap": 0.26,
+              "screwdriver": true
+            }
+          }
+        ],
+        "workState": "FRAME_ASSEMBLY",
+        "inputStage": "kitted",
+        "home": {
+          "gantry": {
+            "x": 0,
+            "y": 1.75,
+            "z": 0
+          }
+        },
+        "status": {
+          "robot": "HOME"
+        },
+        "signals": {
+          "display": {
+            "rows": [
+              [
+                "Unit",
+                "unit"
+              ],
+              [
+                "Conveyor",
+                "conveyor"
+              ],
+              [
+                "Robot",
+                "robot"
+              ],
+              [
+                "Completed",
+                "completed"
+              ]
+            ]
+          }
+        },
+        "process": [
+          {
+            "op": "wait",
+            "seconds": 0.3,
+            "label": "RFID read · build order P1 frame",
+            "status": {
+              "robot": "WORK"
+            }
+          },
+          {
+            "op": "installPart",
+            "machine": "gantry",
+            "part": "Motor_Z",
+            "name": "Z motor",
+            "gap": 0.047,
+            "openGap": 0.26,
+            "clearAbove": 0.22
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "Motor_Z:0",
+            "name": "Z motor M4 1",
+            "state": "FASTENING"
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "Motor_Z:1",
+            "name": "Z motor M4 2",
+            "state": "FASTENING"
+          },
+          {
+            "op": "installPart",
+            "machine": "gantry",
+            "part": "Motor_Y",
+            "name": "Y motor",
+            "gap": 0.047,
+            "openGap": 0.26,
+            "clearAbove": 0.22
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "Motor_Y:0",
+            "name": "Y motor M4 1",
+            "state": "FASTENING"
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "Motor_Y:1",
+            "name": "Y motor M4 2",
+            "state": "FASTENING"
+          },
+          {
+            "op": "installPart",
+            "machine": "gantry",
+            "part": "Bed",
+            "name": "bed",
+            "gap": 0.24,
+            "openGap": 0.26,
+            "clearAbove": 0.3
+          },
+          {
+            "op": "installPart",
+            "machine": "gantry",
+            "part": "Upright_L",
+            "name": "left upright",
+            "gap": 0.045,
+            "openGap": 0.26,
+            "clearAbove": 0.53
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "Upright_L:0",
+            "name": "left upright M5 1",
+            "state": "FASTENING"
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "Upright_L:1",
+            "name": "left upright M5 2",
+            "state": "FASTENING"
+          },
+          {
+            "op": "installPart",
+            "machine": "gantry",
+            "part": "Upright_R",
+            "name": "right upright",
+            "gap": 0.045,
+            "openGap": 0.26,
+            "clearAbove": 0.53
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "Upright_R:0",
+            "name": "right upright M5 1",
+            "state": "FASTENING"
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "Upright_R:1",
+            "name": "right upright M5 2",
+            "state": "FASTENING"
+          },
+          {
+            "op": "installPart",
+            "machine": "gantry",
+            "part": "XGantry",
+            "name": "X axis",
+            "gap": 0.025,
+            "openGap": 0.26,
+            "clearAbove": 0.56
+          },
+          {
+            "op": "installPart",
+            "machine": "gantry",
+            "part": "LeadScrew",
+            "name": "lead screw",
+            "gap": 0.012,
+            "openGap": 0.26,
+            "clearAbove": 0.62,
+            "spinTurns": 5
+          },
+          {
+            "op": "installPart",
+            "machine": "gantry",
+            "part": "TopBar",
+            "name": "top bar",
+            "gap": 0.025,
+            "openGap": 0.26,
+            "clearAbove": 0.55
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "TopBar:0",
+            "name": "top bar M5 1",
+            "state": "FASTENING"
+          },
+          {
+            "op": "driveScrew",
+            "machine": "gantry",
+            "screw": "TopBar:1",
+            "name": "top bar M5 2",
+            "state": "FASTENING"
+          },
+          {
+            "op": "move",
+            "machine": "gantry",
+            "to": {
+              "x": 0,
+              "y": 1.75,
+              "z": 0,
+              "yaw": 0
+            },
+            "seconds": 0.7,
+            "label": "Gantry home"
+          },
+          {
+            "op": "transform",
+            "stage": "framed",
+            "label": "Frame complete"
+          }
+        ]
+      },
+      {
+        "id": "st3",
+        "code": "ST3",
+        "title": "Wiring (stand-in)",
+        "shell": {
+          "type": "assemblyCell",
+          "params": {
+            "code": "ST3",
+            "title": "Wiring (stand-in)",
+            "color": "#3d6fd6"
+          }
+        },
+        "equipment": [
+          {
+            "id": "gantry",
+            "type": "cartesianGantry",
+            "params": {
+              "spanX": 1.5,
+              "spanZ": 0.9,
+              "beamY": 2.3,
+              "maxGap": 0.26,
+              "screwdriver": true
+            }
+          }
+        ],
+        "workState": "WORKING",
+        "inputStage": "framed",
+        "home": {
+          "gantry": {
+            "x": 0,
+            "y": 1.75,
+            "z": 0
+          }
+        },
+        "status": {
+          "robot": "HOME"
+        },
+        "signals": {
+          "display": {
+            "rows": [
+              [
+                "Unit",
+                "unit"
+              ],
+              [
+                "Conveyor",
+                "conveyor"
+              ],
+              [
+                "Robot",
+                "robot"
+              ],
+              [
+                "Completed",
+                "completed"
+              ]
+            ]
+          }
+        },
+        "process": [
+          {
+            "op": "wait",
+            "seconds": 0.3,
+            "label": "RFID read",
+            "status": {
+              "robot": "WORK"
+            }
+          },
+          {
+            "op": "move",
+            "machine": "gantry",
+            "to": {
+              "x": 0,
+              "y": 1.45,
+              "z": -0.1
+            },
+            "seconds": 1.2,
+            "label": "Wiring check"
+          },
+          {
+            "op": "wait",
+            "seconds": 1.5,
+            "label": "Wiring check · checking"
+          },
+          {
+            "op": "move",
+            "machine": "gantry",
+            "to": {
+              "x": 0,
+              "y": 1.75,
+              "z": 0
+            },
+            "seconds": 0.8,
+            "label": "Gantry home",
+            "status": {
+              "robot": "HOME"
+            }
+          }
+        ]
+      }
+    ],
+    "graph": {
+      "edges": [
+        {
+          "from": "st1.output",
+          "to": "st2.input",
+          "carries": "pallet",
+          "transport": {
+            "type": "palletConveyor",
+            "params": {
+              "workStop": false,
+              "drive": true
+            }
+          }
+        },
+        {
+          "from": "st2.output",
+          "to": "st3.input",
+          "carries": "pallet",
+          "transport": {
+            "type": "palletConveyor",
+            "params": {
+              "workStop": false,
+              "drive": false
+            }
+          }
+        }
+      ]
+    }
+  }
+}

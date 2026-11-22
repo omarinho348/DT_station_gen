@@ -186,7 +186,7 @@ describe('grip and release', () => {
 
   it('a part released onto the carrier travels with it', () => {
     const c = cycle();
-    c.carrier.position.set(0.4 - 2.2, 0.85, 0.1); // at the input port
+    c.carrier.position.set(0.4 - 1.6, 0.85, 0.1); // at the input port
     c.cycle.locate('product', { machine: 'line', port: 'input' });
     const at = c.part.position;
     c.cycle.expand([
@@ -199,7 +199,7 @@ describe('grip and release', () => {
     expect(c.part.parent).toBe(c.carrier);
     const offset = worldOf(c.part).sub(worldOf(c.carrier));
     expect(offset.length()).toBeGreaterThan(0.1);
-    expect(worldOf(c.carrier).distanceTo(c.line.root.localToWorld(new THREE.Vector3(2.2, 0.85, 0)))).toBeLessThan(1e-9);
+    expect(worldOf(c.carrier).distanceTo(c.line.root.localToWorld(new THREE.Vector3(1.6, 0.85, 0)))).toBeLessThan(1e-9);
     expect(() => cycle().cycle.expand([{ op: 'release', machine: 'robot', to: 0.2, onto: 'product' }])).toThrow(/"onto" needs the "item"/);
   });
 
@@ -248,18 +248,18 @@ describe('transfer', () => {
     const len = c.line.params.length;
     c.cycle.locate('product', { machine: 'line', port: 'input' });
     c.cycle.expand([{ op: 'transfer', conveyor: 'line', to: 'work' }]);
-    expect(c.cycle.steps[0].duration).toBe(trapezoidDuration(len / 2, 0.45, 0.35));
-    expect(c.cycle.planned('line', 'belt')).toBeCloseTo(wrapValue((len / 2) / 0.5, [0, 1]), 9);
+    expect(c.cycle.steps[0].duration).toBe(trapezoidDuration((len - c.line.params.carrierLength) / 2, 0.45, 0.35));
+    expect(c.cycle.planned('line', 'belt')).toBeCloseTo(wrapValue(((len - c.line.params.carrierLength) / 2) / 0.5, [0, 1]), 9);
     c.sequencer.advance(1);
     const workWorld = c.line.root.localToWorld(new THREE.Vector3(0, 0.85, 0));
     expect(worldOf(c.carrier).distanceTo(workWorld)).toBeGreaterThan(0.1);
     runAll(c);
     expect(worldOf(c.carrier).distanceTo(workWorld)).toBeLessThan(1e-9);
-    close(c.line.state.belt, wrapValue((len / 2) / 0.5, [0, 1]), 1e-9);
+    close(c.line.state.belt, wrapValue(((len - c.line.params.carrierLength) / 2) / 0.5, [0, 1]), 1e-9);
     // where it is now is known: the next transfer needs no "from"
     c.cycle.expand([{ op: 'transfer', conveyor: 'line', to: 'output' }]);
     runAll(c);
-    expect(worldOf(c.carrier).distanceTo(c.line.root.localToWorld(new THREE.Vector3(len / 2, 0.85, 0)))).toBeLessThan(1e-9);
+    expect(worldOf(c.carrier).distanceTo(c.line.root.localToWorld(new THREE.Vector3((len - c.line.params.carrierLength) / 2, 0.85, 0)))).toBeLessThan(1e-9);
   });
 
   it('needs to know where the item starts', () => {

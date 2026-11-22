@@ -1,0 +1,566 @@
+{
+  "$id": "https://twingen.local/spec/factory.schema.json",
+  "title": "factory.json",
+  "description": "A production line digital twin: line, product, stations (shell, equipment, process as ops) and the graph of typed ports. Generated from spec/factory.schema.js; do not edit.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "const": 1
+    },
+    "line": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-zA-Z0-9]*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "units": {
+          "default": "m",
+          "type": "string",
+          "const": "m"
+        },
+        "flow": {
+          "default": "+X",
+          "type": "string",
+          "const": "+X"
+        },
+        "runSize": {
+          "default": 8,
+          "description": "Units released per run",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 999
+        },
+        "speeds": {
+          "default": [
+            1,
+            2,
+            10
+          ],
+          "description": "Simulation speed choices",
+          "minItems": 1,
+          "maxItems": 6,
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 100
+          }
+        },
+        "conventions": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "beltHeight": {
+              "description": "Top of the conveyor belts (m)",
+              "type": "number",
+              "minimum": 0.4,
+              "maximum": 1.5
+            },
+            "conveyor": {
+              "type": "object",
+              "properties": {
+                "speed": {
+                  "description": "m/s",
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 3
+                },
+                "ramp": {
+                  "description": "Acceleration ramp (s)",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 3
+                }
+              }
+            },
+            "lift": {
+              "type": "object",
+              "properties": {
+                "drop": {
+                  "description": "Return line depth below the belt (m)",
+                  "type": "number",
+                  "minimum": 0.2,
+                  "maximum": 1
+                },
+                "duration": {
+                  "description": "Lift move (s)",
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 10
+                }
+              }
+            },
+            "transferLength": {
+              "description": "Gap between station conveyors (m)",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 10
+            },
+            "holdSeconds": {
+              "description": "Re-check interval of a waiting station (s)",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 5
+            }
+          },
+          "description": "Overrides of the line conventions (constitution.md); anything left out keeps its default"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ]
+    },
+    "product": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "catalog"
+            },
+            "type": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9]*$",
+              "description": "Catalog product type"
+            },
+            "params": {
+              "default": {},
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "required": [
+            "kind",
+            "type"
+          ]
+        }
+      ],
+      "description": "What flows down the line"
+    },
+    "stations": {
+      "minItems": 1,
+      "maxItems": 40,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-zA-Z0-9]*$"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "shell": {
+            "description": "Shared furniture (slab, conveyor, lifts, sign, HMI, stack light)",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "^[a-z][a-zA-Z0-9]*$",
+                "description": "Catalog shell preset"
+              },
+              "params": {
+                "default": {},
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "equipment": {
+            "default": [],
+            "description": "This station's own machines",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                },
+                "type": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$",
+                  "description": "Catalog component type"
+                },
+                "params": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                },
+                "position": {
+                  "default": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "description": "Station-local position (m): flow +X, walkway +Z",
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "rotationY": {
+                  "default": 0,
+                  "description": "Turn about the vertical axis (rad)",
+                  "type": "number",
+                  "minimum": -6.283185307179586,
+                  "maximum": 6.283185307179586
+                }
+              },
+              "required": [
+                "id",
+                "type"
+              ]
+            }
+          },
+          "conveyor": {
+            "description": "Station conveyor id (default: the shell's)",
+            "type": "string",
+            "pattern": "^[a-z][a-zA-Z0-9]*$"
+          },
+          "workState": {
+            "default": "WORKING",
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "inputStage": {
+            "description": "Product stage a unit arrives in",
+            "type": "string"
+          },
+          "ports": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9]*$"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "machine": {
+                  "description": "Machine the port belongs to (default: the station conveyor)",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                },
+                "port": {
+                  "description": "Port name on that machine (default: the station port name)",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "in",
+                    "out"
+                  ]
+                },
+                "standalone": {
+                  "description": "Machines that only serve this port when it is not connected",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
+                  }
+                }
+              }
+            }
+          },
+          "intake": {
+            "description": "Default: raise stop, convey to work, locate",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "op": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                }
+              },
+              "required": [
+                "op"
+              ],
+              "additionalProperties": {}
+            }
+          },
+          "process": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "op": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                }
+              },
+              "required": [
+                "op"
+              ],
+              "additionalProperties": {}
+            },
+            "description": "The station's process as ops"
+          },
+          "output": {
+            "description": "Default: release, convey to output",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "op": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                }
+              },
+              "required": [
+                "op"
+              ],
+              "additionalProperties": {}
+            }
+          },
+          "home": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9]*$"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string",
+                "pattern": "^[a-z][a-zA-Z0-9]*$"
+              },
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              }
+            }
+          },
+          "status": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
+            },
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number"
+              ]
+            }
+          },
+          "signals": {
+            "default": {},
+            "type": "object",
+            "properties": {
+              "beacon": {
+                "type": "object",
+                "properties": {
+                  "machine": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
+                  },
+                  "motion": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
+                  }
+                }
+              },
+              "display": {
+                "type": "object",
+                "properties": {
+                  "machine": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
+                  },
+                  "screen": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
+                  },
+                  "rows": {
+                    "maxItems": 6,
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "type": "string",
+                          "maxLength": 24
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
+                        }
+                      ],
+                      "items": false,
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "bar": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
+                      },
+                      "total": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
+                      },
+                      "label": {
+                        "type": "string",
+                        "maxLength": 60
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "total",
+                      "label"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "feed": {
+            "type": "object",
+            "properties": {
+              "fromLift": {
+                "default": true,
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "process"
+        ]
+      }
+    },
+    "graph": {
+      "default": {
+        "edges": []
+      },
+      "type": "object",
+      "properties": {
+        "edges": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "pattern": "^[a-z][a-zA-Z0-9]*\\.[a-z][a-zA-Z0-9]*$",
+                "description": "Output port, \"station.port\""
+              },
+              "to": {
+                "type": "string",
+                "pattern": "^[a-z][a-zA-Z0-9]*\\.[a-z][a-zA-Z0-9]*$",
+                "description": "Input port, \"station.port\""
+              },
+              "carries": {
+                "description": "What flows (checked against both ports)",
+                "type": "string",
+                "enum": [
+                  "unit",
+                  "batch",
+                  "case",
+                  "pallet"
+                ]
+              },
+              "transport": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "default": "conveyor",
+                    "type": "string",
+                    "enum": [
+                      "conveyor"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$",
+                    "description": "Catalog component for the transfer"
+                  },
+                  "params": {
+                    "default": {},
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "transport"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "version",
+    "line",
+    "product",
+    "stations"
+  ]
+}

@@ -1,0 +1,342 @@
+{
+  "about": "Dev check station (#/twin?demo=station): a stand-alone station played by the generic StationCycle. Shell + gantry as catalog types; the process is the ST2 frame build from the assembly ops scene; intake and output are the station defaults. A preview of one station in factory.json (Phase 4).",
+  "camera": {
+    "position": [
+      4.6,
+      3.3,
+      5.6
+    ],
+    "target": [
+      0,
+      1,
+      -0.2
+    ]
+  },
+  "product": {
+    "type": "printer",
+    "params": {}
+  },
+  "equipment": [
+    {
+      "id": "slab",
+      "type": "floorSlab",
+      "params": {
+        "length": 4.7,
+        "depth": 3.1,
+        "walkway": 0.8226
+      },
+      "position": [
+        0,
+        0,
+        0.05
+      ]
+    },
+    {
+      "id": "fence",
+      "type": "guardFence",
+      "params": {
+        "length": 4.1
+      },
+      "position": [
+        0,
+        0,
+        -1.45
+      ]
+    },
+    {
+      "id": "line",
+      "type": "palletConveyor",
+      "params": {},
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "liftIn",
+      "type": "liftUnit",
+      "params": {},
+      "position": [
+        -1.6,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "liftOut",
+      "type": "liftUnit",
+      "params": {},
+      "position": [
+        1.6,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "sign",
+      "type": "stationSign",
+      "params": {
+        "code": "ST2",
+        "title": "Frame Assembly",
+        "color": "#e0782a"
+      },
+      "position": [
+        0,
+        0,
+        -1.05
+      ]
+    },
+    {
+      "id": "panel",
+      "type": "hmi",
+      "params": {},
+      "position": [
+        -1.55,
+        0,
+        0.95
+      ],
+      "rotationY": 0.3
+    },
+    {
+      "id": "beacon",
+      "type": "stackLight",
+      "params": {},
+      "position": [
+        1.95,
+        0,
+        -0.55
+      ]
+    },
+    {
+      "id": "gantry",
+      "type": "cartesianGantry",
+      "params": {
+        "spanX": 1.5,
+        "spanZ": 0.9,
+        "beamY": 2.3,
+        "maxGap": 0.26,
+        "screwdriver": true
+      },
+      "position": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "station": {
+    "id": "frame",
+    "code": "ST2",
+    "title": "Frame Assembly",
+    "workState": "FRAME_ASSEMBLY",
+    "inputStage": "kitted",
+    "conveyor": "line",
+    "home": {
+      "gantry": {
+        "x": 0,
+        "y": 1.75,
+        "z": 0
+      }
+    },
+    "status": {
+      "robot": "HOME"
+    },
+    "signals": {
+      "beacon": {
+        "machine": "beacon"
+      },
+      "display": {
+        "machine": "panel",
+        "rows": [
+          [
+            "Unit",
+            "unit"
+          ],
+          [
+            "Conveyor",
+            "conveyor"
+          ],
+          [
+            "Robot",
+            "robot"
+          ],
+          [
+            "Frames built",
+            "completed"
+          ]
+        ]
+      }
+    },
+    "process": [
+      {
+        "op": "wait",
+        "seconds": 0.3,
+        "label": "RFID read · build order P1 frame",
+        "status": {
+          "robot": "WORK"
+        }
+      },
+      {
+        "op": "installPart",
+        "machine": "gantry",
+        "part": "Motor_Z",
+        "name": "Z motor",
+        "gap": 0.047,
+        "openGap": 0.26,
+        "clearAbove": 0.22
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "Motor_Z:0",
+        "name": "Z motor M4 1",
+        "state": "FASTENING"
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "Motor_Z:1",
+        "name": "Z motor M4 2",
+        "state": "FASTENING"
+      },
+      {
+        "op": "installPart",
+        "machine": "gantry",
+        "part": "Motor_Y",
+        "name": "Y motor",
+        "gap": 0.047,
+        "openGap": 0.26,
+        "clearAbove": 0.22
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "Motor_Y:0",
+        "name": "Y motor M4 1",
+        "state": "FASTENING"
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "Motor_Y:1",
+        "name": "Y motor M4 2",
+        "state": "FASTENING"
+      },
+      {
+        "op": "installPart",
+        "machine": "gantry",
+        "part": "Bed",
+        "name": "bed",
+        "gap": 0.24,
+        "openGap": 0.26,
+        "clearAbove": 0.3
+      },
+      {
+        "op": "installPart",
+        "machine": "gantry",
+        "part": "Upright_L",
+        "name": "left upright",
+        "gap": 0.045,
+        "openGap": 0.26,
+        "clearAbove": 0.53
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "Upright_L:0",
+        "name": "left upright M5 1",
+        "state": "FASTENING"
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "Upright_L:1",
+        "name": "left upright M5 2",
+        "state": "FASTENING"
+      },
+      {
+        "op": "installPart",
+        "machine": "gantry",
+        "part": "Upright_R",
+        "name": "right upright",
+        "gap": 0.045,
+        "openGap": 0.26,
+        "clearAbove": 0.53
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "Upright_R:0",
+        "name": "right upright M5 1",
+        "state": "FASTENING"
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "Upright_R:1",
+        "name": "right upright M5 2",
+        "state": "FASTENING"
+      },
+      {
+        "op": "installPart",
+        "machine": "gantry",
+        "part": "XGantry",
+        "name": "X axis",
+        "gap": 0.025,
+        "openGap": 0.26,
+        "clearAbove": 0.56
+      },
+      {
+        "op": "installPart",
+        "machine": "gantry",
+        "part": "LeadScrew",
+        "name": "lead screw",
+        "gap": 0.012,
+        "openGap": 0.26,
+        "clearAbove": 0.62,
+        "spinTurns": 5
+      },
+      {
+        "op": "installPart",
+        "machine": "gantry",
+        "part": "TopBar",
+        "name": "top bar",
+        "gap": 0.025,
+        "openGap": 0.26,
+        "clearAbove": 0.55
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "TopBar:0",
+        "name": "top bar M5 1",
+        "state": "FASTENING"
+      },
+      {
+        "op": "driveScrew",
+        "machine": "gantry",
+        "screw": "TopBar:1",
+        "name": "top bar M5 2",
+        "state": "FASTENING"
+      },
+      {
+        "op": "move",
+        "machine": "gantry",
+        "to": {
+          "x": 0,
+          "y": 1.75,
+          "z": 0,
+          "yaw": 0
+        },
+        "seconds": 0.7,
+        "label": "Gantry home"
+      },
+      {
+        "op": "transform",
+        "stage": "framed",
+        "label": "Frame complete"
+      }
+    ]
+  }
+}

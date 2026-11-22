@@ -543,4 +543,185 @@ Step 1 approved by the owner on 2026-11-17. Ported from `PickPlace.js` (already 
 - `npm test`: 19 files, 805 tests passed.
 - Screenshots checked: `screenshots/named-upright.png` (left upright mid-transfer, turning from lying to upright), `screenshots/named-screw.png` (upright placed, vertical in the gripper), `screenshots/named-framed.png` (frame complete, last top-bar screw being driven).
 
-**Next:** Phase 3 step 3: `StationCycle` with typed ports (from `AssemblyCycle.js`). Needs the reference station cycle files (the six `st*/…` files that extend `AssemblyCycle` and implement `planWork`).
+Step 2 approved by silence (owner rule).
+
+### Step 3: `StationCycle` with typed ports (done)
+
+**Reference files:** the reference repo is on this machine (`C:\Users\ok\Desktop\3D-Digital-Twin-Visualization-Tool`). I read the `station-agent` branch with `git show` (read-only: no checkout, nothing changed there) and copied into the git-ignored `reference/printer-line/`: the six station cycles (`st*/…Cycle.js`), the six `…Station.js` files, `common/AssemblyStation.js` and `line/` (`PrinterAssemblyLine.js`, `PrinterLineLayout.js`, `PrinterLineOverlay.js`, `PrinterLine.test.js`). So the files for the rest of Phase 3 are here, and the owner doesn't have to send them.
+
+**Changed**
+- `lib/station/stationSpec.js`: a station as data (zod): `id, code, title, workState, inputStage, conveyor, ports, intake?, process, output?, home, status, signals { beacon, display }, feed`. Errors name the station and the field.
+  - **Typed ports:** `input / work / output` default to the conveyor's ports of the same names. Any extra port (e.g. `reject`) names a port of any station machine. Each port takes over what the component port `carries` (`unit | batch | case | pallet`). `portMismatch` only lets output → input ports carrying the same thing connect.
+  - **Default intake / output** made from the conveyor's spec and the line conventions (no component names): stop raised 0.3 s → transfer input → work → lift & locate 0.4 s; release (plate **and** stop pin down together) 0.35 s → transfer work → output. These are the reference steps, labels and times. Without a work stop, units are conveyed straight through. A station can replace either list (e.g. ST4's shutters around the infeed) with its own ops.
+- `lib/station/StationCycle.js`: generic port of `AssemblyCycle`. Same ports interface (`input.take()`, `output.ready()`, `output.put()`), same lifecycle (`start / stop / reset / setSpeed / update`).
+  - Per unit: intake → process → `Process complete` → hold `Holding · downstream busy` while the output isn't ready → output → hand-over. All three phases are op lists expanded on **one OpCycle per unit**, so the planned state (where the carrier is, robot poses) carries from phase to phase.
+  - Stand-alone ports as in the reference: a new unit at `inputStage` rises from the return line at the input port (lift drop / time from the conventions); the output lowers it away and disposes it. Extra output ports keep the last 3 units (a reject lane).
+  - **Exit through another port:** when the process leaves the unit at another output port of the station (ST5's reject lane), the unit is handed over there and the output phase is skipped.
+  - Checked before anything plays: building a station runs its dry plan, so a bad op fails with `station "demo" › process › op #1 (move): machine "robot".x must stay in […]`. Run-time errors (out of reach, unknown fact) stop the station in **ALARM** with the reason on the HMI and the stack light red; it won't restart until reset.
+  - Signals as roles, not component names: `beacon` = any motion with values `off | run | wait | alarm` (off / run / amber while waiting or holding / red on alarm); `display` = any machine display, filled with title `ST2 · FRAME ASSEMBLY`, state, step, rows `[label, statusKey]` and an optional bar with `{key}` text (all cut to the screen's limits). Refreshed every 0.1 s, as in the reference.
+  - Facts for `decide`: `serial` always, plus the product's `facts` and a `facts(unit)` option.
+  - Reset puts every motion back to its default, then applies `home`; it disposes the units and zeroes the counters and serials.
+  - `planStation(registry, station, { equipment, product })`: dry plan from the catalog alone. Returns `intake / process / output` (duration + steps) and `cycleTime`. Stand-alone lift moves and holds are not counted, since a line replaces them with transfers. This is the input for `compiler/timing.js`.
+  - `connectPorts(out, in)`: checks the types, then wires a one-place hand-over (back-pressure through `ready()`). `Line.js` will add the transfer conveyors on top of this.
+- Contract changes:
+  - `palletConveyor` ports are now **carrier-centre positions**: ±(length − carrierLength)/2 = **±1.6 m**, the reference station ports. Before, they were at the belt ends (±2.2), so transfers were 0.6 m too long and the ops demo carrier (placed at −1.6) jumped. No geometry change, goldens unaffected.
+  - `grip` / `release` take `also: { motion: value }`: other range motions of the same machine in the same step.
+  - Line conventions: `workStop` (motion / anchor names and the reference step times) and `holdSeconds` 0.25.
+- Dev scene `#/twin?demo=station` (`?station=<name>`, `?t=<s>` frozen): `app/dev/stationDemo.js` plays `app/dev/stations/frame.json` stand-alone. The file has the shell (slab, fence, conveyor, lifts, sign, HMI, stack light) plus the gantry as catalog types, and the ST2 frame-build ops from the assembly scene; intake and output are the defaults. No component names in the JS.
+- Tests `tests/station/station-cycle.test.js` (21):
+  - spec defaults and errors; typed port resolution and mismatch messages
+  - default intake / output = the reference labels, states and times; dry plan from types = from instances; bad ops located by station › phase › op; explicit intake replaces the default; pass-through conveyor
+  - stand-alone unit in a moved and turned station frame: rises, located on the plate at the work port, worked, released, lowered and disposed
+  - **dry plan = played steps**; 10× = 1× step for step
+  - beacon and HMI screen content; long text cut; WAITING amber; ALARM on a run-time error (refuses to start until reset); reset
+  - reject: the failed unit handed over at the reject port with no output phase
+  - two connected stations: hand-over, **HOLDING** amber while downstream is busy, released when it takes the unit; mismatched port types refused
+  - real printer: installPart + driveScrew through the station cycle, dry = run
+  - every dev station file plays one unit headless
+
+**Reference logic left for later steps (on purpose)**
+- Station-specific work that isn't plain ops yet: ST1 pick lights and supermarket restock, ST3 cable routing and continuity test, ST4 printer test sequence (dock, probe mesh, heat, print), ST5 vision scan, labeller and pop-up reject, ST6 carton flow and pallet stacking. They need ops such as `inspect`, `routeCable`, `palletize` and product-driven steps; these come with the IR/compiler work in Phase 4, when each station is written as data.
+- Lift-carriage motion: the reference lifts don't move. Ours have a `level` motion, but the stand-alone feed only animates the carrier, as the reference does.
+
+**Results**
+- `npm test`: 20 files, 826 tests passed.
+- Screenshots checked: `screenshots/station-intake.png` (t = 3 s: carrier P1-0001 on its way to the work position, HMI INFEED, stack light green) and `screenshots/station-work.png` (t = 20 s: gantry placing the bed on the located printer, HMI FRAME_ASSEMBLY).
+
+Step 3 approved by the owner moving on (2026-11-22).
+
+### Step 4: `layout.js` and `Line.js` (done)
+
+Ported from `line/PrinterLineLayout.js` and `line/PrinterAssemblyLine.js` (copied in step 3).
+
+**Changed**
+- `lib/line/layout.js`: line layout from the graph and the stations' own conveyor extents, never from the LLM.
+  - `flowOrder(ids, edges)` follows the edges (`'a.output' → 'b.input'`) from the only station with no input, so the list order doesn't matter.
+  - `layoutLine({ stations: [{ id, extent }], edges, transferLength })` places each station so the gap between one conveyor end and the next conveyor start is exactly the transfer length. The row is centred (first and last origins symmetric), and placing a station is a pure X offset (station-local frames, rule 4). Returns the order, positions and transfers (`start, end, length, centre`).
+  - Stations of different lengths keep the exact gap.
+  - Only **chains** for now. Branches, merges, loops, separate parts, unknown stations and self-feeds fail with a clear message instead of a wrong layout (graph shapes are Phase 6).
+- `lib/line/lineSpec.js`: a line as data (zod), a preview of the line part of factory.json:
+  - `id, title, runSize (8), product, transferLength?`
+  - `stations[]`: a station spec plus `equipment[] { id, type, params, position, rotationY }`
+  - `edges[] { from, to, carries?, transport { kind: conveyor, type, params } }`
+  - Stations have no positions; layout gives them.
+- `lib/line/Line.js`: generic port of `PrinterAssemblyLine`. Stations are the same `StationCycle`s as stand-alone, unchanged; the line only replaces their ports.
+  - **First input** releases `runSize` units from the return line (status "Run complete · all carriers released" afterwards). **Each edge** gets a transfer conveyor of the edge's catalog type, sized to the gap (its `length` param is set from the layout when the component has one and the edge doesn't give it). **Last output** and unconnected extra outputs (a reject lane) keep their stand-alone behaviour.
+  - Each transfer holds one unit and carries it from the upstream output port to the downstream input port (2.4 m, as in the reference) with the line trapezoid. Belt motions that declare `travel` scroll with it.
+  - Back-pressure: the upstream output isn't ready while the transfer is occupied, so that station shows HOLDING and the stack light goes amber; downstream shows "Waiting for ST1" until the unit has arrived. The units are the same objects from the first station to the last.
+  - Checks, each naming the edge or station: port types per edge (`edge b.output → c.input: "output" carries pallet but "input" takes unit`), `carries` on the edge, unknown ports and transport types, the transport's own port types, duplicate station or equipment ids, and a station conveyor that doesn't run along station +X.
+  - Equipment that only serves a port stand-alone is hidden once the port is connected. For this, station ports got `standalone: [machineIds]`, and a port's `port` name now defaults to the station port name.
+  - `start / stop / reset / setSpeed / update / dispose`. **FINISHED** once the whole run has left the line and every station is back waiting; stations then stop.
+  - `status` (released, in process, exited, transfers, one line per station) and `timing` (each station's dry cycle, each transfer's travel, the bottleneck).
+- Dev scene `#/twin?demo=line` (`?line=`, `?t=`, `?speed=`): `app/dev/lineDemo.js` plays `app/dev/lines/printer.json`, three stations with full shells: ST1 and ST3 are short stand-ins, ST2 is the real frame build. Run of 3. No component names in the JS.
+- Tests `tests/line/line.test.js` (12):
+  - layout of six reference stations = the reference `PrinterLineLayout` (station X = (i − 2.5) × 5.6, transfer ends, 1.2 m gaps); order from edges, uneven lengths, centring; layout refusals
+  - line placement, transfer size, distance 2.4 m and trapezoid time; lifts only at the line ends
+  - a whole run (the same 3 units through all stations in serial order, FINISHED, stations stopped)
+  - transfer ends exactly at the next input port, belts scroll, the next station adopts the unit
+  - back-pressure HOLDING / amber / "Waiting for B2"; 10× = 1×; reset mid-transfer; dry timing and bottleneck
+  - 8 build refusals
+  - the dev line file runs its first unit into the second station headless
+
+**Not yet (on purpose)**
+- Lines that aren't chains: reject branches to another station, merges, parallel stations, buffers, and AGV / robot / worker transports (Phase 6).
+- `FactoryOverlay` / line HUD from the IR: the dev scene only shows a status line.
+- Run complete is counted from the output ports; ST6's own counters (dispatched, pallets) come when ST6 is written as data.
+
+**Results**
+- `npm test`: 21 files, 838 tests passed.
+- Screenshots checked: `screenshots/line-transfer.png` (t = 16 s: P1-0001 on the first transfer into ST2, the second carrier entering ST1, ST2 and ST3 waiting) and `screenshots/line-running.png` (t = 60 s: ST1 HOLDING with downstream busy, ST2 fastening the top bar, ST3 waiting for ST2; transfers fill the gaps, lifts only at the ends).
+- Note: the first headless screenshot of the line timed out at the default 60 s (cold SwiftShader start plus building three stations). The retry with `--timeout 150000` worked.
+
+Step 4 approved by the owner moving on (2026-11-22).
+
+### Step 5: `compiler/timing.js` and the reference timing recording (done)
+
+**Reference timing, recorded rather than copied.** The reference printer-line code only exists on the reference repo's `station-agent` branch; its working tree is on `main`. I exported that branch's `src/station` and `src/motion` with `git archive` into the git-ignored `reference/_src/`. This is read-only: no checkout, nothing in that repo changed (its one untracked file, `NEW_PROJECT_MASTER_PROMPT.md`, was already there). From there the real reference cycles run headless.
+- `scripts/reference-timing.mjs` (`npm run reference:timing`): stubs only the canvas, then runs each of the six reference stations stand-alone for a whole run of 8 units and the whole reference line for one run. It records every step played (state, label, duration).
+  - Units are split where the unit label changes, because ST4 opens its entry shutter before the carrier rises.
+  - It runs 3 s past the end so the last unit's closing steps are recorded too.
+- Output: `benchmarks/expected/printer-line-reference-timing.json`, the timing Phase 4's acceptance test compares against.
+
+| Reference station | Unit (stand-alone) | Steps | Notes |
+|---|---:|---:|---|
+| ST1 Kitting | 51.19 s | 138 | identical for all 8 units |
+| ST2 Frame | 53.66 s | 126 | identical |
+| ST3 Wiring | 76.61 s | 288 | identical, **bottleneck** (74.81 s without the stand-alone lift moves) |
+| ST4 Calibration | 35.15 s | 50 | identical |
+| ST5 Inspection | 16.26 s | 15 | rejects (serials 5, 8): 14.39 / 15.83 s (different reject-bay slots) |
+| ST6 Packaging | 31.22 s | 44 | unit 8: 32.82 s (pallet dispatched) |
+| Line, run of 8 | finished at 771.1 s | | exits 277.6, 352.2, 427.0, 501.8, 545.5 (reject), 651.4, 726.5, 771.1 (reject); transfer 5.683 s |
+
+**Changed**
+- `compiler/timing.js` (reads only data, no geometry):
+  - `lineTiming(registry, lineData)`: for each station in flow order, intake / process / output / cycle time and every step as a row (start time, phase, state, label, duration). Transfers come with distance and time (from the layout and the port positions, no build). Also takt, bottleneck (a station, or a transfer if that is slower), lead time for one unit, and estimated run time.
+  - Line model, as in the reference: takt = slowest station cycle or transfer; lead = lift + Σ cycles + Σ transfers + lift; run ≈ lead + (N − 1) × takt. Waiting stations re-check every 0.25 s, so a played run can be up to one hold per hand-over longer.
+  - `compareStation` / `compareTiming`: our steps against a recorded reference unit (stand-alone lift steps left out), **aligned by label** (longest common subsequence). One missing step is reported once as `missing step` instead of shifting everything after it; also `extra step`, `state` and `duration` differences, plus totals and Δ. Transfers are compared as well.
+  - `referenceTakt`, `formatTimingTable` (markdown, optionally with the reference column).
+- `tests/helpers/lineFixtures.js`: the small test line, shared by the line and timing tests.
+- `npm run reference:timing` added to `package.json` (no new dependency).
+- Tests `tests/compiler/timing.test.js` (10):
+  - timing from data = timing of the built `Line`; step rows (phases, labels, start times add up)
+  - takt / bottleneck / lead / run formulas, including a transfer bottleneck; a played run finishes between the estimate and the estimate + one hold per hand-over; the markdown table
+  - the alignment (missing once, extra, state, duration); the recording covers six stations, 8 units each, and the line run
+  - **our default intake and output are step-for-step the reference ones** in all five stations without shutters; **transfers take exactly the reference 5.683 s**
+  - **the takt model holds on the reference line itself**: dispatched units leave one ST3 cycle apart (median gap within 0.3 s of 74.81 s)
+
+**What the comparison shows already (dev preview line, not the final stations)**
+
+| Station | Intake s | Process s | Output s | Cycle s | Reference s | Δ s | Steps match |
+|---|---:|---:|---:|---:|---:|---:|:---:|
+| ST2 Frame Assembly (dev scene) | 4.61 | 38.60 | 4.26 | 47.46 | 51.86 | −4.40 | no |
+| Transfers | | | | 5.68 | 5.68 | 0.00 | yes |
+
+- ST2 in the dev scene is an approximation from the named-ops step. Its part names differ from the reference HMI texts ("Z motor" vs "Z motor assy", screw "M4 1" vs "1/2"), and it lacks the adjust steps (Y belt tension, V-wheel eccentrics, Z coupler, squareness check). Durations of the matching steps are equal. Phase 4 writes ST2 with the reference names and steps, and this comparison will show what is still missing.
+
+**Not done (on purpose)**
+- No CLI for the timing table yet: our library loads components through Vite's `import.meta.glob`, so a CLI needs a Vite server like `npm run golden`. It comes with the reviewer CLI (Phase 7), which also runs the takt check.
+- No browser change in this step: the timing is not visual yet (the KPI overlay is Phase 11). App files are unchanged since step 4's screenshots.
+
+**Results**
+- `npm test`: 22 files, 848 tests passed.
+- `npm run reference:timing`: six stations and the line recorded in about 1 minute.
+
+**Phase 3 done:** basic and named ops, `StationCycle` with typed ports, `layout.js`, `Line.js` and `compiler/timing.js` are in, each with tests and (where visual) screenshots.
+
+**Next:** Phase 4.
+
+## Phase 4: IR and compiler
+
+### Step 1: `factory.schema.js` (the IR), shell presets, `expand.js` (done)
+
+Phase 3 step 5 approved by the owner moving on (2026-11-22).
+
+**Changed**
+- `spec/factory.schema.js`: `factory.json` as zod, built from the Phase 3 station and line specs.
+  - `version: 1`.
+  - `line { id, title, units 'm', flow '+X', runSize (8), speeds [1, 2, 10], conventions? }`: convention overrides are belt height, conveyor speed / ramp, lift drop / time, transfer length and hold time.
+  - `product`: discriminated by `kind`; only `catalog { type, params }` for now (parametric and GLB come in Phase 6).
+  - `stations[] { id, code, title, shell?, equipment[], conveyor?, workState, inputStage, ports, intake?, process, output?, home, status, signals, feed }`: equipment by catalog type with station-local position / rotationY. **No station positions**: layout gives them.
+  - `graph { edges[] { from 'station.port', to, carries?, transport { kind: conveyor, type, params } } }`.
+  - File-internal checks with paths: duplicate station / equipment ids, edges to unknown stations, a station with neither shell nor conveyor, `station.port` format. `parseFactory` throws a `FactoryError` listing every issue as `stations[1].equipment[1].id: …`. Zod runs the reference checks only once the shape is valid, so the shape is reported first.
+  - `factoryJsonSchema()` and the generated **`spec/factory.schema.json`** (`npm run schema`, plain Node). A test fails when the file is out of date.
+- **Shell presets** (registry): `defineShell({ type, summary, params, build })`. `expandShell(type, params)` validates params, checks every piece of equipment is a known component type and that the station conveyor is among it. Shells keep the compiler free of component names (rule 6) and keep station JSON short: a stand-in station is about 0.9 kB.
+- `lib/components/station/shells.js`: the **`assemblyCell`** shell, the reference `createStationShell` + `StationBase` as data:
+  - slab ±2.35 × [minZ, maxZ] with the walkway at z 1.05; fence at minZ + 0.25, length 4.1
+  - pallet conveyor 4.4 m with work stop; lifts at the ports ±1.6; sign at minZ + 0.45
+  - HMI at (−1.55, 0, 0.95) turned 0.3 rad; stack light at (1.95, 0, −0.55)
+  - ports with the lifts as stand-alone equipment; beacon and display signals
+  - Params: code, title, colour, minZ / maxZ, walkway, HMI x, conveyor and carrier length.
+- `compiler/expand.js`:
+  - `expandFactory(registry, data)` → `{ factory, conventions, ctx, line }`: shells expanded, and the station's own ports and signals merged field by field over the shell's. An equipment id clashing with the shell's is refused, and so is an unknown catalog product. Conventions are merged group by group (`mergeConventions`); `ctx` carries the belt height to components.
+  - `checkFactory(registry, data)` → `{ ok, errors: [{ path, message }], expanded, timing }`: schema, references, catalog types, a dry plan of every op of every station, ports, edges and layout, all without geometry. It never throws. The deterministic reviewer (Phase 7) builds on this.
+- Dev line `app/dev/lines/printer.json` is now a **factory.json** (under `"factory"`); `lineDemo.js` loads it through `expandFactory`.
+- Tests `tests/spec/factory.test.js` (11): defaults; issue paths; JSON Schema file up to date; `assemblyCell` placements = the reference shell; shell refusals; expansion and merging (and the clash refusal); convention merging; `checkFactory` ok / catalog errors with paths or located messages; overrides reaching layout, timing and built components (belt height 0.9 on the conveyor ports); an expanded factory.json running as a line to FINISHED with the middle lifts hidden.
+
+**Notes**
+- Ops in `process` are checked against the registry when planned (`checkFactory`), not by the JSON Schema: their args live in each op's own zod schema. The Phase 8 catalog can turn them into a per-op union for Structured Outputs. OpenAI strict mode also needs every field required and no defaults, so a strict variant of the schema will be derived then.
+- The `graph` has only edges for now; Phase 6 adds nodes (buffers, merges, splits, parallel copies) and layout hints.
+
+**Results**
+- `npm test`: 23 files, 859 tests passed.
+- Screenshot `screenshots/factory-line.png` (t = 60 s): the dev line loaded from factory.json matches step 4's hand-written line at the same moment (ST1 HOLDING, ST2 fastening the top bar, ST3 waiting). The fence now sits at the reference z.
+
+**Next:** Phase 4 step 2: `printer-line.factory.json`, starting with ST1 (kitting) and ST2 (frame) written against the reference recording, with whatever ops they still need (pick lights and supermarket restock for ST1; the adjust steps and stowed cables for ST2). Target: `compareTiming` reports ST1 and ST2 as matching step for step.

@@ -11,7 +11,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "screenshot": "node scripts/screenshot.js",
-    "golden": "node scripts/golden.js"
+    "golden": "node scripts/golden.js",
+    "reference:timing": "node scripts/reference-timing.mjs",
+    "schema": "node scripts/schema.mjs"
   },
   "dependencies": {
     "lucide": "^1.73.0",

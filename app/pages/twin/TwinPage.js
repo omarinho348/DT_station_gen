@@ -49,6 +49,38 @@ export function TwinPage(outlet, route) {
       requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
     });
   }
+  if (route?.query?.demo === 'station') {
+    import('../../dev/stationDemo.js').then(({ createStationDemo }) => {
+      if (!alive) return;
+      demo = createStationDemo({ station: route.query.station ?? 'frame', onStep: (text) => { hint.textContent = text; } });
+      viewer.content.add(demo.root);
+      // ?t=<seconds>: frozen at that moment (screenshots); otherwise it plays.
+      if (route.query.t) demo.skip(Number(route.query.t));
+      else viewer.onFrame(demo.update);
+      const view = demo.camera ?? { position: [4.6, 3.3, 5.6], target: [0, 1.0, -0.2] };
+      viewer.camera.position.fromArray(view.position);
+      viewer.controls.target.fromArray(view.target);
+      requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
+    });
+  }
+  if (route?.query?.demo === 'line') {
+    import('../../dev/lineDemo.js').then(({ createLineDemo }) => {
+      if (!alive) return;
+      demo = createLineDemo({
+        line: route.query.line ?? 'printer',
+        speed: Number(route.query.speed ?? 1),
+        onStatus: (text) => { hint.textContent = text; },
+      });
+      viewer.content.add(demo.root);
+      // ?t=<seconds>: frozen at that moment (screenshots); otherwise it plays.
+      if (route.query.t) demo.skip(Number(route.query.t));
+      else viewer.onFrame(demo.update);
+      const view = demo.camera ?? { position: [0.5, 9.5, 15.5], target: [0, 0.9, -0.3] };
+      viewer.camera.position.fromArray(view.position);
+      viewer.controls.target.fromArray(view.target);
+      requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
+    });
+  }
   if (route?.query?.demo === 'core') {
     import('../../dev/coreDemo.js').then(({ createCoreDemo }) => {
       if (!alive) return;

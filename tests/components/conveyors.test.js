@@ -32,13 +32,14 @@ describe('palletConveyor', () => {
     expect(belt.position.y + 0.003).toBeCloseTo(0.85, 9);
   });
 
-  it('has typed ports at the ends and at the work position, at belt height', () => {
+  it('has typed ports at the carrier-centre end positions (reference ±1.6) and at the work position, at belt height', () => {
     expect(build('palletConveyor').ports).toEqual({
-      input: { position: [-2.2, 0.85, 0], direction: 'in', carries: 'pallet' },
+      input: { position: [-1.6, 0.85, 0], direction: 'in', carries: 'pallet' },
       work: { position: [0, 0.85, 0], direction: 'work', carries: 'pallet' },
-      output: { position: [2.2, 0.85, 0], direction: 'out', carries: 'pallet' },
+      output: { position: [1.6, 0.85, 0], direction: 'out', carries: 'pallet' },
     });
     expect(Object.keys(build('palletConveyor', { workStop: false }).ports)).toEqual(['input', 'output']);
+    expect(build('palletConveyor', { length: 3, carrierLength: 0.6 }).ports.output.position[0]).toBeCloseTo(1.2, 12);
   });
 
   it('follows a different belt height from the line context', () => {
