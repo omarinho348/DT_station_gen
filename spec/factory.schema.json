@@ -273,9 +273,40 @@
             "type": "string",
             "pattern": "^[A-Z][A-Z0-9_]*$"
           },
+          "role": {
+            "default": "station",
+            "description": "transfer: a station that carries units between two others (a row former); a line plays it with its transfers, after the stations each frame",
+            "type": "string",
+            "enum": [
+              "station",
+              "transfer"
+            ]
+          },
           "inputStage": {
             "description": "Product stage a unit arrives in",
             "type": "string"
+          },
+          "unit": {
+            "description": "What this station's units are, when not the line product (cases a station upstream packed the products into): fed stand-alone and planned with",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "^[a-z][a-zA-Z0-9]*$",
+                "description": "Catalog product type"
+              },
+              "params": {
+                "default": {},
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "type"
+            ]
           },
           "ports": {
             "default": {},
@@ -297,6 +328,24 @@
                   "type": "string",
                   "pattern": "^[a-z][a-zA-Z0-9]*$"
                 },
+                "offset": {
+                  "description": "The place is this far from the machine port, in the machine frame (m): e.g. inside an infeed tunnel",
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                },
                 "direction": {
                   "type": "string",
                   "enum": [
@@ -317,8 +366,33 @@
                     "type": "string",
                     "pattern": "^[a-z][a-zA-Z0-9]*$"
                   }
+                },
+                "connected": {
+                  "description": "Machines that only exist when the port is connected (an open-ended hood instead of a closed tunnel)",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
+                  }
                 }
               }
+            }
+          },
+          "prepare": {
+            "description": "Ops played at the start of each cycle once a unit is waiting, before it is taken in (the station readies itself; they cannot touch the unit)",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "op": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                }
+              },
+              "required": [
+                "op"
+              ],
+              "additionalProperties": {}
             }
           },
           "intake": {
@@ -355,6 +429,51 @@
               ],
               "additionalProperties": {}
             }
+          },
+          "batch": {
+            "description": "Units arrive as batches standing like this (a 2 × 2 group of cans); ops reach single members as items member1 … memberN",
+            "type": "object",
+            "properties": {
+              "members": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12,
+                "description": "Units per batch"
+              },
+              "pitch": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 2,
+                "description": "Distance between the units of a row, along X (m)"
+              },
+              "rows": {
+                "default": 1,
+                "description": "Rows across the flow (Z)",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4
+              },
+              "rowPitch": {
+                "default": 0,
+                "description": "Distance between rows, along Z (m)",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "rowsFrom": {
+                "default": "rear",
+                "description": "Which row the member numbers start in (rear = −Z)",
+                "type": "string",
+                "enum": [
+                  "rear",
+                  "front"
+                ]
+              }
+            },
+            "required": [
+              "members",
+              "pitch"
+            ]
           },
           "indexing": {
             "description": "Indexing station: batches of units at positions along the conveyor, moved together one position per machine cycle",
@@ -491,6 +610,15 @@
                   "type": "string",
                   "pattern": "^[a-z][a-zA-Z0-9]*$"
                 }
+              },
+              "startWhen": {
+                "default": "always",
+                "description": "downstreamEmpty: a machine cycle (the index) only starts while the next station holds no unit (the reference factory holds its filling line so)",
+                "type": "string",
+                "enum": [
+                  "always",
+                  "downstreamEmpty"
+                ]
               }
             },
             "required": [
@@ -1147,15 +1275,17 @@
                 "properties": {
                   "kind": {
                     "default": "conveyor",
+                    "description": "conveyor: a transfer conveyor fills the gap; direct: the two ports meet (the layout stands the stations so) and the unit is handed over where it stands",
                     "type": "string",
                     "enum": [
-                      "conveyor"
+                      "conveyor",
+                      "direct"
                     ]
                   },
                   "type": {
+                    "description": "Catalog component for the transfer (conveyor)",
                     "type": "string",
-                    "pattern": "^[a-z][a-zA-Z0-9]*$",
-                    "description": "Catalog component for the transfer"
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
                   },
                   "params": {
                     "default": {},
@@ -1165,10 +1295,7 @@
                     },
                     "additionalProperties": {}
                   }
-                },
-                "required": [
-                  "type"
-                ]
+                }
               }
             },
             "required": [

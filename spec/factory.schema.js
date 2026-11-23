@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { id, opEntry } from '../lib/ops/args.js';
 import { Connections } from '../lib/station/connectionSpec.js';
 import { IndexingSpec } from '../lib/station/indexingSpec.js';
+import { BatchSpec } from '../lib/station/batchSpec.js';
 import { Sensors } from '../lib/station/sensorSpec.js';
 
 export const FACTORY_VERSION = 1;
@@ -71,9 +72,11 @@ export const Equipment = z.object({
 export const PortRef = z.object({
   machine: id.optional().describe('Machine the port belongs to (default: the station conveyor)'),
   port: id.optional().describe('Port name on that machine (default: the station port name)'),
+  offset: vec3.optional().describe('The place is this far from the machine port, in the machine frame (m): e.g. inside an infeed tunnel'),
   direction: z.enum(['in', 'out']).optional(),
   slots: z.number().int().min(1).max(20).optional().describe('Extra output: places it holds, filled in turn (the oldest is cleared when full); the station offers the fact <port>Slot'),
   standalone: z.array(id).optional().describe('Machines that only serve this port when it is not connected'),
+  connected: z.array(id).optional().describe('Machines that only exist when the port is connected (an open-ended hood instead of a closed tunnel)'),
 });
 
 export const Station = z.object({
@@ -85,10 +88,15 @@ export const Station = z.object({
   equipment: z.array(Equipment).default([]).describe('This station\'s own machines'),
   conveyor: id.optional().describe('Station conveyor id (default: the shell\'s)'),
   workState: upper.default('WORKING'),
+  role: z.enum(['station', 'transfer']).default('station').describe('transfer: a station that carries units between two others (a row former); a line plays it with its transfers, after the stations each frame'),
   inputStage: z.string().optional().describe('Product stage a unit arrives in'),
+  unit: z.object({ type: camelType.describe('Catalog product type'), params }).optional()
+    .describe('What this station\'s units are, when not the line product (cases a station upstream packed the products into): fed stand-alone and planned with'),
   ports: z.record(id, PortRef).default({}),
+  prepare: z.array(opEntry).optional().describe('Ops played at the start of each cycle once a unit is waiting, before it is taken in (the station readies itself; they cannot touch the unit)'),
   intake: z.array(opEntry).optional().describe('Default: raise stop, convey to work, locate'),
   process: z.array(opEntry).default([]).describe('The station\'s process as ops (an indexing station leaves it empty)'),
+  batch: BatchSpec.optional().describe('Units arrive as batches standing like this (a 2 × 2 group of cans); ops reach single members as items member1 … memberN'),
   indexing: IndexingSpec.optional().describe('Indexing station: batches of units at positions along the conveyor, moved together one position per machine cycle'),
   output: z.array(opEntry).optional().describe('Default: release, convey to output'),
   home: z.record(id, z.record(id, statusValue)).default({}),
@@ -155,10 +163,10 @@ export const Edge = z.object({
   to: endpoint.describe('Input port, "station.port"'),
   carries: z.enum(['unit', 'batch', 'case', 'pallet']).optional().describe('What flows (checked against both ports)'),
   transport: z.object({
-    kind: z.enum(['conveyor']).default('conveyor'),
-    type: camelType.describe('Catalog component for the transfer'),
+    kind: z.enum(['conveyor', 'direct']).default('conveyor').describe('conveyor: a transfer conveyor fills the gap; direct: the two ports meet (the layout stands the stations so) and the unit is handed over where it stands'),
+    type: camelType.optional().describe('Catalog component for the transfer (conveyor)'),
     params,
-  }),
+  }).refine((t) => t.kind === 'direct' || t.type, { message: 'a conveyor transport needs its catalog type', path: ['type'] }),
 });
 
 export const Graph = z.object({

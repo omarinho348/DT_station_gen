@@ -104,7 +104,7 @@ export function TwinPage(outlet, route) {
   if (route?.query?.demo === 'line') {
     import('../../dev/lineDemo.js').then(async ({ createLineDemo, preloadLineAssets }) => {
       await preloadLineAssets();
-      if (alive) showLine(createLineDemo({ line: route.query.line ?? 'printer', ...lineOptions }));
+      if (alive) showLine(createLineDemo({ line: route.query.line ?? 'printer', station: route.query.station, ...lineOptions }));
     });
   }
   // The hand-built reference line, for the visual acceptance test (dev only; app/dev/referenceLine.js).

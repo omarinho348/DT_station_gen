@@ -231,11 +231,17 @@ try {
     hookSequencer(factory.canSequencer, clock, transfer);
     const events = [];
     let last = { cases: 0, boxes: 0 };
+    // A browser renders every frame, and rendering brings every world matrix up to date; the factory
+    // relies on that (it re-parents cans and cases keeping their world pose). Headless, nothing
+    // renders, so do the same here: once before the start and after every update. Without it the
+    // first can hand-over read a stale transfer frame and took 50.5 s instead of 4.83 s.
+    factory.root.updateMatrixWorld(true);
     factory.start();
     console.log = () => {};
     console.info = () => {};
     while (factory.state !== 'FINISHED_PALLET' && clock.t < 20000) {
       factory.update(DT);
+      factory.root.updateMatrixWorld(true);
       clock.t += DT;
       const s = factory.status;
       if (s.casesPacked > last.cases) events.push({ t: round(clock.t), event: `case ${s.casesPacked} packed` });

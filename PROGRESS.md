@@ -1634,7 +1634,7 @@ The dry plan gives the steady machine cycle: index 3.05 + exit 3.1 + filling 9.9
 - the supply tank and riser connection
 - the timing again equal to the recording
 
-### Step 9a (part 3): station 1 as data, real filling and capping (done)
+### Step 9a (part 3): station 1 as data, real filling and capping (approved)
 
 Part 2 approved by the owner (2026-11-23: "next"). The owner also asked for a plain-language summary of Phase 5 so far; it was given in the chat.
 
@@ -1689,3 +1689,262 @@ While it plays:
   - `screenshots/s1-capping.png` (t = 41.5 s): the capper tightening, the filled batches behind, the panel live
 
 **Phase 5 status:** step 9a is done (station 1 matches the reference). Next is **9b**: the can transfer (single-file guides, row-forming pushers, lane divider) and station 2 (case packing: gather 4 cans in 2 lanes, multi-can pick with the packing gantry, case erected, packed, closed and taped; the case becomes the unit that flows on).
+
+### Step 9b (part 1): station 2 as data, case packing (approved)
+
+Step 9a approved by the owner (2026-11-23: "continue working off from the next step phase 5 step 9b"). 9b is split like 9a: **part 1** = station 2 stand-alone; **part 2** = the can transfer (row former) and the S1 → S2 line geometry.
+
+**Result first:** `spec/examples/lubricant-line.factory.json` now holds **station 2, case packing**, written as data, and it matches the recorded reference station 2:
+- **all 143 timed steps** (state, label, duration, in order)
+- start times within 0.05 s
+- **6 cases out at 189.10 s**, as recorded
+- dry plan 31.55 s per case (the recording's 31.54 is its 0.02 s quantisation)
+
+While it plays:
+- the case is erected in the tunnel; four filled, capped cans and the case ride in together; the cans accumulate in two lanes against the end stop (touching, 0.28 m), the case stops at the swing stop, which swings back across the belt in the first 0.5 s
+- the gantry lowers to the handles, each can hangs in its own gripper, the rows close from lane spacing (0.26) to case spacing (0.20) on the way, the cans are set into the case at their slots, and the gantry returns
+- the case then becomes the unit: the stop opens, the case indexes to the closer, the tuckers fold the end flaps (as far as the bar lets them), the plate tamps them, the folders fold the side flaps, the plate presses the top shut
+- the case is taped from the leading edge back as it passes the fixed head (the tape roll turns) and leaves through the output port with the four cans in it
+- photo-eyes: cans in position, case in position, case at the taper
+
+**Changed**
+- **Batches in rows** (`lib/station/batchSpec.js`; station field `batch`): a batch's members stand in rows across the flow (2 × 2 cans), rear row first, each along +X. `createBatch` takes `rows` / `rowPitch` and offers single members as items `member1 … memberN`. A batch frees only the members still in it.
+- **Station port `offset`**: a station port may sit at an offset from its machine port (the infeed place inside the tunnel, the hand-over place inside the output tunnel). Runtime spec, factory schema and the timing table use it.
+- **StationCycle:**
+  - stand-alone feed of batches for a station with `batch`
+  - `feed.fromLift: false`: stand-alone output just lets the unit go (no return-line lift steps)
+  - a unit that holds things (a case with its cans) is freed with what it holds
+  - presence sensors also see items the station made (the case on its own belt)
+  - the dry plan of a batch station knows the members and where they stand
+- **OpCycle:** `plannedPoint(item)` (where the plan has an item, batch members included, the same in dry and run), `swapUnit` / `swapUnitNow`; the old unit's members stay reachable after a swap.
+- **Ops:**
+  - `accumulate` (named): accumulating conveyors. Several items on several belts ride until each rests at its own stop place (eased in over `blend`), then a stopping step; `alongside` moves during the first seconds (the swing stop). From the reference `planArrival`.
+  - `groupPickPlace` (named): a multi-gripper head picks a group at once (one item per gripper anchor), re-spaces the rows on the way, sets them into a container at its slots, returns. Nine fixed-time steps. At run time it checks every item really stands under its gripper (1 cm). From `planPick` / `planPlace` / `planCompletion`.
+  - `closeCase` (named): the closer's seven steps, by roles (`tuckerOut`, `tuckerUp`, `folderOut`, `plateUp`); the case folds its own flaps from where the tools are. From `planClosing`.
+  - `swapUnit` (named): from now on the station's unit is an item it made (the case); only made items qualify.
+  - `transfer`: `also` (other belts that run with it) and `passes` (a fixed machine the item passes: an item routine driven by how far its visible body has crossed the machine's port, and the machine's surfaces turning). The start of a transfer now keeps a planned offset.
+  - `spawn` records the offset of the place it made the item at.
+- **Carton:** routines `foldUnder` (flaps folded by a bar or a plate, never back open: the reference `flapAngleUnderBar` / `flapAngleUnderPlate`, now in the product) and `tapeAlong`.
+- `lib/core/motion.js`: `rampedTravel`, `rampedDuration`, `stoppingTravel`, `smoothMin`.
+- **Layout:** a station's run now goes from its conveyor's start (or the input machine's) to its conveyor's end (or the output machine's). Station 1 leaves on its outfeed belt and station 2 on its output belt, so the gap to the next station is measured from there (`runExtent`, used by `Line` and the timing table). Printer line unchanged.
+- **Station 2 data**, on the reference geometry (station frame = the reference definition frame: can line at z +0.75, case line at z −0.75): slab and fence, can belt (0.52 m) with infeed tunnel, lane divider and end stop, case infeed belt with erector tunnel and swing stop, output belt with closer, inline taper and output tunnel, packing gantry, three photo-eyes, HMI (conveyors, robot, gripper, cans in case, case-fill bar), beacon on the gantry.
+- Line conventions: belt speed 0.6 m/s, ramp 0.5 s, hold re-check 0.1 s (the reference values); station 1's belts carry `batch`.
+- **Edge S1 → S2** with a plain belt transfer for now, so the file is one line and compiles (`generated/lubricant-line/`: 3 files, takt 31.55 s).
+- Dev: `#/twin?demo=line&line=<name>&station=<id>` plays one station of a line stand-alone.
+- Tests:
+  - `tests/spec/lubricant-station2.test.js` (6): valid, 31.55 s; **step for step against the recording, 6 cases at 189.10 s**; accumulation (positions, stop, photo-eyes); the pick (every can in its gripper by the handle, pitch 0.26 → 0.20, cans at their slots, gantry back); closing, taping and the case leaving as the unit with 4 cans
+  - `tests/ops/packing-ops.test.js` (14): batch layout and members, port offset, run extent, belt helpers, accumulate / groupPickPlace / closeCase / swapUnit durations and errors, carton routines, transfer `passes`
+  - `tests/spec/lubricant-line.test.js`: station 1 is compared **stand-alone** (the recording is stand-alone; in the line it now holds for the slower station 2); the compiled = IR check covers the whole line (both stations, 150 s)
+  - `tests/line/line.test.js`: the dev-line check allows an indexing first station its machine cycles before the second station gets a unit
+
+**Differences vs the reference (deliberate)**
+1. **Gantry frame position:** our gantry is centred on its grippers, so its frame stands at x −0.054 (over the can handles); the reference frame stood at x 0 with the grippers offset.
+2. **Zero-time steps:** ours has three per case that the recording doesn't ("Case erected", "Packed case flows on", "Process complete"); the comparison leaves out zero-time steps.
+3. **Sensor span of the case:** measured once from its body with the flaps open (the reference used the case length).
+
+**My mistakes this part (fixed before the results above):**
+- the batch spec's member count overwrote the member list (`...spec`)
+- the planned input place and `spawn`'s recorded place dropped their offsets (dry plan 33.32 s, then 33.22 s, instead of 31.55 s)
+- swapping the unit at plan time hid the batch members from the pick, which plays before the swap
+- the taping head measured the case with hidden meshes (the unlaid 1 m tape strip), so taping started early; now only visible meshes count
+- several test sample times fell inside a step instead of after it
+- a shell slip of mine (`cat >` waiting on input) hung one command; nothing was written by it
+
+**Results**
+- `npm test`: 41 files, **1487 tests passed** (run alone; one earlier run alongside a SwiftShader screenshot hit test timeouts, and the whole-line compiled check now has a 30 s timeout)
+- `npm run compile`: `generated/lubricant-line/` 3 files (takt 31.55 s); `generated/printer-line/` unchanged
+- `npm run schema`: `spec/factory.schema.json` regenerated
+- Screenshots (`#/twin?demo=line&line=lubricant-line&station=packing`):
+  - `screenshots/s2-transfer.png` (t = 10.6 s): four cans in the grippers on their way to the open case
+  - `screenshots/s2-closing.png` (t = 22.3 s): end flaps pressed under the plate, side flaps still open, tuckers parked
+  - `screenshots/s2-taping.png` (t = 26.9 s): the closed case under the taping head, tape laid from the leading edge
+  - `screenshots/lubricant-s1-s2.png` (whole line, t = 75 s): runs, station 2 packing S1's batches. **Not right yet:** station 2 stands on station 1's centre line, so the plain transfer meets it between its two lines, and the batch slides sideways into the lanes. That is part 2.
+
+**Next:** step 9b part 2: the **can transfer** and the S1 → S2 geometry:
+- the row former as data (single-file guides, two side pushers forming the lanes, lane divider), its steps compared with the recorded `canTransfer` steps (4.83 / 0.7 / 0.45 / 1.83 / 0.7 / 0.45 / 0.2 / 4.18 / 0.5 s)
+- layout aligning ports across the flow (station 2 shifted so its can line meets station 1's centre line, as in the reference factory)
+- note: the reference's first single-file transfer takes 50.5 s (a one-off in its recording, probably a stale world matrix on the first hand-over); I'll check that before deciding whether to match it
+
+### Step 9b (part 2): the can transfer and the line from station 1 to station 2 (approved)
+
+Part 1 approved by the owner (2026-11-23: "continue").
+
+**Result first:** station 1 → can transfer → station 2 now plays as the recorded reference factory:
+- **the transfer** (row former), all 27 batches step for step: 243 steps, start times within 0.05 s
+- **stations 1 and 2 in the line**, step for step too (waits and holds left out: the reference names them differently): over 300 steps each, start times within 0.05 s
+- **every case of the 27-case run packed when the reference packed it** (within 0.05 s; the first at 95.06 s)
+- the layout is the reference factory's: the transfer belt centre 10.45 m after station 1, station 2 16.2 m after it and 0.75 m towards −Z, so its can infeed is on station 1's centre line
+
+**The reference recording, corrected first.** Its first can transfer took 50.5 s, the later ones 4.83 s. I checked why: the first hand-over moved the cans 2.6 m + 27.41 m, and 27.41 m is exactly station 1's world offset. The headless recording never rendered, so the factory's world matrices were stale on the first hand-over (in a browser every frame renders and updates them). The script now updates them once before the start and after every update, as rendering does. Re-recorded:
+- whole factory: **964.82 s** (was 1010.52 s); first case packed at 95.06 s (was 140.76 s)
+- every single-file move 4.83 s; stations 1 and 2 stand-alone unchanged (199.76 s, 189.10 s)
+- the reference repo untouched; only the recording script changed
+
+**Changed**
+- **Row former as data**: station `canTransfer` (role `transfer`), in its own frame (the reference station-1 frame moved to the transfer belt's centre):
+  - transfer belt (3.0 m), single-file guide rails (1.6 m), side pushers A (on +Z) and B (turned, on −Z), lane divider
+  - intake: single-file transfer to the row former; process: pusher A forms lane 1, index the second pair, pusher B forms lane 2, two lanes formed; output: feed station 2's infeed, belt stopping, each step as the reference
+  - stand-alone it feeds itself batches of 4 over a short stand-alone infeed belt (hidden in the line)
+- **Direct edges** (`transport.kind: 'direct'`, runtime and factory schema): the two ports meet and the unit is handed over where it stands (no transfer conveyor). The line refuses a direct edge whose ports don't meet.
+- **Layout**: a direct edge stands the next station so the ports meet; across the flow every station is shifted so the ports an edge joins are in line (station 2's can line on station 1's centre line); transfer conveyors run at the ports' common z. The printer line is unchanged (all its ports at z 0).
+- **Ops:**
+  - `push` (named): a side pusher pushes items across a conveyor with its face (they ride the face once it reaches them), then retracts. With `rest`, the plan knows where the pushed members stand, and playing sets them exactly there at the end (within 1 cm: the can labels stand 1.5 mm proud of the body).
+  - `stopConveyors` (basic): running belts decelerate to a stop.
+  - `accumulate`: `stopping: false` (a stopConveyors op follows, so the station can hand over as soon as the items rest) and `unitTo` (where the unit counts as standing then).
+  - `transfer` now records the offset of the place it ends at (an index by a fixed distance needed it).
+- **Stations:**
+  - `prepare`: ops played at the start of each cycle once a unit is waiting, before it is taken in (station 2's "Line empty", as the reference takes the cans only after it); input ports offer `available()` to look without taking
+  - `role: 'transfer'`: a station that carries units between two others; a line updates it after the other stations, with its transfer conveyors (as both reference lines update their transfers after the stations)
+  - a batch taken in is re-centred on the input place and records where its members really stand (`rebase`), so the plan starts from there (the row former's 2 × 2 at pitch 0.4, not the original single file)
+  - port `connected`: machines that only exist when the port is connected (an open-ended hood where stand-alone a closed tunnel stands); hidden stand-alone
+- **Indexing:** `startWhen: 'downstreamEmpty'`: a machine cycle only starts while the next station holds no unit (the reference factory holds station 1 while the transfer has a batch). The line offers it on output ports.
+- **Batches:** `rowsFrom: 'front'` (member numbers start in the front row): the row former pushes the leading pair (members 3, 4) to the rear lane, so station 2's batch is numbered that way.
+- **Components:** `conveyorTunnel` `open: 'both'` (a hood: no end wall, no lining, trim and a port at each end); `sidePusher` anchor `face`.
+- **Data:**
+  - station 1: hands over where the discharge leaves the batch (output port offset −0.9 m), closed outfeed tunnel stand-alone / hood in the line, `startWhen: downstreamEmpty`
+  - station 2: batches of 2 × 2 at pitch 0.4 (as the transfer leaves them, inside the hood; stand-alone timing unchanged), input place 1.3 m into the belt, closed tunnel stand-alone / hood in the line, "Line empty" as its prepare op, members and grippers in the row former's order
+  - edges S1 → transfer → S2 both direct
+- **Bug fixed in `Line.reset`:** it reset the stations before zeroing the released count, so station 1's preloaded batch was not counted and the line let 28 batches in instead of 27 (the reference's 108 cans).
+- Tests:
+  - `tests/spec/lubricant-transfer.test.js` (5): the plan (13.85 s transfer cycle, no transfer conveyors) and the reference layout; stand-alone transfer = the recorded cycle; pushed lanes (leading pair rear, trailing pair front, pitch kept, pushers back); hoods, hidden stand-alone parts and meeting ports in the line; **27 batches: the transfer, station 1 and station 2 step for step and every case on time**
+  - `tests/spec/lubricant-reference.test.js`: the new total (964.82 s) and the transfer cycle in the recording (27 moves, all 4.83 s)
+  - `tests/ops/packing-ops.test.js` (+7): rows from the front, rebase, direct edges and ports in line, the hood, connected-only machines, push (durations, planned rest, errors), pushed members following their batch, accumulate without its stop + stopConveyors
+  - `tests/spec/lubricant-station2.test.js`: the new member order
+
+**Differences vs the reference (deliberate)**
+1. **Hold labels**: ours say "Waiting for T1" / "Holding · downstream busy" where the reference says "Waiting for jerry cans from Station 1" / "Holding · transfer to Station 2 busy"; the comparisons leave waits out.
+2. **Station 2 stand-alone spawn**: the cans now appear 0.4 m apart in the tunnel (the reference stand-alone: 0.6 m). Hidden in the tunnel, and the case's longer way sets the time, so the recording still matches.
+3. **Belts of the neighbour stations**: the reference scrolls station 1's outfeed belt during the single-file move when station 1 is idle; ours scrolls only the transfer's own belt.
+
+**My mistakes this part (fixed before the results above):**
+- I first wrote 964.8 s from the rounded console line; the file says 964.82 s
+- I wrote the reference-test update and forgot to apply it until the suite caught it
+- the push first checked its rest to 1 mm and stopped on the label thickness
+- one lane test expected the two rows side by side; before the feed the rear pair is one index (0.8 m) ahead, as in the reference
+- the station-step comparison was empty at first (station 1 finishes long before the run ends); it now asserts how many steps it compared
+- several test sample times fell inside steps
+
+**Results**
+- `npm test`: 42 files, **1500 tests passed**
+- `npm run compile`: `generated/lubricant-line/` 4 files (filling, canTransfer, packing, line; takt 31.55 s); `generated/printer-line/` unchanged
+- `npm run reference:timing:lubricant` re-recorded; `npm run schema` regenerated
+- Screenshots:
+  - `screenshots/t1-pushing.png` (t = 55.5 s): pusher A shifting the leading pair across, the trailing pair in the single-file guides
+  - `screenshots/t1-feeding.png` (t = 62.5 s): the formed lanes fed into station 2's open hood
+  - `screenshots/lubricant-s1-s2.png` (t = 100 s): the whole line, station 1's centre line through the transfer into station 2's can line, station 2 shifted back
+
+**Next:** step 9c: station 3 (case source with rear port, conveyor, the ABB IRB 6760 picking the cases onto the pallet stack), the outbound (worker takes the pallet to the wrapper, wrap) and the case transfer S2 → S3.
+
+### Step 9c (part 1): station 3 palletizing with the ABB, and the case transfer (approved)
+
+Step 9b part 2 approved by the owner (2026-11-23: "next"). 9c is split like 9a and 9b: **part 1** = the case transfer S2 → S3 and station 3 stacking the 27 cases (this step); **part 2** = the outbound (the worker takes the full pallet to the wrapper, the wrap) and the whole line to its end at 964.82 s.
+
+**Result first:** station 3 is in `lubricant-line.factory.json`, and in the whole line:
+- **all 27 cases are set on the pallet when the reference set them** (within 0.1 s, see below)
+- **the robot's steps match the recording step for step**: 323 steps (12 per case, the reference states and durations), start times within 0.1 s
+- the layout is the reference factory's: station 3 stands 11.21 m after station 2 and 0.75 m towards −Z; the case transfer is 3.21 m (5.85 s) from station 2's exit to the buffer in the source cabinet
+- every case lands exactly on its spot of the 3 × 3 × 3 pattern, square, on the 2.06 × 1.46 pallet
+
+**Why 0.1 s, not 0.05 s as for the other stations:** the reference station 3 runs its own loop, and each step there ends on a whole frame. Its 0.45 s grip is recorded as 0.46 s, its conveyor run ends on the next frame, and so on. Ours keeps the exact times. The difference stays bounded (no drift: over the 27 cases it wanders between −0.04 and +0.06 s, measured), so I compare station 3 to 0.1 s. Stations 1, 2 and the transfer stay at 0.05 s.
+
+**Changed**
+- **Op `armPalletize`** (named): an articulated robot with a vacuum tool takes an item off a conveyor by its top and sets it on the next spot of a station stack, then returns home. Port of the reference station-3 cycle:
+  - steps: approach 1.8 s, lower 1.0, vacuum on 0.45, lift 1.1, move to the stack 2.0, lower 0.9, vacuum off 0.45, settle 0.16, retract 0.8, home 2.2 (reference)
+  - heights from the reference: hover 0.3 m over the top, lift at least 0.52 m and over the stack, carried case 0.12 m over its spot, tool 1 mm over the top at contact
+  - **swings turn about the robot's base** (radius, angle and height eased together); lowering and lifting are straight
+  - checks when played: the tool within 3.5 cm of the top at the grip (reference tolerance); the case is then set exactly on its spot
+- **A unit left on a stack is done there** (StationCycle and the dry plan): no output phase, it counts as completed, and the stack owns it.
+- **Station field `unit`**: the station's own unit type when it isn't the line product (cartons at station 3), used for the stand-alone feed and the dry plan.
+- **Carton:** stage `closed` (flaps folded, seam taped) and ref `top` (the middle of the closed top, on the tape).
+- `trapezoidTravel` with no ramp is a constant-speed move. The reference station-3 belt runs at 0.7 m/s with no ramp; the formula gave NaN at ramp 0.
+- `beltConveyor`: width up to 1.1 m (the station-3 belt is 1.05 m).
+- **Station 3 data**, reference geometry (station frame = the reference station-3 frame):
+  - belt 4.8 × 1.05 m at 0.82 m; case source cabinet (1.55 × 1.45 × 1.85, rear infeed port) at its input
+  - ABB IRB 6760 placed as the reference places it (bounding box centred at the base point, facing the conveyor), so axis 1 is at (0.901, 0, 1.408)
+  - block pallet 2.06 × 1.46 at (0.14, 2.84); stack 3 columns × 3 rows × 3 layers, 2 cm apart; slab
+  - intake: case into the cell from the buffer (1.83 s), conveyed to the pick point at 0.7 m/s (3.70 s), 0.25 s at the pick point; process: `armPalletize`, then "ready for the next case" (0.2 s), or, when the pallet fills, a placeholder dispatch that part 2 replaces with the outbound
+- **Case transfer S2 → S3**: a conveyor edge (0.52 m belt) from station 2's exit inside its output tunnel to the buffer in the cabinet, at station 2's belt height; the case steps down to station 3's belt inside the cabinet. Line transfer length 1.62 m (station 2's output belt end to the cabinet's rear trim), which gives the reference 11.21 m.
+- Tests:
+  - `tests/spec/lubricant-station3.test.js` (3): valid, the layout and the transfer, the plan; stand-alone, the tool on the case top within 3 mm at the grip, the case carried and set exactly on the first spot, the robot home; **in the line, 27 cases on time and the robot step for step**
+  - `tests/ops/packing-ops.test.js` (+5): constant-speed move, `armPalletize` (10.86 s, a stacked unit has no output phase, errors), the carton's closed stage and top
+  - the whole-line tests (`lubricant-line`, `lubricant-transfer`, the dev-line check) load station 3's robot model first; the transfer test now expects the one transfer conveyor S2 → S3
+
+**Differences vs the reference (deliberate)**
+1. **Robot home:** at its rest pose the reference tool points 30° below horizontal. Our robot interface always holds the tool straight down, so home is a nearby tool-down point (2.2 m out, 2.0 m up). Same step times; the arm's first and last poses look slightly different.
+2. **Robot paths:** the reference interpolates joint poses solved along its paths; ours swings the tool about the base and moves straight up and down, solved by the same IK each frame. The end points are the same; the path in between differs a little.
+3. **Tool:** ours is the rectangular vacuum pad of step 7d; the reference used a round suction cup.
+4. **The case rests on the belt** (0.82 m). The reference held it 12 mm above the belt surface.
+5. **Robot steps' frame rounding** (above): ours keep exact times.
+6. **The case transfer** is one 3.21 m move to the buffer. The reference has three queue places; with station 3 faster than station 2, only the first is ever used, so the timing is the same.
+
+**My mistakes this part (fixed before the results above):**
+- station 3 needed an explicit empty output phase (its units end on the stack); the default output refused two machines
+- the transfer length first used the cabinet's back face; its rear-port trim stands 4 cm proud (3.25 m instead of 3.21 m)
+- several test sample times were inside steps (the release, the carry), one assertion assumed a held item is re-parented (ours follows the tool anchor), and the step comparison first stopped before the last case's last steps
+
+**Results**
+- `npm test`: 43 files, **1507 tests passed**
+- `npm run compile`: `generated/lubricant-line/` 5 files (takt 31.55 s); `generated/printer-line/` unchanged
+- `npm run schema` regenerated
+- `screenshots/s3-palletizing.png` (t = 426.6 s, whole line): the robot carrying the 11th case to the stack, 10 taped cases on the pallet, the case transfer into the source cabinet
+
+**Next:** step 9c part 2: the outbound after the 27th case:
+- the worker with the pallet jack drives to the pallet, lifts it with its stack, carries it to the stretch wrapper and sets it on the deck, then withdraws
+- the 12 s wrap
+- all with the reference step times (approach 2.4, insert 0.72, lift 1.0, transport 4.2, place 1.8, lower 0.9, release 0.5, withdraw 2.4, stow 0.6, wrap 12)
+- the whole line finishing at the recorded 964.82 s
+
+### Step 9c (part 2): station 3's outbound, the wrap, and the whole line to its end (done)
+
+Part 1 approved by the owner (2026-11-23: "next").
+
+**Result first:** the lubricant line now plays from the first empty can to a wrapped pallet, as the reference factory:
+- after the 27th case, **the outbound matches the recording step for step**:
+  - ready 0.35 s, drive under the pallet 2.4 s, settle 0.72 s, lift 1.0 s, take it to the wrapper 4.2 s
+  - roll in 1.8 s, lower onto the deck 0.9 s, release 0.5 s, back out 2.4 s, forks down 0.6 s, wrap 12 s
+  - start times within 0.1 s (station 3's frame rounding, as in part 1)
+- **the wrap ends at 964.70 s** (reference 964.78 s); **the line reports finished at 964.72 s** (reference 964.82 s)
+- at the end: the pallet with all 27 cases on the wrapper deck (exactly on its anchor), wrapped, the worker backed out with its forks down
+
+**Changed**
+- **Op `haulStack`** (named): a pallet truck takes a station stack (its pallet with everything on it) to a machine anchor (the wrapper deck), sets it down there and backs out. Port of the reference outbound, ten fixed-time steps (14.87 s). Roles: the truck's `x` travel, `forks`, `stride` (the legs walk one cycle per 1.2 m), anchor `cargo`. Positions and fork heights are station data (from the reference layout), checked against the truck's ranges. The pallet rests exactly on the destination anchor and moves with it afterwards, so it turns with the wrapper deck.
+- **Stacks travel:** the stack API's `gather` puts everything on a stack onto its machine (the pallet), so the cases ride with it.
+- **Reset fixed:**
+  - units left on a stack are now freed with it. Before, a reset emptied the stack's list but left the cases in the scene; this didn't show until station 3 left units on a stack.
+  - machines an op carried away (the pallet) go back to where they stood
+- **`decide` `planAs`**: names the branch a dry plan takes (cycle time, takt) when the fact isn't known. Without it the longest branch counts, as before. Station 3 plans the usual "next case" branch: the outbound comes once per 27 cases and would otherwise have made station 3 the bottleneck (43.5 s instead of 16.85 s). The takt stays 31.55 s (station 2).
+- **Station 3 data:**
+  - the worker with its pallet truck parked in a floor bay (reference: 2.4 m before the pallet centre)
+  - the stretch wrapper 4.2 m beyond the pallet (deck 0.44 m)
+  - the slab enlarged to hold them
+  - when the pallet fills: `haulStack` to the wrapper deck, then the 12 s wrap
+- Tests:
+  - `tests/spec/lubricant-station3.test.js` (4): the line test now runs to the end. The outbound is checked step for step, plus the wrap end, the line's finish, and the pallet with 27 cases on the deck, wrapped, worker out. New: a reset puts the pallet back and frees its cases.
+  - `tests/ops/packing-ops.test.js` (+2): `haulStack` (14.87 s, range checks, unknown anchor), `decide` `planAs`
+
+**Differences vs the reference (deliberate)**
+1. **The worker is always there**, parked in its bay; the reference creates it when the outbound starts. Same moves and times.
+2. **Backing out:** the truck stops when its fork tips are 0.6 m clear of the pallet (the reference rule), using our truck's fork length. The step time is the reference's 2.4 s either way.
+3. **The wrap** is the procedural wrapper of step 7b (owner's decision); the pallet turns with its deck.
+4. The line counts the 27th case done after the wrap, so its HMI says "done 26" during the outbound.
+
+**My mistakes this part (fixed before the results above):**
+- the dry plan first took the outbound branch for station 3's cycle time (43.5 s), which would have made it the bottleneck; hence `planAs`
+
+**Results**
+- `npm test`: 43 files, **1510 tests passed**
+- `npm run compile`: `generated/lubricant-line/` 5 files, takt 31.55 s; `generated/printer-line/` unchanged
+- `npm run schema` regenerated
+- Screenshots (whole line):
+  - `screenshots/s3-outbound.png` (t = 944.2 s): the worker carrying the full pallet (27 cases) to the wrapper
+  - `screenshots/s3-wrapping.png` (t = 959 s): the pallet turning on the wrapper deck, film part way up, the worker backed out
+
+**Phase 5 status:** the lubricant line is complete as data (stations 1–3, the can transfer, the case transfer), and its timing is checked against the reference station by station:
+- stations 1 and 2 and the transfer: step for step within 0.05 s
+- station 3: step for step within 0.1 s (its frame rounding)
+- the line's end: within 0.1 s
+
+**Next:** step 9d:
+- screenshot comparison with the reference lubricant factory rendered in our viewer, as Phase 4 step 8 did for the printer line (`npm run visual`, golden images)
+- a look at the compiled files
+- the Phase 5 wrap-up

@@ -2,7 +2,8 @@
 // "factory", or spec/examples/<name>.factory.json) through compiler/expand.js and plays it with the
 // generic Line (layout from lib/line/layout.js, stations chained through typed ports). This plays
 // the IR directly; the compiled files of a line play at #/twin?line=<folder> (compiledLines.js).
-// Open with #/twin?demo=line (line "printer"); ?line=<name>, ?t=<s> frozen, ?speed=<n>, ?cam=x,y,z,tx,ty,tz.
+// Open with #/twin?demo=line (line "printer"); ?line=<name>, ?station=<id> (that station alone, fed
+// stand-alone), ?t=<s> frozen, ?speed=<n>, ?cam=x,y,z,tx,ty,tz.
 // Nothing here knows a component or product by name (rule 6): it is all data.
 import { registry } from '../../lib/components/index.js';
 import '../../lib/products/index.js';
@@ -25,11 +26,16 @@ export const lineNames = () => Object.keys(LINES);
 /** Loads the model assets any component may need (call before createLineDemo). */
 export const preloadLineAssets = () => preloadComponentAssets(registry);
 
-export function createLineDemo({ line: name = 'printer', speed = 1, onStatus } = {}) {
+export function createLineDemo({ line: name = 'printer', station = null, speed = 1, onStatus } = {}) {
   const data = LINES[name];
   if (!data) throw new Error(`Unknown dev line "${name}" (lines: ${lineNames().join(', ')})`);
   const materials = createMaterials();
   const expanded = expandFactory(registry, data.factory);
-  const line = new Line({ registry, line: expanded.line, ctx: { ...expanded.ctx, materials }, conventions: expanded.conventions });
+  let lineData = expanded.line;
+  if (station) {
+    if (!lineData.stations.some((s) => s.id === station)) throw new Error(`Line "${name}" has no station "${station}"`);
+    lineData = { ...lineData, stations: lineData.stations.filter((s) => s.id === station), edges: [] };
+  }
+  const line = new Line({ registry, line: lineData, ctx: { ...expanded.ctx, materials }, conventions: expanded.conventions });
   return { ...playLine(line, { materials, name, speed, onStatus }), camera: data.camera ?? null };
 }

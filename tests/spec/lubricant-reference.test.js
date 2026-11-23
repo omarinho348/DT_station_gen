@@ -9,10 +9,30 @@ describe('reference lubricant timing (recorded)', () => {
   it('has station 1 and 2 stand-alone runs and the whole factory to a 27-case pallet', () => {
     expect(ref.stations.s1.finished).toBeCloseTo(199.76, 6);
     expect(ref.stations.s2.finished).toBeCloseTo(189.1, 6);
-    expect(ref.line.finished).toBeCloseTo(1010.52, 6);
+    // 964.82 s since the recording keeps world matrices up to date as a browser does (it was
+    // 1010.52 s with the first can hand-over reading a stale frame: 50.5 s instead of 4.83 s).
+    expect(ref.line.finished).toBeCloseTo(964.82, 6);
     expect(ref.line.status.palletBoxes).toBe(27);
     expect(ref.line.events.filter((e) => /packed/.test(e.event))).toHaveLength(27);
     for (const k of ['s1', 's2', 's3', 'canTransfer']) expect(ref.line.steps[k].length).toBeGreaterThan(50);
+  });
+
+  it('the can transfer forms two lanes the same way every time: every single-file move is 4.83 s', () => {
+    const moves = ref.line.steps.canTransfer.filter((s) => s.label === 'Single-file transfer to row former');
+    expect(moves).toHaveLength(27);
+    expect(moves.every((s) => Math.abs(s.duration - 4.833333) < 1e-6)).toBe(true);
+    const first = ref.line.steps.canTransfer.findIndex((s) => s.label === 'Single-file transfer to row former');
+    expect(ref.line.steps.canTransfer.slice(first, first + 9).map((s) => [s.label, s.duration])).toEqual([
+      ['Single-file transfer to row former', 4.833333],
+      ['Pusher A forming lane 1', 0.7],
+      ['Pusher retracting', 0.45],
+      ['Indexing second pair', 1.833333],
+      ['Pusher B forming lane 2', 0.7],
+      ['Pusher retracting', 0.45],
+      ['Two lanes formed', 0.2],
+      ['Feeding Station 2 infeed', 4.183333],
+      ['Transfer belt stopping', 0.5],
+    ]);
   });
 
   it('station 1 is an indexing line: each machine cycle indexes, then outputs, fills and caps the batches present', () => {

@@ -6,7 +6,13 @@
     "title": "Lubricant line",
     "runSize": 27,
     "conventions": {
-      "beltHeight": 0.86
+      "beltHeight": 0.86,
+      "conveyor": {
+        "speed": 0.6,
+        "ramp": 0.5
+      },
+      "holdSeconds": 0.1,
+      "transferLength": 1.62
     }
   },
   "product": {
@@ -25,7 +31,18 @@
       "inputStage": "empty",
       "ports": {
         "output": {
-          "machine": "outfeed"
+          "machine": "outfeed",
+          "offset": [
+            -0.9,
+            0,
+            0
+          ],
+          "standalone": [
+            "outfeedTunnel"
+          ],
+          "connected": [
+            "outfeedHood"
+          ]
         }
       },
       "equipment": [
@@ -61,7 +78,8 @@
           "params": {
             "length": 8.4,
             "beltWidth": 0.34,
-            "guideGap": 0.2
+            "guideGap": 0.2,
+            "carries": "batch"
           },
           "position": [
             -0.1,
@@ -76,7 +94,8 @@
             "length": 4.74,
             "beltWidth": 0.34,
             "guideGap": 0.2,
-            "drive": false
+            "drive": false,
+            "carries": "batch"
           },
           "position": [
             6.53,
@@ -105,6 +124,20 @@
             "length": 1.8,
             "beltWidth": 0.34,
             "open": "-X"
+          },
+          "position": [
+            8.05,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "outfeedHood",
+          "type": "conveyorTunnel",
+          "params": {
+            "length": 1.8,
+            "beltWidth": 0.34,
+            "open": "both"
           },
           "position": [
             8.05,
@@ -369,11 +402,1277 @@
               }
             ]
           }
-        ]
+        ],
+        "startWhen": "downstreamEmpty"
       }
+    },
+    {
+      "id": "canTransfer",
+      "code": "T1",
+      "title": "Can Transfer",
+      "conveyor": "belt",
+      "workState": "TRANSFER",
+      "role": "transfer",
+      "inputStage": "capped",
+      "batch": {
+        "members": 4,
+        "pitch": 0.4
+      },
+      "feed": {
+        "fromLift": false
+      },
+      "ports": {
+        "input": {
+          "machine": "belt",
+          "port": "input",
+          "offset": [
+            -0.95,
+            0,
+            0
+          ],
+          "standalone": [
+            "standaloneInfeed"
+          ]
+        },
+        "output": {
+          "machine": "belt",
+          "port": "output",
+          "offset": [
+            1.35,
+            0,
+            0
+          ]
+        }
+      },
+      "equipment": [
+        {
+          "id": "belt",
+          "type": "beltConveyor",
+          "params": {
+            "length": 3,
+            "beltWidth": 0.52,
+            "guideGap": 0.46,
+            "drive": false,
+            "carries": "batch"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "standaloneInfeed",
+          "type": "beltConveyor",
+          "params": {
+            "length": 1.3,
+            "beltWidth": 0.34,
+            "guideGap": 0.2,
+            "drive": false,
+            "carries": "batch"
+          },
+          "position": [
+            -2.15,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "singleFile",
+          "type": "guideRails",
+          "params": {
+            "length": 1.6,
+            "span": 0.58,
+            "gap": 0.2
+          },
+          "position": [
+            -0.7,
+            0.87,
+            0
+          ]
+        },
+        {
+          "id": "pusherA",
+          "type": "sidePusher",
+          "params": {
+            "plateLength": 0.68
+          },
+          "position": [
+            0.55,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "pusherB",
+          "type": "sidePusher",
+          "params": {
+            "plateLength": 0.68
+          },
+          "position": [
+            0.55,
+            0,
+            0
+          ],
+          "rotationY": 3.141592653589793
+        },
+        {
+          "id": "divider",
+          "type": "laneDivider",
+          "params": {
+            "length": 0.6,
+            "span": 0.58
+          },
+          "position": [
+            1.25,
+            0.87,
+            0
+          ]
+        }
+      ],
+      "intake": [
+        {
+          "op": "transfer",
+          "conveyor": "belt",
+          "to": {
+            "machine": "belt",
+            "port": "input",
+            "offset": [
+              1.65,
+              0,
+              0
+            ]
+          },
+          "state": "TRANSFER",
+          "label": "Single-file transfer to row former"
+        }
+      ],
+      "process": [
+        {
+          "op": "push",
+          "machine": "pusherA",
+          "items": [
+            "member4",
+            "member3"
+          ],
+          "to": -0.035,
+          "rest": -0.13,
+          "state": "TRANSFER",
+          "label": "Pusher A forming lane 1"
+        },
+        {
+          "op": "transfer",
+          "conveyor": "belt",
+          "to": {
+            "machine": "belt",
+            "port": "input",
+            "offset": [
+              2.45,
+              0,
+              0
+            ]
+          },
+          "state": "TRANSFER",
+          "label": "Indexing second pair"
+        },
+        {
+          "op": "push",
+          "machine": "pusherB",
+          "items": [
+            "member2",
+            "member1"
+          ],
+          "to": -0.035,
+          "rest": -0.13,
+          "state": "TRANSFER",
+          "label": "Pusher B forming lane 2"
+        },
+        {
+          "op": "wait",
+          "seconds": 0.2,
+          "state": "TRANSFER",
+          "label": "Two lanes formed"
+        }
+      ],
+      "output": [
+        {
+          "op": "accumulate",
+          "state": "TRANSFER",
+          "label": "Feeding Station 2 infeed",
+          "items": [
+            {
+              "item": "member4",
+              "conveyor": "belt",
+              "to": {
+                "machine": "belt",
+                "port": "output",
+                "offset": [
+                  1.55,
+                  0,
+                  -0.13
+                ]
+              }
+            },
+            {
+              "item": "member3",
+              "conveyor": "belt",
+              "to": {
+                "machine": "belt",
+                "port": "output",
+                "offset": [
+                  1.15,
+                  0,
+                  -0.13
+                ]
+              }
+            },
+            {
+              "item": "member2",
+              "conveyor": "belt",
+              "to": {
+                "machine": "belt",
+                "port": "output",
+                "offset": [
+                  1.55,
+                  0,
+                  0.13
+                ]
+              }
+            },
+            {
+              "item": "member1",
+              "conveyor": "belt",
+              "to": {
+                "machine": "belt",
+                "port": "output",
+                "offset": [
+                  1.15,
+                  0,
+                  0.13
+                ]
+              }
+            }
+          ],
+          "stopping": false,
+          "unitTo": {
+            "machine": "belt",
+            "port": "output",
+            "offset": [
+              1.35,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "op": "stopConveyors",
+          "conveyors": [
+            "belt"
+          ],
+          "state": "TRANSFER",
+          "label": "Transfer belt stopping"
+        }
+      ]
+    },
+    {
+      "id": "packing",
+      "code": "S2",
+      "title": "Case Packing",
+      "conveyor": "canBelt",
+      "workState": "BOX_COMPLETED",
+      "inputStage": "capped",
+      "batch": {
+        "members": 4,
+        "pitch": 0.4,
+        "rows": 2,
+        "rowPitch": 0.26,
+        "rowsFrom": "front"
+      },
+      "feed": {
+        "fromLift": false
+      },
+      "ports": {
+        "input": {
+          "machine": "canBelt",
+          "port": "input",
+          "offset": [
+            1.3,
+            0,
+            0
+          ],
+          "standalone": [
+            "canTunnel"
+          ],
+          "connected": [
+            "canHood"
+          ]
+        },
+        "output": {
+          "machine": "boxOutput",
+          "port": "output",
+          "offset": [
+            -0.8,
+            0,
+            0
+          ]
+        }
+      },
+      "equipment": [
+        {
+          "id": "slab",
+          "type": "floorSlab",
+          "params": {
+            "length": 10.9,
+            "depth": 4.4,
+            "walkway": 0.8295
+          },
+          "position": [
+            0.55,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "fence",
+          "type": "guardFence",
+          "params": {
+            "length": 10.3
+          },
+          "position": [
+            0.55,
+            0,
+            -2.15
+          ]
+        },
+        {
+          "id": "canBelt",
+          "type": "beltConveyor",
+          "params": {
+            "length": 4.75,
+            "beltWidth": 0.52,
+            "guideGap": 0.46,
+            "carries": "batch"
+          },
+          "position": [
+            -1.825,
+            0,
+            0.75
+          ]
+        },
+        {
+          "id": "canTunnel",
+          "type": "conveyorTunnel",
+          "params": {
+            "length": 1.85,
+            "beltWidth": 0.52,
+            "open": "+X"
+          },
+          "position": [
+            -3.325,
+            0,
+            0.75
+          ]
+        },
+        {
+          "id": "canHood",
+          "type": "conveyorTunnel",
+          "params": {
+            "length": 1.85,
+            "beltWidth": 0.52,
+            "open": "both"
+          },
+          "position": [
+            -3.325,
+            0,
+            0.75
+          ]
+        },
+        {
+          "id": "divider",
+          "type": "laneDivider",
+          "params": {
+            "length": 2.66,
+            "span": 0.58
+          },
+          "position": [
+            -1.05,
+            0.87,
+            0.75
+          ]
+        },
+        {
+          "id": "canStop",
+          "type": "beltEndStop",
+          "params": {
+            "span": 0.58
+          },
+          "position": [
+            0.28,
+            0.87,
+            0.75
+          ]
+        },
+        {
+          "id": "boxInfeed",
+          "type": "beltConveyor",
+          "params": {
+            "length": 5.2,
+            "beltWidth": 0.52,
+            "guideGap": 0.43,
+            "carries": "case"
+          },
+          "position": [
+            -1.7,
+            0,
+            -0.75
+          ]
+        },
+        {
+          "id": "erector",
+          "type": "conveyorTunnel",
+          "params": {
+            "length": 1.95,
+            "beltWidth": 0.52,
+            "clearHeight": 0.7,
+            "open": "+X"
+          },
+          "position": [
+            -3.375,
+            0,
+            -0.75
+          ]
+        },
+        {
+          "id": "boxStop",
+          "type": "swingStop",
+          "params": {
+            "reach": 0.32
+          },
+          "position": [
+            0.318,
+            0.87,
+            -1.04
+          ]
+        },
+        {
+          "id": "boxOutput",
+          "type": "beltConveyor",
+          "params": {
+            "length": 4.64,
+            "beltWidth": 0.52,
+            "guideGap": 0.43,
+            "drive": false,
+            "carries": "case"
+          },
+          "position": [
+            3.28,
+            0,
+            -0.75
+          ]
+        },
+        {
+          "id": "outTunnel",
+          "type": "conveyorTunnel",
+          "params": {
+            "length": 1.7,
+            "beltWidth": 0.52,
+            "open": "-X"
+          },
+          "position": [
+            4.8,
+            0,
+            -0.75
+          ]
+        },
+        {
+          "id": "closer",
+          "type": "caseCloser",
+          "params": {
+            "caseLength": 0.62,
+            "caseWidth": 0.42,
+            "caseHeight": 0.42,
+            "flap": 0.005
+          },
+          "position": [
+            1.35,
+            0,
+            -0.75
+          ]
+        },
+        {
+          "id": "taper",
+          "type": "inlineTaper",
+          "params": {
+            "caseHeight": 0.42,
+            "beltWidth": 0.52
+          },
+          "position": [
+            2.3,
+            0,
+            -0.75
+          ]
+        },
+        {
+          "id": "gantry",
+          "type": "packingGantry",
+          "params": {},
+          "position": [
+            -0.054,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "eyeCans",
+          "type": "photoEye",
+          "params": {
+            "span": 0.58
+          },
+          "position": [
+            0.14,
+            0.87,
+            0.75
+          ]
+        },
+        {
+          "id": "eyeCase",
+          "type": "photoEye",
+          "params": {
+            "span": 0.58
+          },
+          "position": [
+            -0.15,
+            0.87,
+            -0.75
+          ]
+        },
+        {
+          "id": "eyeTaper",
+          "type": "photoEye",
+          "params": {
+            "span": 0.58
+          },
+          "position": [
+            1.85,
+            0.87,
+            -0.75
+          ]
+        },
+        {
+          "id": "panel",
+          "type": "hmi",
+          "params": {},
+          "position": [
+            -1.7,
+            0,
+            1.75
+          ],
+          "rotationY": 0.35
+        }
+      ],
+      "sensors": [
+        {
+          "machine": "eyeCans",
+          "across": 0.3
+        },
+        {
+          "machine": "eyeCase",
+          "across": 0.3
+        },
+        {
+          "machine": "eyeTaper",
+          "across": 0.3
+        }
+      ],
+      "home": {
+        "gantry": {
+          "z": 0.75,
+          "y": 1.942,
+          "pitch": 0.26,
+          "grip": 0.09
+        }
+      },
+      "status": {
+        "inputConveyor": "STOPPED",
+        "boxConveyor": "STOPPED",
+        "robot": "HOME",
+        "gripper": "OPEN",
+        "boxStop": "CLOSED",
+        "cansInBox": 0,
+        "cansPerCase": 4
+      },
+      "signals": {
+        "beacon": {
+          "machine": "gantry",
+          "motion": "beacon"
+        },
+        "display": {
+          "machine": "panel",
+          "rows": [
+            [
+              "Input conveyor",
+              "inputConveyor"
+            ],
+            [
+              "Case conveyor",
+              "boxConveyor"
+            ],
+            [
+              "Robot",
+              "robot"
+            ],
+            [
+              "Gripper",
+              "gripper"
+            ],
+            [
+              "Cans in case",
+              "cansInBox"
+            ],
+            [
+              "Cases out",
+              "completed"
+            ]
+          ],
+          "bar": {
+            "value": "cansInBox",
+            "total": "cansPerCase",
+            "label": "Case fill {cansInBox}/{cansPerCase}"
+          }
+        }
+      },
+      "prepare": [
+        {
+          "op": "wait",
+          "state": "EMPTY",
+          "label": "Line empty",
+          "seconds": 0.3,
+          "status": {
+            "cansInBox": 0,
+            "robot": "HOME",
+            "gripper": "OPEN"
+          }
+        }
+      ],
+      "intake": [
+        {
+          "op": "spawn",
+          "state": "JERRYCANS_ARRIVE",
+          "label": "Case erected",
+          "items": [
+            {
+              "item": "case",
+              "product": {
+                "type": "carton",
+                "params": {
+                  "length": 0.62,
+                  "width": 0.42,
+                  "height": 0.42,
+                  "wall": 0.006,
+                  "flap": 0.005,
+                  "foam": 0
+                }
+              },
+              "at": {
+                "machine": "boxInfeed",
+                "port": "input",
+                "offset": [
+                  1,
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "op": "accumulate",
+          "state": "JERRYCANS_ARRIVE",
+          "label": "Jerry cans & empty case arriving",
+          "status": {
+            "inputConveyor": "RUNNING",
+            "boxConveyor": "RUNNING",
+            "boxStop": "CLOSED"
+          },
+          "items": [
+            {
+              "item": "member1",
+              "conveyor": "canBelt",
+              "to": {
+                "machine": "canStop",
+                "port": "stop",
+                "offset": [
+                  -0.42,
+                  0,
+                  0.13
+                ]
+              }
+            },
+            {
+              "item": "member2",
+              "conveyor": "canBelt",
+              "to": {
+                "machine": "canStop",
+                "port": "stop",
+                "offset": [
+                  -0.14,
+                  0,
+                  0.13
+                ]
+              }
+            },
+            {
+              "item": "member3",
+              "conveyor": "canBelt",
+              "to": {
+                "machine": "canStop",
+                "port": "stop",
+                "offset": [
+                  -0.42,
+                  0,
+                  -0.13
+                ]
+              }
+            },
+            {
+              "item": "member4",
+              "conveyor": "canBelt",
+              "to": {
+                "machine": "canStop",
+                "port": "stop",
+                "offset": [
+                  -0.14,
+                  0,
+                  -0.13
+                ]
+              }
+            },
+            {
+              "item": "case",
+              "conveyor": "boxInfeed",
+              "to": {
+                "machine": "boxInfeed",
+                "port": "output",
+                "offset": [
+                  -0.9,
+                  0,
+                  0
+                ]
+              }
+            }
+          ],
+          "alongside": [
+            {
+              "machine": "boxStop",
+              "to": {
+                "open": 0
+              },
+              "seconds": 0.5
+            }
+          ],
+          "stopping": {
+            "label": "Conveyors stopping",
+            "status": {
+              "inputConveyor": "STOPPING",
+              "boxConveyor": "STOPPING"
+            }
+          }
+        },
+        {
+          "op": "wait",
+          "state": "JERRYCANS_ARRIVE",
+          "label": "Cans in 2×2 position",
+          "seconds": 0.4,
+          "status": {
+            "inputConveyor": "STOPPED",
+            "boxConveyor": "STOPPED"
+          }
+        }
+      ],
+      "process": [
+        {
+          "op": "groupPickPlace",
+          "machine": "gantry",
+          "items": [
+            {
+              "item": "member1",
+              "anchor": "grip3"
+            },
+            {
+              "item": "member2",
+              "anchor": "grip4"
+            },
+            {
+              "item": "member3",
+              "anchor": "grip1"
+            },
+            {
+              "item": "member4",
+              "anchor": "grip2"
+            }
+          ],
+          "into": "case",
+          "slots": [
+            [
+              -0.14,
+              0.1
+            ],
+            [
+              0.14,
+              0.1
+            ],
+            [
+              -0.14,
+              -0.1
+            ],
+            [
+              0.14,
+              -0.1
+            ]
+          ],
+          "gap": 0.047,
+          "openGap": 0.09,
+          "travelLift": 0.7,
+          "states": {
+            "pick": "PICK_4_CANS",
+            "place": "PLACE_INTO_BOX",
+            "done": "BOX_COMPLETED"
+          },
+          "labels": {
+            "lower": "Lowering to can handles",
+            "grip": "Closing grippers",
+            "lift": "Lifting 4 cans",
+            "transfer": "Transferring to case",
+            "place": "Lowering cans into case",
+            "release": "Releasing cans",
+            "retract": "Retracting from case",
+            "return": "Case filled · robot returning",
+            "done": "Case filled"
+          },
+          "countStatus": "cansInBox"
+        },
+        {
+          "op": "swapUnit",
+          "item": "case",
+          "state": "BOX_COMPLETED",
+          "label": "Packed case flows on"
+        },
+        {
+          "op": "move",
+          "machine": "boxStop",
+          "to": {
+            "open": 1
+          },
+          "seconds": 0.35,
+          "state": "CASE_CLOSING",
+          "label": "Releasing box stop",
+          "status": {
+            "boxStop": "OPEN"
+          }
+        },
+        {
+          "op": "transfer",
+          "conveyor": "boxInfeed",
+          "also": [
+            "boxOutput"
+          ],
+          "to": {
+            "machine": "closer",
+            "port": "work"
+          },
+          "state": "CASE_CLOSING",
+          "label": "Indexing case to flap closer",
+          "status": {
+            "boxConveyor": "RUNNING"
+          }
+        },
+        {
+          "op": "closeCase",
+          "machine": "closer",
+          "state": "CASE_CLOSING",
+          "status": {
+            "boxConveyor": "STOPPED"
+          }
+        }
+      ],
+      "output": [
+        {
+          "op": "transfer",
+          "conveyor": "boxOutput",
+          "also": [
+            "boxInfeed"
+          ],
+          "to": {
+            "machine": "boxOutput",
+            "port": "output",
+            "offset": [
+              -0.8,
+              0,
+              0
+            ]
+          },
+          "passes": {
+            "machine": "taper",
+            "routine": "tapeAlong"
+          },
+          "state": "OUTPUT",
+          "label": "Taping & discharging case",
+          "status": {
+            "boxConveyor": "RUNNING"
+          }
+        },
+        {
+          "op": "wait",
+          "state": "OUTPUT",
+          "label": "Case delivered",
+          "seconds": 0.2,
+          "status": {
+            "boxConveyor": "STOPPED",
+            "cansInBox": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "palletizing",
+      "code": "S3",
+      "title": "Palletizing",
+      "conveyor": "belt",
+      "workState": "PALLETIZING",
+      "inputStage": "closed",
+      "unit": {
+        "type": "carton",
+        "params": {
+          "length": 0.62,
+          "width": 0.42,
+          "height": 0.42,
+          "wall": 0.006,
+          "flap": 0.005,
+          "foam": 0
+        }
+      },
+      "feed": {
+        "fromLift": false
+      },
+      "ports": {
+        "input": {
+          "machine": "source",
+          "port": "input",
+          "offset": [
+            0.75,
+            0.04,
+            0
+          ]
+        },
+        "output": {
+          "machine": "belt",
+          "port": "output"
+        }
+      },
+      "equipment": [
+        {
+          "id": "slab",
+          "type": "floorSlab",
+          "params": {
+            "length": 10.6,
+            "depth": 5.8,
+            "walkway": 0.55
+          },
+          "position": [
+            1.2,
+            0,
+            1.6
+          ]
+        },
+        {
+          "id": "belt",
+          "type": "beltConveyor",
+          "params": {
+            "length": 4.8,
+            "beltWidth": 1.05,
+            "guides": false,
+            "drive": false,
+            "carries": "case"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "beltHeight": 0.82
+        },
+        {
+          "id": "source",
+          "type": "caseSource",
+          "params": {
+            "depth": 1.55,
+            "width": 1.45,
+            "height": 1.85,
+            "caseHeight": 0.42,
+            "rearPort": true
+          },
+          "position": [
+            -2.4,
+            0,
+            0
+          ],
+          "beltHeight": 0.82
+        },
+        {
+          "id": "robot",
+          "type": "abbIrb6760",
+          "params": {},
+          "position": [
+            0.90097,
+            0,
+            1.408
+          ],
+          "rotationY": 3.141592653589793
+        },
+        {
+          "id": "pallet",
+          "type": "blockPallet",
+          "params": {
+            "length": 2.06,
+            "width": 1.46
+          },
+          "position": [
+            0.14,
+            0,
+            2.84
+          ]
+        },
+        {
+          "id": "bay",
+          "type": "bayMarking",
+          "params": {
+            "length": 2.3,
+            "width": 1.1,
+            "color": "yellow"
+          },
+          "position": [
+            -2.06,
+            0,
+            2.84
+          ]
+        },
+        {
+          "id": "worker",
+          "type": "palletJackWorker",
+          "params": {
+            "travel": 7
+          },
+          "position": [
+            -2.26,
+            0,
+            2.84
+          ]
+        },
+        {
+          "id": "wrapper",
+          "type": "stretchWrapper",
+          "params": {
+            "deckHeight": 0.44
+          },
+          "position": [
+            4.34,
+            0,
+            2.84
+          ]
+        }
+      ],
+      "stacks": {
+        "pallet": {
+          "machine": "pallet",
+          "port": "top",
+          "columns": [
+            -0.64,
+            0,
+            0.64
+          ],
+          "rows": [
+            -0.44,
+            0,
+            0.44
+          ],
+          "layers": 3,
+          "layerHeight": 0.42
+        }
+      },
+      "home": {
+        "robot": {
+          "x": 2.2,
+          "y": 2,
+          "z": 0,
+          "yaw": 0
+        }
+      },
+      "status": {
+        "robot": "HOME",
+        "gripper": "OPEN"
+      },
+      "intake": [
+        {
+          "op": "transfer",
+          "conveyor": "source",
+          "to": {
+            "machine": "belt",
+            "port": "input"
+          },
+          "state": "CONVEYOR_RUNNING",
+          "label": "Case into the cell"
+        },
+        {
+          "op": "transfer",
+          "conveyor": "belt",
+          "to": {
+            "machine": "belt",
+            "port": "input",
+            "offset": [
+              2.592,
+              0,
+              0
+            ]
+          },
+          "speed": 0.7,
+          "ramp": 0,
+          "state": "CONVEYOR_RUNNING",
+          "label": "Conveying to the pick point"
+        },
+        {
+          "op": "wait",
+          "seconds": 0.25,
+          "state": "BOX_AT_PICKUP",
+          "label": "Case at the pick point"
+        }
+      ],
+      "process": [
+        {
+          "op": "armPalletize",
+          "machine": "robot",
+          "stack": "pallet",
+          "states": {
+            "approach": "APPROACH_BOX",
+            "lower": "LOWER_TO_BOX",
+            "grip": "GRIPPING",
+            "lift": "LIFT",
+            "move": "MOVE_TO_STACK",
+            "place": "LOWER_TO_STACK",
+            "release": "RELEASING",
+            "settle": "VERIFY_PLACEMENT",
+            "retract": "RETRACT",
+            "home": "RETURN_HOME"
+          },
+          "labels": {
+            "approach": "Approaching case",
+            "lower": "Lowering to case",
+            "grip": "Gripping case",
+            "lift": "Lifting case",
+            "move": "Moving to stack",
+            "place": "Lowering onto stack",
+            "release": "Releasing case",
+            "settle": "Verifying placement",
+            "retract": "Retracting",
+            "home": "Returning home"
+          }
+        },
+        {
+          "op": "decide",
+          "on": "palletFills",
+          "planAs": "otherwise",
+          "cases": {
+            "yes": [
+              {
+                "op": "haulStack",
+                "machine": "worker",
+                "stack": "pallet",
+                "to": {
+                  "machine": "wrapper",
+                  "anchor": "deck"
+                },
+                "at": {
+                  "under": 1.85,
+                  "destination": 4.215,
+                  "place": 6.05,
+                  "clear": 3.97
+                },
+                "forks": {
+                  "down": 0.045,
+                  "lift": 0.55,
+                  "set": 0.485,
+                  "free": 0.455
+                },
+                "states": {
+                  "ready": "WORKER_SPAWN",
+                  "approach": "WORKER_APPROACH",
+                  "insert": "JACK_INSERT",
+                  "lift": "JACK_LIFT",
+                  "transport": "TRANSPORT_PALLET",
+                  "place": "PLACE_IN_WRAP",
+                  "lower": "JACK_LOWER",
+                  "release": "JACK_RELEASE",
+                  "withdraw": "WORKER_WITHDRAW",
+                  "stow": "JACK_STOW"
+                }
+              },
+              {
+                "op": "move",
+                "machine": "wrapper",
+                "to": {
+                  "wrap": 1
+                },
+                "seconds": 12,
+                "state": "WRAPPING",
+                "label": "Wrapping the pallet"
+              }
+            ]
+          },
+          "otherwise": [
+            {
+              "op": "wait",
+              "seconds": 0.2,
+              "state": "SPAWN_BOX",
+              "label": "Ready for the next case"
+            }
+          ]
+        }
+      ],
+      "output": []
     }
   ],
   "graph": {
-    "edges": []
+    "edges": [
+      {
+        "from": "filling.output",
+        "to": "canTransfer.input",
+        "carries": "batch",
+        "transport": {
+          "kind": "direct"
+        }
+      },
+      {
+        "from": "canTransfer.output",
+        "to": "packing.input",
+        "carries": "batch",
+        "transport": {
+          "kind": "direct"
+        }
+      },
+      {
+        "from": "packing.output",
+        "to": "palletizing.input",
+        "carries": "case",
+        "transport": {
+          "kind": "conveyor",
+          "type": "beltConveyor",
+          "params": {
+            "beltWidth": 0.52,
+            "guideGap": 0.43,
+            "drive": false,
+            "carries": "case"
+          }
+        }
+      }
+    ]
   }
 }

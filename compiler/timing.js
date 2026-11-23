@@ -15,7 +15,7 @@
 import { Vector3 } from 'three';
 import { planStation } from '../lib/station/StationCycle.js';
 import { parseStation, resolvePorts } from '../lib/station/stationSpec.js';
-import { layoutLine, endpoint } from '../lib/line/layout.js';
+import { layoutLine, endpoint, runExtent } from '../lib/line/layout.js';
 import { parseLine } from '../lib/line/lineSpec.js';
 import { trapezoidDuration } from '../lib/core/motion.js';
 import { CONVENTIONS } from '../lib/core/conventions.js';
@@ -62,20 +62,25 @@ export function lineTiming(registry, lineData, { ctx = {}, conventions = CONVENT
     const entries = Object.fromEntries(list.map((e) => [e.id, e]));
     const specs = Object.fromEntries(list.map((e) => [e.id, registry.componentSpec(e.type, e.params ?? {}, e.beltHeight !== undefined ? { ...ctx, beltHeight: e.beltHeight } : ctx)]));
     const placed = Object.fromEntries(list.map((e) => [e.id, { ...specs[e.id], placement: { position: e.position ?? [0, 0, 0], rotationY: e.rotationY ?? 0 } }]));
-    const plan = planStation(registry, stationData, { equipment: placed, product: line.product.type, ctx, conventions, facts: facts[station.id] ?? {} });
-    const conveyor = entries[station.conveyor];
-    const [lo, hi] = specs[station.conveyor].footprint.x;
-    const x0 = conveyor.position?.[0] ?? 0;
+    const plan = planStation(registry, stationData, { equipment: placed, product: station.unit?.type ?? line.product.type, ctx, conventions, facts: facts[station.id] ?? {} });
+    const ports = resolvePorts(station, specs);
+    const span = (m) => (Math.abs(entries[m].rotationY ?? 0) < 1e-9
+      ? specs[m].footprint.x.map((v) => v + (entries[m].position?.[0] ?? 0)) : null);
     return {
       id: station.id, code: station.code ?? null, title: station.title, station, entries, specs, plan,
-      extent: { start: x0 + lo, end: x0 + hi },
-      ports: resolvePorts(station, specs),
+      extent: runExtent(span(station.conveyor), span(ports.input.machine), span(ports.output.machine)),
+      ports,
     };
   });
   const byId = new Map(stations.map((s) => [s.id, s]));
+  const placeOf = (s, name) => {
+    const p = s.ports[name];
+    const v = portInStation(s.entries[p.machine], p.position);
+    return { x: v.x, z: v.z };
+  };
   const layout = layoutLine({
-    stations: stations.map((s) => ({ id: s.id, extent: s.extent })),
-    edges: line.edges,
+    stations: stations.map((s) => ({ id: s.id, extent: s.extent, ports: Object.fromEntries(Object.keys(s.ports).filter((n) => n !== 'work').map((n) => [n, placeOf(s, n)])) })),
+    edges: line.edges.map((e) => ({ ...e, direct: e.transport.kind === 'direct' })),
     transferLength: line.transferLength ?? conventions.transferLength,
   });
 

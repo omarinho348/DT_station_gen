@@ -1,9 +1,10 @@
 // lubricant-line.factory.json against the recorded reference (Phase 5 step 9): station 1 (filling &
 // capping, an indexing station) step for step, and what it does to the cans, the machines, the
 // photo-eyes and the tank while it plays.
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import * as THREE from 'three';
 import { registry } from '../../lib/components/index.js';
+import { preloadComponentAssets } from '../../lib/core/assets.js';
 import '../../lib/products/index.js';
 import '../../lib/ops/index.js';
 import { checkFactory, expandFactory } from '../../compiler/expand.js';
@@ -16,10 +17,15 @@ import reference from '../../benchmarks/expected/lubricant-line-reference-timing
 const materials = createMaterials();
 const DT = 0.02;
 
-/** Station 1 played through Line, as the twin plays it; every step recorded with its start time. */
-function playStation1() {
+/**
+ * Station 1 played stand-alone through Line, as the twin plays it (the recording is of station 1
+ * on its own; in the line it would hold for the slower station 2); every step recorded with its
+ * start time. `whole`: the whole line instead.
+ */
+function playStation1({ whole = false } = {}) {
   const expanded = expandFactory(registry, factory);
-  const line = new Line({ registry, line: expanded.line, ctx: { ...expanded.ctx, materials }, conventions: expanded.conventions });
+  const data = whole ? expanded.line : { ...expanded.line, stations: expanded.line.stations.filter((s) => s.id === 'filling'), edges: [] };
+  const line = new Line({ registry, line: data, ctx: { ...expanded.ctx, materials }, conventions: expanded.conventions });
   const station = line.byId.get('filling');
   const steps = [];
   const clock = { t: 0 };
@@ -32,6 +38,7 @@ function playStation1() {
 const worldY = (o) => { o.updateWorldMatrix(true, false); return new THREE.Vector3().setFromMatrixPosition(o.matrixWorld).y; };
 
 describe('lubricant-line.factory.json · station 1 (filling & capping)', () => {
+  beforeAll(() => preloadComponentAssets(registry)); // station 3's robot model
   it('is a valid factory.json; station 1 plans the reference machine cycle, 21.35 s', () => {
     const check = checkFactory(registry, factory);
     expect(check.errors).toEqual([]);
@@ -105,16 +112,19 @@ describe('lubricant-line.factory.json · station 1 (filling & capping)', () => {
     line.dispose();
   });
 
-  it('the compiled files play the same as the IR', async () => {
+  it('the compiled files play the same as the IR (whole line)', async () => {
     const mod = await import('../../generated/lubricant-line/line.js');
     const compiled = mod.createLine({ materials });
-    const ir = playStation1();
+    const ir = playStation1({ whole: true });
     compiled.start();
-    for (let t = 0; t < 60; t += DT) { compiled.update(DT); ir.line.update(DT); }
-    const a = compiled.byId.get('filling').cycle.status;
-    const b = ir.cycle.status;
-    expect([a.state, a.step, a.completed, a.cycles]).toEqual([b.state, b.step, b.completed, b.cycles]);
+    for (let t = 0; t < 150; t += DT) { compiled.update(DT); ir.line.update(DT); }
+    for (const id of ['filling', 'packing']) {
+      const a = compiled.byId.get(id).cycle.status;
+      const b = ir.line.byId.get(id).cycle.status;
+      expect([a.state, a.step, a.completed, a.cycles], id).toEqual([b.state, b.step, b.completed, b.cycles]);
+    }
+    expect(ir.line.byId.get('packing').cycle.status.cycles).toBeGreaterThan(0); // station 2 got batches from station 1
     compiled.dispose();
     ir.line.dispose();
-  });
+  }, 30000); // two whole lines for 150 s
 });

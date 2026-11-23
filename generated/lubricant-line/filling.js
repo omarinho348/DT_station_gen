@@ -12,6 +12,7 @@
 //   outfeed        beltConveyor    station  [6.53, 0, 0]
 //   infeedTunnel   conveyorTunnel  station  [-3.375, 0, 0]
 //   outfeedTunnel  conveyorTunnel  station  [8.05, 0, 0]
+//   outfeedHood    conveyorTunnel  station  [8.05, 0, 0]
 //   filler         filler          station  [0.075, 0, 0]
 //   capper         capper          station  [3.275, 0, 0]
 //   supply         supplyTank      station  [-1.3, 0, -1.5]
@@ -30,7 +31,14 @@ export const station = {
   workState: 'WORKING',
   inputStage: 'empty',
   conveyor: 'main',
-  ports: { output: { machine: 'outfeed' } },
+  ports: {
+    output: {
+      machine: 'outfeed',
+      offset: [-0.9, 0, 0],
+      standalone: ['outfeedTunnel'],
+      connected: ['outfeedHood'],
+    },
+  },
   process: [],
   home: { supply: { level: 0.88 } },
   stock: {},
@@ -94,6 +102,7 @@ export const station = {
       },
     ],
     preload: ['staging'],
+    startWhen: 'downstreamEmpty',
   },
   sensors: [
     { machine: 'eyeInfeed', motion: 'beam', clear: 'clear', blocked: 'blocked', across: 0.75 },
@@ -147,6 +156,7 @@ export function build({ registry, ctx }) {
     length: 8.4,
     beltWidth: 0.34,
     guideGap: 0.2,
+    carries: 'batch',
   }, ctx);
   equipment.main.root.position.set(-0.1, 0, 0);
   root.add(equipment.main.root);
@@ -157,6 +167,7 @@ export function build({ registry, ctx }) {
     beltWidth: 0.34,
     guideGap: 0.2,
     drive: false,
+    carries: 'batch',
   }, ctx);
   equipment.outfeed.root.position.set(6.53, 0, 0);
   root.add(equipment.outfeed.root);
@@ -178,6 +189,15 @@ export function build({ registry, ctx }) {
   }, ctx);
   equipment.outfeedTunnel.root.position.set(8.05, 0, 0);
   root.add(equipment.outfeedTunnel.root);
+
+  // outfeedHood: Sheet-metal tunnel hood over a belt conveyor, closed at one end: units enter...
+  equipment.outfeedHood = registry.buildComponent('conveyorTunnel', {
+    length: 1.8,
+    beltWidth: 0.34,
+    open: 'both',
+  }, ctx);
+  equipment.outfeedHood.root.position.set(8.05, 0, 0);
+  root.add(equipment.outfeedHood.root);
 
   // filler: Volumetric multi-head filler in a guarded portal over a belt conveyor...
   equipment.filler = registry.buildComponent('filler', {

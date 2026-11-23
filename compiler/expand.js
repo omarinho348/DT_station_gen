@@ -72,9 +72,12 @@ export function expandStation(registry, station, ctx = {}) {
     code: station.code,
     title: station.title,
     workState: station.workState,
+    role: station.role === 'transfer' ? 'transfer' : undefined, // left out for ordinary stations
     inputStage: station.inputStage,
+    unit: station.unit,
     conveyor: station.conveyor ?? shell?.station.conveyor,
     ports,
+    prepare: station.prepare?.length ? station.prepare : undefined, // left out when there are none
     intake: station.intake,
     process: station.process,
     output: station.output,
@@ -83,6 +86,7 @@ export function expandStation(registry, station, ctx = {}) {
     stacks: station.stacks,
     // Only when there are any, so stations without connections compile exactly as before.
     connections: station.connections?.length ? station.connections : undefined,
+    batch: station.batch, // undefined (left out) unless units arrive as batches
     indexing: station.indexing, // undefined (left out) for single-unit stations
     sensors: station.sensors?.length ? station.sensors : undefined,
     status: station.status,

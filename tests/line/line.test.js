@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { registry } from '../../lib/components/index.js';
+import { preloadComponentAssets } from '../../lib/core/assets.js';
 import '../../lib/products/index.js';
 import '../../lib/ops/index.js';
 import { Line, LINE_STATES, layoutLine, flowOrder, LayoutError, LineError } from '../../lib/line/index.js';
@@ -198,17 +199,18 @@ describe('line', () => {
 describe('dev line files (app/dev/lines)', () => {
   it('every dev line builds and moves its first unit into the second station (one-station lines: through the station)', async () => {
     const { createLineDemo, lineNames } = await import('../../app/dev/lineDemo.js');
+    await preloadComponentAssets(registry); // the lubricant line's robot model
     expect(lineNames().length).toBeGreaterThan(0);
     for (const name of lineNames()) {
       const demo = createLineDemo({ line: name });
       const [first, second] = demo.line.layout.order.map((id) => demo.line.byId.get(id));
+      // An indexing station needs one machine cycle per position a batch travels.
+      const cycles = first.cycle.station.indexing ? first.cycle.station.indexing.positions.length + 1 : 1;
       if (second) {
-        demo.skip(first.cycle.timing.cycleTime + demo.line.transfers[0].duration + CONVENTIONS.lift.duration + 1);
+        demo.skip(first.cycle.timing.cycleTime * cycles + demo.line.transfers[0].duration + CONVENTIONS.lift.duration + 1);
         expect(demo.line.stations.every((s) => s.cycle.error === null), name).toBe(true);
         expect(second.cycle.status.unit, name).not.toBe('—');
       } else {
-        // An indexing station needs one machine cycle per position a batch travels.
-        const cycles = first.cycle.station.indexing ? first.cycle.station.indexing.positions.length + 1 : 1;
         demo.skip(first.cycle.timing.cycleTime * cycles + 1);
         expect(first.cycle.error, name).toBe(null);
         expect(demo.line.status.exited, name).toBeGreaterThan(0);
