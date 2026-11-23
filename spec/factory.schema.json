@@ -149,9 +149,57 @@
             "kind",
             "type"
           ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "parametric"
+            },
+            "params": {
+              "default": {},
+              "description": "Shape (box | cylinder | bottle | tray), length / width / height (m), finish, colours, fill level, label text; stages raw → processed → filled → capped → labelled",
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "glb"
+            },
+            "file": {
+              "type": "string",
+              "pattern": "^[\\w.-]+\\.glb$",
+              "description": "The owner's model of the product"
+            },
+            "params": {
+              "default": {},
+              "description": "scale, turn, grasp [x, y, z] (the grasp point the user marked), processedTint, labelText",
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "required": [
+            "kind",
+            "file"
+          ]
         }
       ],
-      "description": "What flows down the line"
+      "description": "What flows down the line: a catalog product, a parametric one, or the owner's GLB model"
     },
     "stations": {
       "minItems": 1,
@@ -210,7 +258,7 @@
                 "type": {
                   "type": "string",
                   "pattern": "^[a-z][a-zA-Z0-9]*$",
-                  "description": "Catalog component type"
+                  "description": "Catalog component type; \"composite\" for a machine put together from parts (params.parts: basic frames, axes, tools, each on a mount point of an earlier one)"
                 },
                 "params": {
                   "default": {},
@@ -281,6 +329,12 @@
               "station",
               "transfer"
             ]
+          },
+          "parallel": {
+            "description": "Copies of this station working side by side (a slow station): ids <id>1 … <id>N, each edge to or from it repeated for every copy; units go to whichever copy has room",
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 6
           },
           "inputStage": {
             "description": "Product stage a unit arrives in",
@@ -1416,6 +1470,12 @@
                       "type": "string"
                     },
                     "additionalProperties": {}
+                  },
+                  "capacity": {
+                    "description": "Units the transfer holds queued, a pitch apart (a buffer between two stations); default 1",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20
                   }
                 }
               }

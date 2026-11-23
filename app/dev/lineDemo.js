@@ -23,8 +23,12 @@ for (const [path, factory] of Object.entries(import.meta.glob('../../spec/exampl
 
 export const lineNames = () => Object.keys(LINES);
 
-/** Loads the model assets any component may need (call before createLineDemo). */
-export const preloadLineAssets = () => preloadComponentAssets(registry);
+/** Loads the model assets any component may need, and the line's product model (call before createLineDemo). */
+export const preloadLineAssets = (name = null) => {
+  const factory = LINES[name]?.factory;
+  const products = factory ? [expandFactory(registry, factory).line.product] : [];
+  return preloadComponentAssets(registry, null, products);
+};
 
 export function createLineDemo({ line: name = 'printer', station = null, speed = 1, onStatus } = {}) {
   const data = LINES[name];

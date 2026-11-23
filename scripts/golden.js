@@ -43,6 +43,9 @@ try {
         timeout: 90000,
       });
       for (const l of logs.filter((l) => !l.includes('favicon'))) console.warn(`  ${l}`);
+      // The gallery shows a build error instead of the component: the image is not a golden.
+      const broken = logs.find((l) => l.includes('gallery error:'));
+      if (broken) throw new Error(broken);
       console.log(`✓ ${shot.name}  (${((Date.now() - started) / 1000).toFixed(0)} s)  ${out}`);
     } catch (e) {
       failed += 1;

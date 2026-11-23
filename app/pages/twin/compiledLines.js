@@ -18,7 +18,8 @@ export async function loadCompiledLine(name, { speed = 1, onStatus = null } = {}
     throw new Error(`No compiled line "${name}" (compiled: ${compiledLineNames().join(', ') || 'none'}; run npm run compile)`);
   }
   const mod = await load();
-  await preloadComponentAssets(catalog); // a line may use a component built from a model
+  // A line may use a component built from a model, and its product may be the owner's GLB model.
+  await preloadComponentAssets(catalog, null, [mod.product]);
   const materials = createMaterials();
   const line = mod.createLine({ materials });
   return { ...playLine(line, { materials, name, speed, onStatus }), module: mod };

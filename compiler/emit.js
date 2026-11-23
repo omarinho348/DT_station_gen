@@ -226,7 +226,7 @@ export function compileFactory(registry, data, { source = null, libPath = '../..
   const files = [];
   for (const id of timing.layout.order) {
     const station = expanded.line.stations.find((s) => s.id === id);
-    const written = expanded.factory.stations.find((s) => s.id === id);
+    const written = expanded.factory.stations.find((s) => s.id === (station.copyOf ?? id)); // a parallel copy is written once
     files.push({
       name: stationFiles[id],
       content: emitStation(registry, {

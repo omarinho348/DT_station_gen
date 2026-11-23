@@ -18,13 +18,17 @@ function sourceFiles(dir) {
 }
 
 describe('rule 6: generic code', () => {
-  it('only lib/components/** mentions a catalog component by name', async () => {
+  it('only lib/components/** and lib/basics/** mention a catalog component by name', async () => {
     const { registry } = await import('../../lib/components/index.js');
-    const types = registry.components().map((d) => d.type);
+    // `composite` and `genericMachine` are IR keywords (Claude.md §6.5: equipment is a catalog type,
+    // a composite or a genericMachine), registered as components so everything plays them; the
+    // schema and agents may name them.
+    const IR_KEYWORDS = ['composite', 'genericMachine'];
+    const types = registry.components().map((d) => d.type).filter((t) => !IR_KEYWORDS.includes(t));
     const files = ['lib', 'compiler', 'agents', 'app', 'spec', 'server']
       .filter((dir) => { try { return statSync(join(ROOT, dir)).isDirectory(); } catch { return false; } })
       .flatMap(sourceFiles)
-      .filter((file) => !file.replace(/\\/g, '/').startsWith('lib/components/'));
+      .filter((file) => !/^lib\/(components|basics)\//.test(file.replace(/\\/g, '/')));
     const offenders = [];
     for (const file of files) {
       const text = readFileSync(join(ROOT, file), 'utf8');

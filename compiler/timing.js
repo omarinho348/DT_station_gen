@@ -45,6 +45,23 @@ function portInStation(equipmentEntry, portPosition) {
     .add(new Vector3(...(equipmentEntry.position ?? [0, 0, 0])));
 }
 
+/** A station's Z range [min, max] in its own frame, from its machines' footprints (side lanes, copies). */
+function depthOf(s) {
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const [id, e] of Object.entries(s.entries)) {
+    const fp = s.specs[id].footprint;
+    for (const x of fp.x) {
+      for (const z of fp.z) {
+        const v = portInStation(e, [x, 0, z]);
+        lo = Math.min(lo, v.z);
+        hi = Math.max(hi, v.z);
+      }
+    }
+  }
+  return Number.isFinite(lo) ? [lo, hi] : [-1, 1];
+}
+
 /**
  * Timing of a whole line from its data. `registry` must have the components, ops and product.
  * `facts`: { stationId: { fact: value } } plans those decisions one way (e.g. a reject path);
@@ -79,14 +96,20 @@ export function lineTiming(registry, lineData, { ctx = {}, conventions = CONVENT
     return { x: v.x, z: v.z };
   };
   const layout = layoutLine({
-    stations: stations.map((s) => ({ id: s.id, extent: s.extent, ports: Object.fromEntries(Object.keys(s.ports).filter((n) => n !== 'work').map((n) => [n, placeOf(s, n)])) })),
+    stations: stations.map((s) => ({
+      id: s.id,
+      extent: s.extent,
+      ports: Object.fromEntries(Object.keys(s.ports).filter((n) => n !== 'work').map((n) => [n, placeOf(s, n)])),
+      depth: depthOf(s),
+      group: line.stations.find((d) => d.id === s.id).copyOf ?? s.id,
+    })),
     edges: line.edges.map((e) => ({ ...e, direct: e.transport.kind === 'direct' })),
     transferLength: line.transferLength ?? conventions.transferLength,
   });
 
   const { speed, ramp } = conventions.conveyor;
   const transfers = layout.transfers.map((t) => {
-    const edge = line.edges.find((e) => endpoint(e.from).station === t.from && endpoint(e.to).station === t.to);
+    const edge = line.edges[t.edge];
     const at = (end) => {
       const { station, port } = endpoint(end);
       const s = byId.get(station);
@@ -110,13 +133,28 @@ export function lineTiming(registry, lineData, { ctx = {}, conventions = CONVENT
     rows: stationTable(s.plan),
   }));
   const ordered = layout.order.map((id) => rows.find((r) => r.id === id));
-  const slowestStation = ordered.reduce((a, b) => (b.cycleTime > a.cycleTime ? b : a));
-  const slowestTransfer = transfers.reduce((a, b) => (b.duration > (a?.duration ?? -1) ? b : a), null);
-  const bottleneck = slowestTransfer && slowestTransfer.duration > slowestStation.cycleTime
-    ? { kind: 'transfer', id: `${slowestTransfer.from} → ${slowestTransfer.to}`, time: slowestTransfer.duration }
-    : { kind: 'station', id: slowestStation.id, time: slowestStation.cycleTime };
+  // The takt comes from the main path. Parallel copies share their station's work (its cycle time
+  // over the copies), and so do the transfers into / out of them; stations off the main path (rework,
+  // feeders) see only part of the flow and don't set it.
+  const groupOf = (id) => line.stations.find((d) => d.id === id).copyOf ?? id;
+  const copies = (id) => line.stations.filter((d) => groupOf(d.id) === groupOf(id)).length;
+  const onMain = new Set(layout.main.map(groupOf));
+  const mainRows = ordered.filter((r) => onMain.has(groupOf(r.id)));
+  const effective = (r) => r.cycleTime / copies(r.id);
+  const slowestStation = mainRows.reduce((a, b) => (effective(b) > effective(a) ? b : a));
+  const mainTransfers = transfers.filter((t) => [t.from, t.to].every((end) => onMain.has(groupOf(endpoint(end).station))));
+  const share = (t) => Math.max(copies(endpoint(t.from).station), copies(endpoint(t.to).station));
+  const slowestTransfer = mainTransfers.reduce((a, b) => (b.duration / share(b) > (a ? a.duration / share(a) : -1) ? b : a), null);
+  const bottleneck = slowestTransfer && slowestTransfer.duration / share(slowestTransfer) > effective(slowestStation)
+    ? { kind: 'transfer', id: `${slowestTransfer.from} → ${slowestTransfer.to}`, time: round(slowestTransfer.duration / share(slowestTransfer)) }
+    : { kind: 'station', id: slowestStation.id, time: round(effective(slowestStation)), ...(copies(slowestStation.id) > 1 ? { copies: copies(slowestStation.id) } : {}) };
   const lift = conventions.lift.duration;
-  const leadTime = round(lift + ordered.reduce((sum, r) => sum + r.cycleTime, 0) + transfers.reduce((sum, t) => sum + t.duration, 0) + lift);
+  // One unit through the main path: one copy of each place, one transfer per join.
+  const joinTime = layout.main.slice(1).reduce((sum, id, i) => {
+    const pair = mainTransfers.filter((t) => groupOf(endpoint(t.from).station) === groupOf(layout.main[i]) && groupOf(endpoint(t.to).station) === groupOf(id));
+    return sum + (pair.length ? Math.min(...pair.map((t) => t.duration)) : 0);
+  }, 0);
+  const leadTime = round(lift + layout.main.reduce((sum, id) => sum + rows.find((r) => r.id === id).cycleTime, 0) + joinTime + lift);
   return {
     line: line.id,
     stations: ordered,

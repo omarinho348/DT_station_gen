@@ -1,0 +1,397 @@
+{
+  "about": "Dev check (#/twin?demo=line&line=graph-shapes): Phase 6 step 6 graph shapes in one line: two loading belts merging (a feeder in a side lane), a buffered transfer (capacity 3), a slow composite doser as two parallel copies (parallel: 2), then the placeholder laser marker.",
+  "camera": {
+    "position": [
+      0,
+      9,
+      13
+    ],
+    "target": [
+      0,
+      0.8,
+      -1
+    ]
+  },
+  "factory": {
+    "version": 1,
+    "line": {
+      "id": "graphDemo",
+      "title": "Graph shapes demo",
+      "runSize": 8,
+      "conventions": {
+        "beltHeight": 0.86
+      }
+    },
+    "product": {
+      "kind": "catalog",
+      "type": "jerryCan",
+      "params": {
+        "height": 0.33
+      }
+    },
+    "stations": [
+      {
+        "id": "loadA",
+        "title": "Loading A",
+        "conveyor": "belt",
+        "inputStage": "empty",
+        "ports": {
+          "input": {
+            "machine": "belt",
+            "port": "input"
+          },
+          "output": {
+            "machine": "belt",
+            "port": "output"
+          }
+        },
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {
+              "length": 2.4
+            }
+          }
+        ],
+        "intake": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": {
+              "machine": "belt",
+              "port": "input",
+              "offset": [
+                1.2,
+                0,
+                0
+              ]
+            },
+            "label": "Can in"
+          }
+        ],
+        "process": [
+          {
+            "op": "wait",
+            "seconds": 2,
+            "label": "Loading"
+          }
+        ],
+        "output": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": "output",
+            "label": "Out"
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      },
+      {
+        "id": "loadB",
+        "title": "Loading B",
+        "conveyor": "belt",
+        "inputStage": "empty",
+        "ports": {
+          "input": {
+            "machine": "belt",
+            "port": "input"
+          },
+          "output": {
+            "machine": "belt",
+            "port": "output"
+          }
+        },
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {
+              "length": 2.4
+            }
+          }
+        ],
+        "intake": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": {
+              "machine": "belt",
+              "port": "input",
+              "offset": [
+                1.2,
+                0,
+                0
+              ]
+            },
+            "label": "Can in"
+          }
+        ],
+        "process": [
+          {
+            "op": "wait",
+            "seconds": 2,
+            "label": "Loading"
+          }
+        ],
+        "output": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": "output",
+            "label": "Out"
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      },
+      {
+        "id": "dose",
+        "title": "Dosing",
+        "parallel": 2,
+        "conveyor": "belt",
+        "inputStage": "empty",
+        "ports": {
+          "input": {
+            "machine": "belt",
+            "port": "input"
+          },
+          "output": {
+            "machine": "belt",
+            "port": "output"
+          }
+        },
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {
+              "length": 2.4
+            }
+          },
+          {
+            "id": "doser",
+            "type": "composite",
+            "params": {
+              "parts": [
+                {
+                  "id": "frame",
+                  "type": "portalFrame",
+                  "params": {
+                    "span": 0.8,
+                    "height": 2.1
+                  }
+                },
+                {
+                  "id": "cross",
+                  "type": "linearAxis",
+                  "params": {
+                    "stroke": 0.5,
+                    "hang": true
+                  },
+                  "on": "frame.beam",
+                  "rotationY": 1.5707963267948966
+                },
+                {
+                  "id": "lift",
+                  "type": "verticalAxis",
+                  "params": {
+                    "stroke": 0.25,
+                    "bodyLength": 0.35
+                  },
+                  "on": "cross.carriage"
+                },
+                {
+                  "id": "nozzle",
+                  "type": "dispenseNozzle",
+                  "params": {
+                    "jetLength": 0.15
+                  },
+                  "on": "lift.ram"
+                }
+              ],
+              "motions": {
+                "travel": "cross.travel",
+                "lower": "lift.extend",
+                "flow": "nozzle.flow"
+              },
+              "anchors": {
+                "tool": "nozzle"
+              }
+            }
+          }
+        ],
+        "intake": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": {
+              "machine": "belt",
+              "port": "input",
+              "offset": [
+                1.2,
+                0,
+                0
+              ]
+            },
+            "label": "Can to the doser"
+          }
+        ],
+        "process": [
+          {
+            "op": "move",
+            "machine": "doser",
+            "to": {
+              "lower": 0.2
+            },
+            "seconds": 1,
+            "label": "Nozzle down"
+          },
+          {
+            "op": "move",
+            "machine": "doser",
+            "to": {
+              "flow": 1
+            },
+            "seconds": 0.3,
+            "label": "Valve open"
+          },
+          {
+            "op": "wait",
+            "seconds": 9,
+            "label": "Dosing"
+          },
+          {
+            "op": "move",
+            "machine": "doser",
+            "to": {
+              "flow": 0
+            },
+            "seconds": 0.3,
+            "label": "Valve closed"
+          },
+          {
+            "op": "move",
+            "machine": "doser",
+            "to": {
+              "lower": 0
+            },
+            "seconds": 1,
+            "label": "Nozzle up"
+          }
+        ],
+        "output": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": "output",
+            "label": "Out"
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      },
+      {
+        "id": "mark",
+        "title": "Laser marking",
+        "conveyor": "belt",
+        "inputStage": "empty",
+        "ports": {
+          "input": {
+            "machine": "belt",
+            "port": "input"
+          },
+          "output": {
+            "machine": "belt",
+            "port": "output"
+          }
+        },
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {
+              "length": 2.6
+            }
+          },
+          {
+            "id": "marker",
+            "type": "genericMachine",
+            "params": {
+              "name": "Laser marker",
+              "note": "fiber laser, 20 W",
+              "length": 1.2,
+              "depth": 0.9
+            }
+          }
+        ],
+        "intake": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": {
+              "machine": "marker",
+              "port": "work"
+            },
+            "label": "Into the marker"
+          }
+        ],
+        "process": [
+          {
+            "op": "operate",
+            "machine": "marker",
+            "seconds": 4,
+            "label": "Marking"
+          }
+        ],
+        "output": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": "output",
+            "label": "Out"
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      }
+    ],
+    "graph": {
+      "edges": [
+        {
+          "from": "loadA.output",
+          "to": "dose.input",
+          "transport": {
+            "kind": "conveyor",
+            "type": "beltConveyor",
+            "params": {},
+            "capacity": 3
+          }
+        },
+        {
+          "from": "loadB.output",
+          "to": "dose.input",
+          "transport": {
+            "kind": "conveyor",
+            "type": "beltConveyor",
+            "params": {}
+          }
+        },
+        {
+          "from": "dose.output",
+          "to": "mark.input",
+          "transport": {
+            "kind": "conveyor",
+            "type": "beltConveyor",
+            "params": {}
+          }
+        }
+      ]
+    }
+  }
+}

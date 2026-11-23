@@ -110,7 +110,7 @@ export function TwinPage(outlet, route) {
   const lineOptions = { speed: Number(route?.query?.speed ?? 1), onStatus: (text) => { hint.textContent = text; } };
   if (route?.query?.demo === 'line') {
     import('../../dev/lineDemo.js').then(async ({ createLineDemo, preloadLineAssets }) => {
-      await preloadLineAssets();
+      await preloadLineAssets(route.query.line ?? 'printer');
       if (alive) showLine(createLineDemo({ line: route.query.line ?? 'printer', station: route.query.station, ...lineOptions }));
     });
   }

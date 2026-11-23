@@ -1949,7 +1949,7 @@ Part 1 approved by the owner (2026-11-23: "next").
 - a look at the compiled files
 - the Phase 5 wrap-up
 
-### Step 9d: the lubricant line compared with the reference by eye and by pixel, supply racks, Phase 5 wrap-up (done)
+### Step 9d: the lubricant line compared with the reference by eye and by pixel, supply racks, Phase 5 wrap-up (approved)
 
 Step 9c part 2 approved by the owner (2026-11-23: "continue with phase 5 step 9d").
 
@@ -2036,3 +2036,454 @@ Lubricant components and adapters (steps 1–8) and the lubricant line as data (
 - the screenshots match the reference factory in place and pose, with the differences listed
 
 **Next:** Phase 6 (generic level): basic frames / axes / tools / transport / buffers, `composite` equipment in the IR and compiler, `genericMachine`, graph shapes (reject branch, merge, parallel station, buffer), parametric and GLB products. I'll propose how to split it before starting.
+
+## Phase 6: Generic level
+
+Step 9d approved by the owner moving on (2026-11-23: "continue with phase 6"). No answer on the station 3 slab question, so the slab stays (it can be removed later as one equipment entry).
+
+**Split** (proposed 2026-11-23; work started on 6.1 under the "don't wait" rule):
+
+| Step | Content |
+|---|---|
+| 6.1 | Basic **frames**: portal, column, cantilever, table, turntable, enclosure, with mount points (anchors) for the parts hung on them |
+| 6.2 | Basic **axes** (linear, rotary) and **tools** (gripper, vacuum, nozzle, spindle, press ram, camera, laser, labeller, screwdriver), with tool anchors |
+| 6.3 | Basic **transport and buffers** (accumulation table, gravity chute, buffer lane, turntable transfer) |
+| 6.4 | **`composite`** equipment in the IR and compiler: a machine assembled from basics (frame + axes + tool, mounted by anchor), its motions and ops under one id |
+| 6.5 | **`genericMachine`** fallback: enclosure with the right footprint, ports, timing, sign and stack light; flagged for the reviewer |
+| 6.6 | **Graph shapes**: reject branch, merge, parallel copies, buffers in `layout.js` and `Line.js` |
+| 6.7 | **Products**: parametric shapes with stages; GLB import with marked grasp points |
+| 6.8 | A test line built only from basics and composites, compiled and played |
+
+### Step 6.1: basic frames (approved)
+
+**Result first:** six basic frames are in the catalog (category `frame`), each with mount points (anchors) where step 6.4's composites will hang axes and tools. All six pass the generic component checks at min / default / max params:
+- every mesh named, no NaN
+- inside the footprint, nothing floating
+- motions run through their whole range
+
+Golden images written and checked by eye.
+
+| Frame | What it is | Mount points | Ports / motions |
+|---|---|---|---|
+| `portalFrame` | two posts and a cross beam across the flow | `beam` (under the middle), `beamTop` | |
+| `columnFrame` | a column on a base plate | `top`, `side` (on +Z at `mountHeight`) | |
+| `cantileverFrame` | column on the equipment side (−Z), arm reaching across the flow | `tip` (under the arm end, at the origin), `armTop` | |
+| `tableFrame` | top on four braced legs | `top` | port `surface` |
+| `turntableFrame` | drum base, turning plate with N nests | `plate`, `nest1…N` (turn with the plate; nest 1 on +X, counter-clockwise) | motion `angle` (wraps), port `load` |
+| `enclosureFrame` | corner posts, roof, guard-glass sides, end walls with a pass-through opening down to the floor | `roof` (inside) | ports `input` / `output` at belt height |
+
+**Changed**
+- `lib/basics/frames/*.js` (six frames) and `lib/basics/frames/common.js` (colour choice, foot plates, `mountPoint`)
+- `lib/components/index.js` also loads `lib/basics/**`, so basic blocks register like components; gallery, goldens and the generic checks pick them up with no other change
+- **Rule 6 test:** component names may appear in `lib/basics/**` as well as `lib/components/**` (Claude.md §6.1 puts the basic blocks there). Claude.md §3 rule 6 still says only `lib/components/**`; I haven't edited Claude.md, so please confirm or adjust its wording.
+- Parameter checks that keep every combination valid: column side mount at or below the top; turntable nests at least 10 cm inside the plate edge; enclosure opening at least 2.5 cm of wall each side and 10 cm below the roof
+- Tests `tests/components/frames.test.js` (7): the six frames registered as `frame`; portal posts outside the clear width and its mounts; column mounts; cantilever tip `reach` in front of the column under the arm; table port and mount on the surface; turntable nests evenly spaced, turning with the plate (a quarter turn brings nest 4 to the load place); enclosure ports at belt height with nothing standing in the pass-through, roof mount
+
+**My mistakes this step (fixed before the results above):**
+- my first frame test used `inst.anchors.x`; instances expose anchors through `anchor(name)`
+
+**Results**
+- `npm test`: 46 files, **1647 tests passed** (the generic checks add about 110 for the six frames)
+- `npm run golden -- portalFrame columnFrame cantileverFrame tableFrame turntableFrame enclosureFrame`: 6 images in `tests/golden/components/`
+
+**Next:** step 6.2: basic axes (linear, rotary) and tools (gripper, vacuum, nozzle, spindle, press ram, camera, laser, labeller, screwdriver). Existing tools (`fingerGripper`, `screwdriver` under `lib/components/tools/`) will be reused where they fit.
+
+### Step 6.2: basic axes and tools (approved)
+
+Step 6.1 approved by the owner (2026-11-24: "next"). The rule-6 wording question (Claude.md still names only `lib/components/**`) is still open.
+
+**Result first:** the catalog has three basic axes and six new basic tools. With the existing finger gripper, vacuum pad and screwdriver, that covers all nine tools of Claude.md §6.6. All nine new parts pass the generic component checks at min / default / max params, and their golden images were checked by eye.
+
+**Mounting conventions** (step 6.4's composites will rely on them; tested):
+- **frames:** origin on the floor
+- **axes:** origin at the **mounting face**. Standing ones rise from it; hung ones (`hang: true`) hang below it.
+- **tools** (`mount: 'tool'`): origin at the **tool point**; mounting face on top, at the footprint height (checked for the new tools and the gripper and vacuum pad)
+- **mount points (anchors):** Y always up, also on hung parts; positive rotation is counter-clockwise seen from above
+
+| Part | What it is | Motions | Mount point |
+|---|---|---|---|
+| `linearAxis` | profile, rail, carriage, drive motor; along X (turn about Y for Z); standing or hung | `travel` (m) | `carriage` |
+| `verticalAxis` | slide body hanging from its face, ram coming down | `extend` (m) | `ram` |
+| `rotaryAxis` | housing and turning flange; standing or hung | `angle` (rad, wraps) | `flange` |
+| `dispenseNozzle` | valve body and needle; stream colour by liquid (oil, water, glue, sealant) | `flow` 0–1 (stream to `jetLength`) | |
+| `machiningSpindle` | motor, nose, collet, drill or end mill | `spin` (rad, wraps) | |
+| `pressRam` | cylinder body, rod, pressing head | `extend` (m) | `face` |
+| `visionCamera` | body, lens, ring light; sight line to the working distance while lit | `light` off / on | |
+| `laserHead` | source, focusing optic, nozzle; beam converging to the focus | `beam` 0–1 | |
+| `labelHead` | label roll, peel plate, tamp pad with a label | `tamp` (m), `label` none / loaded | `pad` |
+
+Reused as basic tools: `fingerGripper`, `vacuumPad`, `screwdriver` (`lib/components/tools/`).
+
+**Changed**
+- `lib/basics/axes/*.js` (3), `lib/basics/tools/*.js` (6)
+- **Gallery:** a part whose footprint reaches below its origin (tools, hung axes) is lifted onto the floor with its footprint overlay. Before, the vertical axis rendered under the floor. Golden images re-rendered for the 7 such parts at default params, including the existing `screwdriver` (now shown lifted).
+- Tests `tests/components/axes-tools.test.js` (18):
+  - linear axis: carriage on top following `travel`; hung, underneath, Y up, motor still on +X, everything below the mounting face
+  - vertical axis: ram mount down by `extend`; stroke refused when the ram would leave its guide
+  - rotary axis: counter-clockwise standing and hung
+  - every new tool and the gripper and vacuum pad: mounting face at the footprint height
+  - nozzle stream length, press face, label head pad and label, camera sight line and laser beam reaching their distances, spindle turning only the cutter side
+
+**My mistakes this step (fixed before the results above):**
+- the rotary axis turned the other way when hung; its index mark and connector block stood outside the footprint
+- the linear axis's end caps were wider than its footprint at the largest section; the vertical axis motor stuck out on +Z
+- the label head's pad missed its rods with a narrow label, and with a long stroke the rods left the body; the label lay 0.5 mm below the declared bottom
+- `spindle` as a type name collided with the plain word "spindle" in three files (rule 6 check); renamed `machiningSpindle`
+- one test read a stale world matrix (the stream's parent had just been scaled)
+
+**Results**
+- `npm test`: 47 files, **1827 tests passed**
+- golden images: the 9 new parts, plus `screwdriver` re-rendered
+
+**Next:** step 6.3: basic transport and buffers (accumulation table, gravity chute, buffer lane, turntable transfer).
+
+### Step 6.3: basic transport and buffers (approved)
+
+Step 6.2 approved by the owner (2026-11-24: "ok"). The rule-6 wording in Claude.md is still open.
+
+**Result first:** five basic transport and buffer blocks are in the catalog. All pass the generic component checks at min / default / max params, and their golden images were checked by eye. Each has typed ports at belt height and a roller or turning motion with `travel`, so **the existing `transfer` op drives them unchanged** (tested: a unit conveyed from a buffer lane's input to slot 2 takes exactly the trapezoid time for 0.75 m; one rolls down a chute).
+
+| Part | Category | What it is | Ports | Motions |
+|---|---|---|---|---|
+| `gravityChute` | transport | roller chute sloping down along +X, side guides, no drive | `input` (belt height + `drop`), `output` | `rollers` |
+| `turntableTransfer` | transport | roller section on a turning base: straight on, or 90° to a branch | `input`, `output`, `toRear` (−Z), `toFront` (+Z) | `turn` (±π/2), `rollers` |
+| `agvCart` | transport | driverless cart, roller deck at belt height on a lift column, status light strip, safety scanner | `input`, `output`, `deck` | `rollers`, `light` (off / run / wait) |
+| `accumulationTable` | buffer | turning disc in a guard rail, fixed centre cone, rail openings at both ports | `input` (−X edge), `output` (+X edge) | `spin` (travel on the ring at ¾ radius) |
+| `bufferLane` | buffer | accumulating roller lane, pop-up stop at the end of each slot | `input`, `output`, `slot1…N` (work) | `rollers`, `stop1…N` (down / up) |
+
+`flowRack` (Phase 2) was already in the `buffer` category and stays there.
+
+**Changed**
+- `lib/basics/transport/` (`rollerBed.js` shared roller bed and cross bar; `gravityChute`, `turntableTransfer`, `agvCart`), `lib/basics/buffers/` (`accumulationTable`, `bufferLane`)
+- Parameter checks: chute drop at most 40 % of its length (about 22°); table openings no wider than the radius
+- Tests `tests/components/transport-buffers.test.js` (7):
+  - categories
+  - chute ports, and every roller top on the line from input to output
+  - turntable: a quarter turn brings the section's outfeed exactly to `toRear`, minus a quarter to `toFront`
+  - AGV deck at belt height; light colours
+  - table disc at belt height, nothing of the rail in either opening, ring travel
+  - lane slot ports; each stop rising 4 cm above the rollers or 3 cm below, between its slot and the next
+  - the `transfer` op on the lane and the chute
+
+**My mistakes this step (fixed before the results above):**
+- the table's centre cone stood above the footprint height; rail posts could land in an opening when the openings were wide; the rail ends reached 2 mm into the openings
+- two AGV strips stood 1 mm proud of the footprint
+- my category test forgot `flowRack`
+
+**Results**
+- `npm test`: 48 files, **1924 tests passed**
+- golden images for the 5 parts
+
+**Basic level so far:** 6 frames, 3 axes, 9 tools (6 new + 3 reused), 3 transport, 3 buffers (2 new + `flowRack`).
+
+**Next:** step 6.4: **`composite`** equipment in the IR and compiler. A machine put together from basic blocks: a frame, axes and a tool, each mounted on a named mount point of the one before. Its motions come out under one id (e.g. `head.travel`, `head.extend`), so ops drive a composite like any catalog machine. Checked like a component (footprint from its parts, nothing floating), compiled into readable `build()` code.
+
+### Step 6.4: composite equipment (approved)
+
+Step 6.3 approved by the owner (2026-11-24: "ok").
+
+**Result first:** a machine the catalog doesn't have can now be written in `factory.json` as a **composite**: a list of parts (basic frames, axes, tools, or any catalog component), each mounted on a mount point of an earlier part. A one-station dosing line with a composite doser (portal frame, hung linear axis across the belt, vertical slide, dispensing nozzle), driven by plain `move` ops:
+- passes the full check, with the timing table counting the composite's moves
+- compiles to a readable `registry.buildComponent('composite', { parts: [...] })`
+- plays: the nozzle comes down 0.2 m over each can, doses and goes back up, three cans through
+
+`screenshots/composite-doser.png` (`#/twin?demo=line&line=composite-doser`) shows it in the twin.
+
+**How it works:** `composite` is registered as one more component (`lib/basics/composite.js`) whose params are the parts list. So the line, the dry plans, the timing table, the compiler and the gallery handle it with **no change**; the IR is just `{ "type": "composite", "params": { "parts": [...] } }`.
+- **Mounting** (the basic-block conventions of 6.1–6.2): `on: "part.anchor"` hangs a part from that mount point; a tool goes there by its mounting face, anything else by its origin; `position` / `rotationY` offset and turn it. A part without `on` stands on the composite's floor.
+- **Names** offered:
+  - motions `<part><Motion>` (`lift` + `extend` → `liftExtend`)
+  - ports `<part><Port>`
+  - mount points `<part><Anchor>`, plus each part's own origin under the part's name (a tool's tool point)
+  - short aliases the composite declares: `motions: { lower: "lift.extend" }`, `anchors: { tool: "nozzle" }`, `ports: { input: "bed.input" }`
+  - **a motion's short name replaces its part name**, so every motion has one name and one state (ops planning one motion under two names would lose track of it)
+- **Footprint and port places are measured**, not typed in: the composite is built once headless (cached per params and belt height) and its bounds taken at the default pose and with every motion at each end of its range.
+- **Checks**, each message naming the part:
+  - unknown type
+  - `on` pointing at a later or missing part, or at a mount point the host doesn't have (the message lists the ones it has)
+  - a part id used twice; a composite inside a composite
+  - an alias to a missing motion / port / mount point; a motion with two short names; a name offered twice
+  - a part's own params out of range
+
+**Changed**
+- `lib/basics/composite.js`. The gallery example is a dosing head on a portal.
+- `spec/factory.schema.js`: the equipment `type` description explains `composite` (for the agents' Structured Outputs later); `spec/factory.schema.json` regenerated
+- **Rule 6 test:** `composite` and `genericMachine` are allowed by name everywhere. They are IR keywords (Claude.md §6.5), registered as components so everything plays them; catalog components stay confined to `lib/components/**` and `lib/basics/**`.
+- **Golden script fix:** a gallery page that shows a build error instead of the component now fails its shot. The gallery logs the error, `scripts/golden.js` checks for it. Before, the first composite golden (taken while the example was still broken) was written and reported as fine.
+- `app/dev/lines/composite-doser.json`: the dev line (portal raised to 2.1 m so the nozzle clears a 0.33 m can)
+- Tests `tests/components/composite.test.js` (7):
+  - names and the alias replacing the part name
+  - mounting: the nozzle's mounting face on the ram's mount point, tool point height worked out by hand
+  - lowering and the turned axis moving the tool along −Z; an alias driving the stream
+  - the footprint holding the parts at motion extremes
+  - eight refusals with their messages
+  - the factory: check and timing (4.6 s process), compile, play
+
+**My mistakes this step (fixed before the results above):**
+- the "unknown type" check called `registry.getComponent`, which throws its own message, so the part was never named
+- zod 4 doesn't parse default values: the gallery example's parts lacked `position` / `rotationY` and failed to build (caught by the registry spec test and the broken golden)
+- my first composite test expected an alias and its part name to share one state; that wart led to the alias replacing the name
+- the dev line's first portal height put the nozzle's home point inside the can
+
+**Results**
+- `npm test`: 49 files, **1949 tests passed**
+- `npm run schema`, `npm run compile` (both example lines unchanged)
+- golden image `composite` (re-rendered after the fix); `screenshots/composite-doser.png`
+
+**Next:** step 6.5: **`genericMachine`**, the fallback for a machine nobody can build yet. An enclosure with the right footprint, ports and timing, a sign with its name and a stack light, so the line still runs, and a flag for the reviewer (Phase 7).
+
+### Step 6.5: `genericMachine`, the placeholder (approved)
+
+Step 6.4 approved by the owner (2026-11-24: "ok").
+
+**Result first:** a machine nobody can build yet is written as a **`genericMachine`**, and the line still runs. In a one-station marking line, a placeholder "Laser marker":
+- passes the full check, and `checkFactory` lists it as a **warning** (new): `station "mark": "marker" is a placeholder for "Laser marker" (genericMachine); replace it with a catalog machine or a composite`
+- its 6 s (op `operate`) is in the timing table
+- it compiles and plays: three cans pass through it, it shows "run" for 3 × 6 s with its progress bar filling, then goes idle
+
+`screenshots/generic-marker.png` (`#/twin?demo=line&line=generic-marker`): the conveyor through the enclosure, a can inside, sign "LASER MARKER · PLACEHOLDER · fiber laser, 20 W", hazard trim, green lamp, progress bar.
+
+**Changed**
+- **`lib/basics/genericMachine.js`** (category `machine`):
+  - params: `name` and `note` (on its sign), `length` / `depth` / `height`, `passThrough`, `carries`
+  - pass-through: the basic `enclosureFrame` as housing, with ports `input` / `work` / `output` at belt height
+  - cabinet beside the line: one `work` port on its front face
+  - looks unmistakably like a stand-in: a roof sign with the name over PLACEHOLDER (both sides), a hazard-stripe band, a three-lamp tower on the roof, a progress bar on the front
+  - motions `state` (idle / run / wait / alarm) and `progress` (0–1)
+- **Op `operate`** (`lib/ops/named/operate.js`): a machine works for a fixed time. State run, progress filling, then idle. Generic: any machine with `state` (run, idle) and `progress`. Refused otherwise: `machine "belt" has no motion "state"`.
+- **`checkFactory` returns `warnings`** (`factoryWarnings` in `compiler/expand.js`): every placeholder with its path and what it stands for. Empty when there are none or the check failed. The Phase 7 reviewer will read it.
+- `spec/factory.schema.json` regenerated; `app/dev/lines/generic-marker.json` (dev line)
+- Tests `tests/components/generic-machine.test.js` (6):
+  - pass-through ports, and nothing standing in a 0.5 × 0.4 m passage through the machine
+  - the cabinet's front port
+  - lamps per state, the progress bar's width, the sign
+  - `operate`: exact duration, refusal
+  - the line: warning, timing, compile, play (18 s running, progress to the end, idle at the end)
+
+**My mistakes this step (fixed before testing):**
+- the hazard bands and progress panel first stood a few millimetres off the glass and cabinet faces (they would have floated); they now sit on the outer faces
+
+**Results**
+- `npm test`: 50 files, **1973 tests passed**
+- golden image `genericMachine`; `screenshots/generic-marker.png`; `npm run schema`, `npm run compile` (example lines unchanged)
+
+**How a machine gets into a line now**, best first:
+1. a **catalog** component (named, tuned)
+2. a **composite** of basic blocks (6.4)
+3. a **genericMachine** placeholder, reported as a warning (6.5)
+
+So nothing fails outright for lack of a machine (Claude.md §6.6.5).
+
+**Next:** step 6.6: **graph shapes** in `layout.js` and `Line.js`. Today a line must be a chain (layout refuses branches). To add:
+- a **reject branch** (an extra output to a side lane)
+- a **merge** (two stations feeding one)
+- **parallel** copies of a slow station
+- **buffers** between stations
+
+I'll propose the IR and layout rules first, as it touches the line runtime both example lines depend on.
+
+### Step 6.6: graph shapes (approved)
+
+Step 6.5 approved by the owner (2026-11-24: "ok"). I had said I'd propose the rules first because this touches the runtime both reference lines run on. Under the "don't wait" rule I went ahead, holding to one constraint: **a plain chain must behave exactly as before**. It does:
+- every step-for-step reference timing test of the printer and lubricant lines passes unchanged
+- both compiled lines are byte-for-byte the same
+
+**Result first:** a line is no longer only a chain. One dev line (`#/twin?demo=line&line=graph-shapes`, `screenshots/graph-shapes.png`) has:
+- two loading belts merging into one place, the second as a feeder in a side lane
+- a buffered transfer (3 units)
+- a slow composite doser as two parallel copies
+- the placeholder laser marker at the end
+
+It is checked, compiled (6 files, one per copy) and played: 8 cans released through both loaders, shared between the two copies, all 8 out.
+
+**Rules** (in `lib/line/layout.js` and `lib/line/Line.js`):
+
+| Shape | Written as | Plays as | Laid out as |
+|---|---|---|---|
+| parallel copies | station `parallel: n` → `<id>1 … <id>n` (`copyOf`), every edge to or from it repeated per copy | each unit to the first copy with room, taking turns | side by side across Z, centred where one station would stand |
+| fan-out | several edges from one output port | first edge with room, taking turns | (edges) |
+| merge (fan-in) | several edges into one input port | the unit that has waited longest goes first | (edges) |
+| reject branch | an edge from a side output port (a reject lane) to a station | the station holds if that port is busy (new: before, a connected extra port was never checked) | side lane on the port's side, the two ports at the same X |
+| feeder | a second station nothing feeds, into a station's input | a second source: the run is released through all sources together | side lane, its output one transfer length upstream |
+| buffer | edge `transport.capacity: n` | up to n units queued along the transfer a pitch apart, each moving with the trapezoid to its place | (the transfer) |
+
+- **Main path:** starts at the first station nothing feeds and follows `output` ports. It is laid out as before; side lanes go to the equipment side (−Z) unless the joined port is on +Z, further out if a lane is taken.
+- **Transfers between ports not in line** run straight from port to port, at an angle.
+- **Loops** (rework back upstream) are refused: they can block the line.
+- **Dry timing:**
+  - the takt comes from the main path, where parallel copies divide their station's time (bottleneck shows `copies`)
+  - stations off the main path (feeders, rework) see only part of the flow and don't set the takt
+  - lead time: one copy per place, one transfer per join
+
+**Changed**
+- `lib/line/layout.js`: graph checks (unknown stations, self-feed, loops, separate parts); main path; copies; side lanes with clash avoidance; per-edge transfers (`edge`, `angle`, `inLine`)
+- `lib/line/Line.js`: transfers for every edge (angled conveyors); fan-out / fan-in wiring; buffers (`capacity`, queue, retargeting as the head leaves); several sources sharing the run; station depth and group passed to the layout; a line clock for "waited longest"
+- `lib/station/StationCycle.js`: holds (`Holding · <port> busy`) when a connected extra output has no room
+- `compiler/timing.js`: station depths and groups, edge-indexed transfers, the takt rules above
+- `compiler/expand.js`: `parallel` expanded into copies with their edges; a copy id that clashes with a station id is refused
+- `compiler/emit.js`: a copy is compiled from its written station (bug found by the new test)
+- `spec/factory.schema.js`: station `parallel` (2–6), edge `transport.capacity` (1–20, not with `direct`); `spec/factory.schema.json` regenerated
+- `lib/line/lineSpec.js`: transport `capacity`
+- `app/dev/lines/graph-shapes.json` (dev line)
+- **Tests** (`tests/line/graph.test.js`, 10):
+  - layout: copies across Z with angled transfers; reject branch in a side lane at the port's X; feeder upstream and a second side station in the next lane; a chain exactly as before
+  - playing:
+    - copies share the work (3 + 3 units) and cut the run by more than 30 %
+    - a reject branch (verdict by serial) sends units 2 and 4 to rework and 1 and 3 on
+    - a merge of two sources releases the run through both
+    - a buffer fills to 3, units rest a pitch apart, and the fast station upstream is done well earlier
+  - timing: copies divide the takt; a slow feeder off the main path doesn't set it
+  - factory.json: `parallel` and `capacity` checked, expanded, compiled, played; clashing copy id refused
+- `tests/line/line.test.js`: the old "branches are refused" test now checks what is still refused (loops, including a rework loop)
+
+**Limits (honest):**
+- **Transfers can cross:** in the dev line, the feeder's transfer to the far copy crosses the main loader's transfer to the near copy. Crossing or overlapping transfers aren't detected yet; that belongs to the Phase 7 overlap checks.
+- **Buffer motion:** queued units retarget when the head leaves (a fresh trapezoid from where each one is), not a continuous accumulation conveyor.
+- **Merges of different unit types** (a station assembling a unit from two kinds of input) are not supported: a merge feeds one input port with one unit type.
+
+**My mistakes this step (fixed before the results above):**
+- my first graph tests used an 8 s "slow" station that wasn't slow next to the fixtures' station overheads, and a buffer the rates never filled
+- the reject transfer in my test had no `from`; the port type check then caught my roller lane carrying `unit` on a pallet line (a good refusal)
+- the first feeder rule put the feeder level with the input, so its transfer ran through the station's infeed (seen in the screenshot)
+- one test expected the doser copies to be the bottleneck; with the doser's time shared, the marker is slower
+
+**Results**
+- `npm test`: 51 files, **1983 tests passed**
+- `npm run compile`: both example lines unchanged; `npm run schema` regenerated
+- `screenshots/graph-shapes.png`
+
+**Next:** step 6.7: products. A **parametric** product (box, cylinder, bottle or tray shapes with dimensions, stages as visual changes: filled, capped, labelled), and a **GLB** product (the owner's model with grasp points marked as refs), so a line can carry products that aren't in the catalog.
+
+### Step 6.7: products not in the catalog, parametric and GLB (approved)
+
+Step 6.6 approved by the owner (2026-11-24: "ok").
+
+**Result first:** a line can carry a product the catalog doesn't have.
+- **Parametric:** `product: { kind: "parametric", params: { shape: "bottle", … } }`. A box, cylinder, bottle or tray of any size, finish and colour, with stages raw → processed → filled → capped → labelled.
+- **GLB:** `product: { kind: "glb", file: "…glb", params: { grasp: [x, y, z] } }`. The owner's own model, rested on its base, with the grasp point they mark.
+
+`screenshots/bottle-doser.png` (`#/twin?demo=line&line=bottle-doser`) shows a parametric glass bottle on the composite doser of 6.4: the nozzle's stream in its neck, the juice rising (its `fill` routine), then its label laid round it.
+
+**Changed**
+- **`lib/products/parametric/index.js`** (type `parametric`):
+  - params: shape, length / width / height, finish (plastic, glass, metal, cardboard), colour, an optional processed colour (none: processing leaves the colour), liquid colour, fill level, cap colour, label text, serial (shown on the label)
+  - stages each include the ones before
+  - refs: `grasp`, `top` (on the cap once capped), `base`, `neckTop`, `capSeat`, `liquidSurface` (live), `labelSpot`
+  - features: `cap`, `label`
+  - routines: `fill`, `process` (colour blending), `label` (laid on from one edge)
+  - so the existing ops' product roles work on it unchanged (`fill`, `cap`, `runRoutine`, picks by grasp / top)
+  - a round product's label is **wrapped** (a band of the cylinder, drawn segment by segment as it is laid on); a box's or tray's is flat
+- **`lib/products/model/index.js`** (type `model`):
+  - the owner's GLB with `scale` and `turn`, rested on its base and centred
+  - `grasp` as marked (default: the middle of its top); `top`, `base`, `labelSpot` from its bounds
+  - stages raw → processed (its **own copies** of the model's materials tinted; the cached model and other units keep theirs) → labelled
+  - routines `process`, `label`; feature `label`
+- **Sample model:** `lib/assets/sampleCrate.glb` (6 KB crate with a lid and grip slots), written by `scripts/make-sample-glb.mjs`. No dependency: three.js geometry, glTF 2.0 binary written by hand. It exercises the import path without a user's file.
+- **Product assets:**
+  - registry products may declare `assets` (a list, or a function of their params); `buildProduct` refuses an unloaded file and says how to load it
+  - `preloadComponentAssets(registry, types, products)` also loads every product's assets at its defaults and those of the products given
+  - the twin page and compiled lines preload the line's product
+- **IR:** `product.kind` `parametric` / `glb`; `compiler/expand.js` maps them to the two product types and **checks the product's params at expand** (errors at `product.params.<field>`); `spec/factory.schema.json` regenerated
+- **Tests:**
+  - **new generic product checks** `tests/products/all-products.test.js` (33), for every product, as for components: every stage builds with every object named and no NaN, of a sensible size; every ref finite; every feature value; dispose. Products ride at belt height, so parts may reach below their origin (the printer's carrier skirt does, which my first version of the check flagged wrongly).
+  - `tests/products/generic-products.test.js` (8):
+    - the four shapes to size, standing on their base
+    - stages cumulative, no recolour unless asked
+    - the fill routine raising the live liquid surface; cap / label features; the wrapped label drawn half / whole
+    - the GLB rested and centred; grasp default and marked; turn and scale
+    - processed tint on its own materials only; refused before its file is loaded
+    - a parametric bottle in a line, filled and labelled by routine steps
+    - a GLB product checked; a bad param at `product.params.scale`; its missing `fill` routine reported by the dry plan
+- Golden images: `parametric-*` (5 stages), `model-*` (3 stages); dev line `app/dev/lines/bottle-doser.json`
+
+**My mistakes this step (fixed before the results above):**
+- the bottle's first label was a flat card standing out from the round body, and the default processed colour turned every glass bottle blue at "filled" (both seen in the golden images)
+- my GLB test looked for the mesh by its glTF name; the loader sanitises names ("Crate_body")
+- the generic product check first demanded nothing below the origin
+
+**Results**
+- `npm test`: 53 files, **2024 tests passed**
+- `npm run schema`; `npm run compile` (both example lines unchanged)
+- golden images (8); `screenshots/bottle-doser.png`
+
+**Next:** step 6.8, the last of Phase 6: a **test line built only from the generic level**:
+- basic blocks, composites, a placeholder where nothing fits
+- graph shapes (a reject branch or parallel copies, a buffer)
+- a parametric or GLB product
+
+Written as `factory.json`, checked, compiled, played and screenshot, to show the level holds together beyond the two reference lines. Then the Phase 6 wrap-up.
+
+### Step 6.8: a test line from the generic level only (done)
+
+Step 6.7 approved by the owner (2026-11-24: "ok").
+
+**Result first:** `spec/examples/bottling-line.factory.json` is a juice bottling line whose machines all come from the generic level. Its conveyors are the catalog belt, its reject lane the catalog roller lane.
+
+| Station | Built from |
+|---|---|
+| Filling ×2 (`parallel: 2`) | composite doser: portal frame + hung linear axis + vertical slide + dispensing nozzle; the bottle's `fill` routine |
+| *buffer* | edge capacity 3 (each copy's) |
+| Capping | composite capper: cantilever frame + vertical slide + hung rotary wrist + finger chuck; cap set on, wrist turns 3 times |
+| Inspection | composite vision: cantilever frame + vision camera; `decide` on the bottle's quality (`planAs: pass`); rejects over a roller lane |
+| Rework (reject branch, side lane) | placeholder "Rework bench" |
+| Case packing | placeholder "Case packer" |
+
+The product is a parametric glass bottle (0.09 × 0.26 m) whose quality fails for every 4th serial: deterministic, never random.
+
+It runs end to end:
+- checked, with both placeholders listed as warnings
+- compiled to `generated/bottling-line/` (7 files, takt 10.48 s: the two fillers share the slowest work)
+- a run of 10: each filler takes 5; every bottle reaches its end filled (0.85) and capped; serials 4 and 8 go to rework, the other 8 to packing
+- screenshots: `screenshots/bottling-line.png` (the whole line at 60 s) and `screenshots/bottling-inspect.png` (capping, inspection, the reject lane to the rework bench)
+
+**Found and fixed on the way (both real bugs):**
+1. **Serials repeated with two sources:** each source station numbered its own units, so both fillers made 1–5 (rework received serial 4 twice). A line now gives all its sources one numbering (`serialSource`). With one source the serials are as before (all reference tests unchanged). Pinned in the merge test.
+2. **A composite inherited the gallery example's short names:** a camera composite without `anchors` got `tool: nozzle` from the gallery example and was refused. Only `parts` defaults to the example now; short names default to none.
+
+**Changed**
+- `spec/examples/bottling-line.factory.json` (written by `scripts/make-bottling-line.mjs`); `generated/bottling-line/` (`npm run compile` compiles every example)
+- parametric product: fact `quality` (pass / reject), param `rejectEvery` (every Nth serial fails; 0: none)
+- `lib/station/StationCycle.js` `nextSerial` / `serialSource`; `lib/line/Line.js` shared numbering for sources
+- `lib/basics/composite.js`: example aliases removed from the defaults
+- Tests `tests/spec/bottling-line.test.js` (4):
+  - no tuned catalog machine, and every composite part a basic block
+  - the check: warnings, main path and side lane, takt from the shared filling
+  - the compiled files on disk = the compiler's output
+  - the run of 10 (fillers 5 + 5, filled and capped, 4 and 8 to rework)
+- `tests/line/graph.test.js`: serials unique across two sources
+
+**My mistakes this step (fixed before the results above):**
+- the inspection's camera first stood 0.5 m upstream of the work place (I moved it to clear the reject lane, which never needed it)
+- I first left the inspection's verdict unplanned, so the dry plan couldn't place the bottle for the output; `planAs: 'pass'` plans the usual path, as station 3 of the lubricant line does
+
+**Results**
+- `npm test`: 54 files, **2028 tests passed**
+- `npm run compile`: three example lines (bottling new; lubricant and printer unchanged)
+
+## Phase 6 status: done
+
+The generic level of Claude.md §6.6 is in place and holds together in a line that uses nothing tuned:
+
+| Piece | What |
+|---|---|
+| basic building blocks | 6 frames, 3 axes, 9 tools (6 new + gripper, vacuum pad, screwdriver), 3 transport, 3 buffers (2 new + `flowRack`), each with mount points for the next |
+| `composite` | machines put together from them in factory.json, measured footprint, motions / ports / mount points by part, short names |
+| `genericMachine` + `operate` | the placeholder, reported as a warning by `checkFactory` |
+| graph shapes | parallel copies, fan-out / fan-in, merges of sources, reject branches to a station, buffers; side-lane layout; takt rules |
+| products | parametric (shape, size, finish, stages, deterministic quality) and GLB (the owner's model, marked grasp point) |
+
+Throughout, both reference lines stayed exact: step-for-step timing, compiled files byte-for-byte.
+
+**Open for later phases:**
+- crossing / overlapping transfers aren't detected (Phase 7 overlap checks)
+- buffers move queued units in steps, not as continuous accumulation
+- merges carry one unit type (no two-input assembly)
+- the rule-6 wording in Claude.md (`lib/basics/**`, the IR keywords `composite` / `genericMachine`) waits for the owner
+
+**Next:** Phase 7, the deterministic reviewer. All Claude.md §7.3 checks, run from a CLI and the API, with clear messages:
+- schema; types and ops in the catalog; op ↔ machine
+- footprint overlaps (including the crossing transfers above); ports and flow types along edges
+- reach of robots and gantries; cycle time against the takt target
+- compiled files import and build headless
+
+I'll propose how to split it before starting.

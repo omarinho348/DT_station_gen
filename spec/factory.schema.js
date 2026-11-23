@@ -59,11 +59,20 @@ export const Product = z.discriminatedUnion('kind', [
     type: camelType.describe('Catalog product type'),
     params,
   }),
-]).describe('What flows down the line');
+  z.object({
+    kind: z.literal('parametric'),
+    params: params.describe('Shape (box | cylinder | bottle | tray), length / width / height (m), finish, colours, fill level, label text; stages raw → processed → filled → capped → labelled'),
+  }),
+  z.object({
+    kind: z.literal('glb'),
+    file: z.string().regex(/^[\w.-]+\.glb$/, 'a .glb file name in lib/assets/').describe('The owner\'s model of the product'),
+    params: params.describe('scale, turn, grasp [x, y, z] (the grasp point the user marked), processedTint, labelText'),
+  }),
+]).describe('What flows down the line: a catalog product, a parametric one, or the owner\'s GLB model');
 
 export const Equipment = z.object({
   id,
-  type: camelType.describe('Catalog component type'),
+  type: camelType.describe('Catalog component type; "composite" for a machine put together from parts (params.parts: basic frames, axes, tools, each on a mount point of an earlier one)'),
   params,
   position: vec3.default([0, 0, 0]).describe('Station-local position (m): flow +X, walkway +Z'),
   rotationY: z.number().min(-Math.PI * 2).max(Math.PI * 2).default(0).describe('Turn about the vertical axis (rad)'),
@@ -90,6 +99,7 @@ export const Station = z.object({
   conveyor: id.optional().describe('Station conveyor id (default: the shell\'s)'),
   workState: upper.default('WORKING'),
   role: z.enum(['station', 'transfer']).default('station').describe('transfer: a station that carries units between two others (a row former); a line plays it with its transfers, after the stations each frame'),
+  parallel: z.number().int().min(2).max(6).optional().describe('Copies of this station working side by side (a slow station): ids <id>1 … <id>N, each edge to or from it repeated for every copy; units go to whichever copy has room'),
   inputStage: z.string().optional().describe('Product stage a unit arrives in'),
   unit: z.object({ type: camelType.describe('Catalog product type'), params }).optional()
     .describe('What this station\'s units are, when not the line product (cases a station upstream packed the products into): fed stand-alone and planned with'),
@@ -168,7 +178,9 @@ export const Edge = z.object({
     kind: z.enum(['conveyor', 'direct']).default('conveyor').describe('conveyor: a transfer conveyor fills the gap; direct: the two ports meet (the layout stands the stations so) and the unit is handed over where it stands'),
     type: camelType.optional().describe('Catalog component for the transfer (conveyor)'),
     params,
-  }).refine((t) => t.kind === 'direct' || t.type, { message: 'a conveyor transport needs its catalog type', path: ['type'] }),
+    capacity: z.number().int().min(1).max(20).optional().describe('Units the transfer holds queued, a pitch apart (a buffer between two stations); default 1'),
+  }).refine((t) => t.kind === 'direct' || t.type, { message: 'a conveyor transport needs its catalog type', path: ['type'] })
+    .refine((t) => t.kind !== 'direct' || (t.capacity ?? 1) === 1, { message: 'a direct hand-over holds one unit (no capacity)', path: ['capacity'] }),
 });
 
 export const Graph = z.object({

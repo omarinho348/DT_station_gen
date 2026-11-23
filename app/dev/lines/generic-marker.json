@@ -1,0 +1,103 @@
+{
+  "about": "Dev check (#/twin?demo=line&line=generic-marker): a placeholder machine (genericMachine, Phase 6 step 5) in a line: right size, ports and timing, PLACEHOLDER sign, lamps and progress bar, driven by the operate op.",
+  "camera": {
+    "position": [
+      2.6,
+      2.4,
+      3.4
+    ],
+    "target": [
+      0,
+      1,
+      0
+    ]
+  },
+  "factory": {
+    "version": 1,
+    "line": {
+      "id": "markDemo",
+      "title": "Marking demo (placeholder)",
+      "runSize": 6,
+      "conventions": {
+        "beltHeight": 0.86
+      }
+    },
+    "product": {
+      "kind": "catalog",
+      "type": "jerryCan",
+      "params": {
+        "height": 0.33
+      }
+    },
+    "stations": [
+      {
+        "id": "mark",
+        "title": "Laser marking",
+        "conveyor": "belt",
+        "inputStage": "empty",
+        "ports": {
+          "input": {
+            "machine": "belt",
+            "port": "input"
+          },
+          "output": {
+            "machine": "belt",
+            "port": "output"
+          }
+        },
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {
+              "length": 2.6
+            }
+          },
+          {
+            "id": "marker",
+            "type": "genericMachine",
+            "params": {
+              "name": "Laser marker",
+              "note": "fiber laser, 20 W",
+              "length": 1.2,
+              "depth": 0.9
+            }
+          }
+        ],
+        "intake": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": {
+              "machine": "marker",
+              "port": "work"
+            },
+            "label": "Into the marker"
+          }
+        ],
+        "process": [
+          {
+            "op": "operate",
+            "machine": "marker",
+            "seconds": 6,
+            "label": "Marking"
+          }
+        ],
+        "output": [
+          {
+            "op": "transfer",
+            "conveyor": "belt",
+            "to": "output",
+            "label": "Out"
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      }
+    ],
+    "graph": {
+      "edges": []
+    }
+  }
+}

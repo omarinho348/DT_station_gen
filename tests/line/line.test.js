@@ -43,9 +43,10 @@ describe('layout', () => {
     close(l.stations.a.x + l.stations.c.x, 0); // centred
   });
 
-  it('refuses graphs it cannot lay out yet, with clear messages', () => {
-    expect(() => flowOrder(['a', 'b', 'c'], [{ from: 'a.output', to: 'b.input' }, { from: 'a.reject', to: 'c.input' }])).toThrow(/branches and merges are not laid out yet/);
+  it('refuses graphs it cannot lay out, with clear messages (branches are laid out: tests/line/graph.test.js)', () => {
+    expect(flowOrder(['a', 'b', 'c'], [{ from: 'a.output', to: 'b.input' }, { from: 'a.reject', to: 'c.input' }])).toEqual(['a', 'b']);
     expect(() => flowOrder(['a', 'b'], [{ from: 'a.output', to: 'b.input' }, { from: 'b.output', to: 'a.input' }])).toThrow(/loop/);
+    expect(() => flowOrder(['a', 'b', 'c'], [{ from: 'a.output', to: 'b.input' }, { from: 'b.reject', to: 'c.input' }, { from: 'c.output', to: 'a.input' }])).toThrow(/rework lane cannot feed back upstream/);
     expect(() => flowOrder(['a', 'b', 'c'], [{ from: 'a.output', to: 'b.input' }])).toThrow(/2 separate parts/);
     expect(() => flowOrder(['a'], [{ from: 'a.output', to: 'x.input' }])).toThrow(/unknown station "x"/);
     expect(() => flowOrder(['a'], [{ from: 'a.output', to: 'a.input' }])).toThrow(/cannot feed itself/);

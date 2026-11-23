@@ -106,13 +106,17 @@ export function GalleryPage(outlet, route) {
     if (keepState) for (const [k, v] of Object.entries(keepState)) inst.set(k, v);
     viewer.content.add(inst.root);
     const fp = inst.footprint;
+    // Parts that hang below their origin (tools, hung axes: footprint bottom < 0) are lifted so they
+    // show above the floor; the overlay moves with them.
+    const lift = -(fp.bottom ?? 0);
+    inst.root.position.y = lift;
     // Overlay: footprint box + port markers (a Box3Helper rescales its children, so both
     // live side by side in a plain group).
     footprintBox = new Group();
     footprintBox.name = 'overlay';
     footprintBox.visible = showFootprint;
     const outline = new Box3Helper(
-      new Box3(new Vector3(fp.x[0], 0, fp.z[0]), new Vector3(fp.x[1], fp.height, fp.z[1])),
+      new Box3(new Vector3(fp.x[0], fp.bottom ?? 0, fp.z[0]), new Vector3(fp.x[1], fp.height, fp.z[1])),
       new Color(0x00c1b6),
     );
     outline.name = 'footprint';
@@ -126,6 +130,7 @@ export function GalleryPage(outlet, route) {
       marker.renderOrder = 10;
       footprintBox.add(marker);
     }
+    footprintBox.position.y = lift;
     viewer.scene.add(footprintBox);
     if (frame) frameCamera();
     renderPanel(def);
@@ -137,6 +142,8 @@ export function GalleryPage(outlet, route) {
     clearTimeout(errorTimer);
     el.hidden = !message;
     if (message) {
+      // Also to the console: scripts/golden.js fails a shot whose page logged a gallery error.
+      console.error(`gallery error: ${message}`);
       el.querySelector('span').textContent = message;
       errorTimer = setTimeout(() => (el.hidden = true), 6000);
     }
