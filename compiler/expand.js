@@ -81,6 +81,10 @@ export function expandStation(registry, station, ctx = {}) {
     home: station.home,
     stock: station.stock,
     stacks: station.stacks,
+    // Only when there are any, so stations without connections compile exactly as before.
+    connections: station.connections?.length ? station.connections : undefined,
+    indexing: station.indexing, // undefined (left out) for single-unit stations
+    sensors: station.sensors?.length ? station.sensors : undefined,
     status: station.status,
     signals,
     feed: station.feed,

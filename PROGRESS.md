@@ -15,6 +15,14 @@ Source of truth for requirements: [Claude.md](Claude.md). One step at a time; ea
   - **Twin page**, dark theme: full-screen 3D, station-by-station Builder approval with diffs, chat drawer, KPI overlay, zip download.
   - Siemens petrol `#009999` for text accents (project sponsor). OpenAI only, plus mock mode; the UI shows "key found / missing" and never asks for the key. No login or roles.
 
+- **Palletizing robot** (Claude.md §13, asked 2026-11-23): **both**. A procedural 4-axis palletizer (`palletizerRobot`) is the default component; the ABB IRB 6760 (reference `robot.glb`, `InverseKinematics.js`, `Rig.js`, IRB 6760 rig, copied read-only) comes as an optional component for a reference-quality station 3.
+- **Stretch wrapper** (Claude.md §13, asked 2026-11-23): **procedural**. `Wrapping.STEP` is neither converted nor loaded; `occt-import-js` stays out.
+
+- **Lubricant line** (asked 2026-11-23, Phase 5 step 9):
+  - station 1 as a generic **indexing station** (positions on one conveyor, one synchronous index per cycle, then the work at each occupied position), so the timing matches the reference
+  - station 3 uses the **ABB IRB 6760**; the procedural palletizer stays the default for agent-built lines
+  - fidelity as for the printer line: **recorded reference timing + screenshot comparison**
+
 ## Phase 0: Set-up
 
 ### Step 1: Project scaffold (approved)
@@ -1052,3 +1060,632 @@ Phase 4 step 8 approved by the owner (2026-11-23: "start phase 5 step 1").
 - `npm run golden beltConveyor jerryCan`: 4 written. Checked by eye: the conveyor with guides, drums and motor; the can empty, filled (oil visible through the body) and capped (blue cap on the neck).
 
 **Next:** Phase 5 step 2: the filling machine and the capping machine (from `FillingMachine.js` / `CappingMachine.js`), with the conveyor tunnel (`createConveyorTunnel`, in the same reference file as the conveyor). The capper uses `lib/core/screwCap.js`.
+
+### Step 2: `filler`, `capper`, `conveyorTunnel` (done)
+
+Step 1 approved by the owner (2026-11-23: "start phase 5 step 2").
+
+**Changed**
+- `lib/components/machines/portalCommon.js` (helpers, not a component): the reference `buildPortalFrame` (posts, base plates, rails, polycarbonate guards), the control cabinet, the roof stack light, and `headXs` (head positions, rounded so ports and compiled files carry no `0.6000000000000001`).
+- **`filler`** (`lib/components/machines/filler.js`), from the reference `FillingMachine.js`:
+  - params `heads` (1–8, default 4), `pitch` (0.4 m), `tipHeight` (lowered nozzle tips above the belt, 0.353 m = the can's neck rim − 45 mm insertion), `stroke` (0.25 m)
+  - ports `work` (batch) and `head1…headN` (the nozzle axes at belt height, where a container's neck goes)
+  - motions `headTravel` (0 raised … 1 lowered), `jetStart` / `jetEnd` (top and bottom of the oil streams below the tips, in m: the oil surface while dispensing, the falling tail after the valves close), `beacon` (`off | run | wait | alarm`, the roof stack light; stations can use it as their signal tower)
+  - anchors for next step's hoses: `productInlet` / `airInlet` (on the moving manifold), `productBulkhead` / `airBulkhead` (cabinet underside), `rearInlet`
+  - the manifold, guide shafts and frame width follow the head count; at the defaults every number is the reference's (tips 1.463 / 1.213 m, cabinet at 2.05 m, posts at ±0.95 m, nozzles at ±0.2 / ±0.6 m)
+- **`capper`** (`lib/components/machines/capper.js`), from the reference `CappingMachine.js`:
+  - params `heads`, `pitch`, `seatHeight` (cap centre above the belt when screwed on, 0.388 m = the can's `capSeat`), `stroke` (0.26 m), `capRadius` / `capHeight`, `capColor` (`blue | yellow`, the can's two looks)
+  - motions `headTravel`, `spin` (chuck turn phase, `wrap`, one turn per range), `caps` (`loaded | empty`: handed over to the containers), `capFeed` (0 = fresh caps up in the sleeves, 1 = seated in the jaws), `beacon`
+  - elevated vibratory cap feeder with 18 caps in the bowl (a fixed spiral) and a gravity chute into the back of the cabinet; the bowl height follows the cabinet
+  - chuck caps are the same cap as the can's own (`lib/core/screwCap.js`). A test puts a can's neck under `head2` and checks that the lowered chuck cap is exactly on its `capSeat`.
+- **`conveyorTunnel`** (`lib/components/conveyors/conveyorTunnel.js`), from the reference `createConveyorTunnel`: params `length`, `beltWidth`, `clearHeight` (0.58 m), `open` (`+X | -X`, the end with the product opening). Port `opening` (`out` at +X, `in` at −X).
+- Tests `tests/components/lubricant.test.js` (14):
+  - filler: reference numbers; nozzles 45 mm into the neck of a can under a head port; jets and splash; beacon lamps; a long stroke; hose anchors moving with the head or not; 1 and 8 heads
+  - capper: reference numbers; caps exactly on the can's cap seat, same size as the can's cap; spin / hand-over / feed; feeder and chute; lift cylinders with 1 and 2 spindles
+  - tunnel: open and closed ends; over the tail of a belt conveyor of the same width with no part touching it, a capped can passing under the roof
+- The generic checks cover all three at default / min / max (54 more).
+- Golden images: `filler`, `capper`, `conveyorTunnel`.
+
+**Fixes / differences vs the reference (deliberate)**
+1. **Capper chucks floated.** The spindle shaft stopped 8 mm above the chuck sleeve; it now reaches into it.
+2. **Roof stack lights floated.** The lamps stood 5 mm apart and the cap 3 cm above the top lamp; a core tube joins them (as the station `stackLight` in Phase 2).
+3. **Tunnel**:
+   - It hung beside the conveyor frames touching nothing; it now has four stands on the outer faces of its walls, clear of the conveyor's legs and feet.
+   - Its walls cut 1 cm into the conveyor's drum bearing housings where it covers a conveyor end (as the reference infeed does). It's 2 cm wider per side, so it clears them by 5 mm.
+4. **Capper with one or two spindles**: the reference put both lift cylinders on the centre line (two spindles) or at a fixed ±0.62 m. They now go 0.2 m outside the spindles. This doesn't change four spindles.
+5. **Long strokes**: the cabinet stays at the reference 1.19 m above the belt unless a long stroke needs more room for the raised head. Then it rises instead of the params being refused.
+6. Oil-stream splash: the reference pulsed it with a clock. Motions take no time, so it's a steady ring; a pulse can come from the fill op later if it's wanted.
+
+**Known, not changed:** the cap chute's two rails are offset along z (as in the reference), so with this chute direction one rail enters the cabinet and the other stops 3 cm behind it. Both hang from the bowl, so nothing floats.
+
+**Note for the line step:** in the reference the outfeed tunnel covers the outfeed conveyor's discharge end, where its gear motor is, so the motor pokes through the tunnel wall. When the lubricant line is written as data, that conveyor should drive from its other end or have no motor drawn.
+
+**Results**
+- `npm test`: 30 files, 1051 tests passed. The rule-6 guard first caught "filler" / "capper" in a comment of the can product (now catalog names); I reworded the comment.
+- `npm run golden filler capper conveyorTunnel`: 3 written and checked by eye. I didn't screenshot the machines in action over a belt with cans; the head, jets, spin and feed are checked numerically.
+
+**Next:** Phase 5 step 3: oil tank, transfer pump, hoses and sensors (`OilTank.js`, `OilHoses.js`, `OilSensors.js`), connected to the filler's anchors.
+
+### Step 3: `supplyTank`, `photoEye`, filler hoses (done)
+
+Step 2 approved by the owner (2026-11-23: "start phase 5 step 3").
+
+**Changed**
+- **`supplyTank`** (`lib/components/machines/supplyTank.js`): the supply side of the reference oil station as one unit. It's built from `OilTank.js` (tank, transfer pump), the supply piping of `OilFillingStation.js` and the tank level transmitter of `OilSensors.js`:
+  - tank on legs (dished head, manway with lid bolts, vent, stiffening rings, outlet cone, level sight glass, name plate), ultrasonic level transmitter on the head
+  - transfer pump on its skid `pumpOffset` towards +X (default 0.975 m: in the reference station the pump stands under the filler's rear inlet)
+  - suction line from the outlet cone to the pump, with its ball valve; discharge stub up to 1.5 m with the discharge valve (0.95 m) and pressure gauge (1.45 m), where the reference riser had them
+  - params `radius`, `height`, `legHeight`, `pumpOffset`, name plate `tag` / `contents`
+  - motion `level` (sight glass, default 0.85); anchor `discharge` (top of the stub, where the line on to the filler starts)
+- **`photoEye`** (`lib/components/fixtures/photoEye.js`), from the reference `createPhotoEye`:
+  - emitter / receiver with status LED and cable on the front rod, reflector on the rear rod
+  - mount `surface`: it stands on the conveyor's side frames (y = 0 is the frame top), rods `span` apart; the beam is 0.2 m above the belt on a belt conveyor
+  - motion `beam` (`clear | blocked`): LED amber / green
+- **`filler`**: the reference flexible **product hose** and **pneumatic line**, from the cabinet bulkheads to the manifold inlets, same spline shapes. They're rebuilt whenever `headTravel` moves the head, so they follow it.
+- Tests (in `tests/components/lubricant.test.js`, now 20):
+  - hoses end at their anchors raised and lowered, and drop with the head
+  - supply tank reference numbers, discharge anchor at (0.975, 1.5, 0), sight-glass level, the transmitter sitting on the dished head (ray-cast onto the head), pump-inside-tank refused
+  - a photo-eye standing on both side frames of a real `beltConveyor`, beam 0.2 m above the belt and across a jerry can
+  - the LED states
+- The generic checks cover the two new components at default / min / max.
+- Golden images: `supplyTank`, `photoEye`, `filler` (re-rendered with its hoses).
+
+**Fixes / differences vs the reference (deliberate)**
+1. Several parts of the supply side floated (found by the generic "nothing floats" check):
+   - **Sight glass:** its valves stood 5 mm off the tube ends; they now overlap them.
+   - **Pump motor:** it hung 1 cm off the bearing frame with nothing under it. The bearing frame now reaches it and it stands on motor feet on the skid.
+   - **Suction valve lever:** for a valve on a pipe along z, the handle stayed long in x and missed its stem. It now turns with the valve.
+2. **Level transmitter:** it was set at the dome's apex height, 1.8 cm above the head where it stood. It now stands on the head.
+3. **Photo-eye:**
+   - In the reference its rods stood 1 cm outside the conveyor frames and touched nothing. As a component it stands on the frames.
+   - Its cable hung 2.5 cm below the housing; it now leaves the housing's underside.
+   - The two LED materials are now one material, recoloured, so nothing is left undisposed.
+4. **Discharge valve and gauge:** they're on the tank unit's own discharge stub rather than on the riser.
+5. **Name plate:** it reads "LIQUID SUPPLY" instead of "LUBE OIL SUPPLY"; the tag and contents lines are params.
+
+**Not in this step: the riser from the pump to the filler.** It joins two machines (tank unit `discharge` → filler `rearInlet`), so no single component can own it. The generic way is station-level **connections** between machine anchors in the IR. For example, `{ from: 'supply.discharge', to: 'filler.rearInlet', kind: 'pipe', radius: 0.026 }`, drawn by the station runtime as a rigid run (up, then across), or as a flexible hose that follows moving anchors. I propose that as the next step.
+
+**Results**
+- `npm test`: 30 files, 1093 tests passed.
+- `npm run golden supplyTank photoEye filler`: 3 written and checked by eye.
+
+**Next (proposed):** Phase 5 step 4: station-level connections (pipes and hoses between machine anchors) in the factory schema, the station runtime and the compiler, used for the pump → filler riser.
+
+### Step 4: Station connections (pipes and hoses between machines) (done)
+
+Step 3 approved by the owner (2026-11-23: "start phase 5 step 4").
+
+**Result first:** a station can now join two machines with a pipe or hose, written as data in factory.json:
+
+```json
+"connections": [{ "id": "riser", "from": "supply.discharge", "to": "filler.rearInlet" }]
+```
+
+The reference oil station's product riser is drawn exactly where the reference had it: up from the pump discharge to the inlet height, one elbow, then along Z to the filler's rear inlet, flanged at both ends. It's checked before anything is built, played in the station frame, and compiled into the station file.
+
+**Changed**
+- `lib/station/connectionSpec.js` (data only, no three.js):
+  - the `Connection` schema: `id`, `from` / `to` (`"machine.anchor"`), `kind` (`pipe | hose`), `radius` (default 0.026 / 0.018 m), `material` (one of the shared library's: stainless, brushed, aluminium, hose, airLine, frame, cableBlack)
+  - pipe options: `route` (`up` rises to the end height first, then X, then Z; `across` runs first, then rises) and `flanges`
+  - hose options: `sag`, `startTangent`, `endTangent`
+  - repeated ids are refused; `connectionProblems(connections, machines)` checks unknown machines and missing anchors, naming the anchors the machine has
+- `lib/station/connections.js`:
+  - `pipeRoute(a, b, route)` (corners only: repeated points and straight-through corners dropped)
+  - `buildConnections({ connections, equipment, root, materials })` draws them under a `Connections` group in the station frame. Each is redrawn only when one of its ends moved, so a hose to an anchor on a moving head follows it. Materials are shared; only geometry is freed.
+- `lib/station/stationSpec.js` and `spec/factory.schema.js`: `connections` on a station (default none); `spec/factory.schema.json` regenerated.
+- `lib/station/StationCycle.js`:
+  - `planStation` (the dry plan, so `checkFactory` too) refuses bad connection ends before anything is built
+  - a playing station builds its connections, updates them on every refresh and frees them on dispose
+- `compiler/expand.js`: passes `connections` through only when a station has any, so stations without them expand and compile exactly as before. **`generated/printer-line/` is byte-identical** (the on-disk test passes).
+- `app/dev/lines/oil-supply.json`: dev check line (`#/twin?demo=line&line=oil-supply`) with belt, filler, supply unit and the riser connection. The process is a stand-in wait until the lubricant station is written.
+- Tests `tests/station/connections.test.js` (11):
+  - routes: up / across, corners dropped, the reference riser = 3 points
+  - schema: defaults; bad end, repeated id and unknown material refused with paths
+  - dry check: unknown anchor (with the anchors the machine does have) and unknown machine
+  - stations without connections expand without the field
+  - runtime: the reference riser's two segments, elbow at (−0.325, 2.21, −1.5) and flanges; same inside a moved station root; a hose to the filler's moving inlet following the head; a station refusing an anchor its machine lacks
+  - compiler: the station file carries the connection, and the compiled line, written to `generated/_draft/` and imported, draws it
+
+**Results**
+- `npm test`: 31 files, 1104 tests passed. The rule-6 guard caught "filler" in a comment of the new module; I reworded it.
+- Screenshots:
+  - `screenshots/oil-supply.png`: the dev line running, beacon green, can on the belt
+  - `screenshots/oil-supply-rear.png`: from behind, the riser from the pump up past the discharge valve, elbow, into the back of the filler cabinet
+
+**Not changed:** the filler's own two hoses stay inside the component (both their ends are on the filler). Connections are for things that join two machines.
+
+**Next:** Phase 5 step 5: the case-packing side, from station-2: `PickAndPlaceRobot` (gantry with four handle grippers), `CaseCloser`, `PackingLineEquipment`, and the `CardboardCase` mapped onto our `carton` product.
+
+### Step 5: `packingGantry`, `caseCloser` (done)
+
+Step 4 approved by the owner (2026-11-23: "start phase 5 step 5").
+
+**Correction to step 4:** I ran step 4's full test suite *before* adding the dev line `app/dev/lines/oil-supply.json`. That file then broke `tests/line/line.test.js` ("every dev line moves its first unit into the second station"), because it has one station. Step 4's "1104 passed" didn't cover it. Fixed here: the test now also accepts one-station dev lines, which must take their first unit through the station without errors. `oil-supply` does.
+
+**Changed**
+- **`packingGantry`** (`lib/components/robots/packingGantry.js`), from the reference `PickAndPlaceRobot.js`:
+  - two-axis Cartesian gantry: carriage along Z on twin beams, vertical mast, gripper head with a grid of pneumatic handle grippers on pitch-change rails
+  - params `columnZ` (1.65), `beamY` (2.45), `columns` (2) × `columnPitch` (0.28), `rows` (1–2)
+  - motions in metres, like `cartesianGantry`: `z`, `y` (gripper origin height), `pitch` (row spacing), `grip` (finger gap), plus `beacon` (`off | run | wait | alarm`, one lamp recoloured)
+  - anchors `grip1…gripN` (rear row first, each along +X), each at the point it holds, so ops can carry items on them
+  - a grid of handle grippers rather than a single tool, so the existing `pickPlace` (which needs x / yaw and one `tool` anchor) doesn't drive it. A multi-item pick op comes with the station step.
+- **`caseCloser`** (`lib/components/machines/caseCloser.js`), from the reference `CaseCloser.js`:
+  - sized from the case it closes: params `caseLength` / `caseWidth` / `caseHeight` / `flap`, reference 0.62 × 0.42 × 0.42; heights follow the belt
+  - port `work` (`case`)
+  - motions in metres measured from the case, as the reference: `tuckerOut`, `tuckerUp`, `folderOut`, `plateUp`. Defaults are the reference park positions; ranges cover what the reference cycle uses.
+- **The reference case = our `carton`** (ported in Phase 4 step 6) with `{ length: 0.62, width: 0.42, height: 0.42, foam: 0 }`; no new product.
+- Tests `tests/components/packing.test.js` (8):
+  - gantry: reference frame and gripper positions; pitch to the case layout (z ±0.1); reach of both conveyors (z ±0.75) and both reference heights (pick 1.242 m, travel 1.942 m)
+  - **closed fingers hook under a jerry can's handle** (plates clear of the grip faces, lips under its underside; open, the lips clear it); one row of four; beacon
+  - closer: reference beam, columns, folder cylinders, plate size; **parked, an erected case with open flaps passes underneath touching no tool**; tools moving to the reference positions, the pad landing on the closed top
+  - carton: four 0.33 m cans in the reference 2 × 2 layout inside the walls and under the flaps
+- The generic checks cover both at default / min / max.
+- Golden images: `packingGantry`, `caseCloser`.
+
+**Fixes / differences vs the reference (deliberate)**
+1. **Grippers floated.**
+   - The reference's two pitch rails sat 6 cm beside the grippers and 5 mm above their carriages. There's now one rail per gripper column, and the carriages reach it.
+   - The carriage servos hovered 2 cm above the carriage plate, touching only the raised mast. They now stand on the plate, 2 cm further out so they clear the mast.
+2. **End stops:** they stood between the beams on nothing. They now span both beams.
+3. **Gantry beacon:** the reference swapped two lamp materials (running green / idle amber). It's now one material, recoloured for the four standard modes.
+4. **Case closer:** the folder rod length and the cylinder and column positions follow the case width. They equal the reference at 0.42 m, and the rods stay in their cylinders over the whole travel at other widths.
+
+**Results**
+- `npm test`: 32 files, 1148 tests passed (including the fixed dev-line test).
+- `npm run golden packingGantry caseCloser`: 2 written and checked by eye.
+
+**Next:** Phase 5 step 6: the input and case-line fixtures from `PackingLineEquipment.js`:
+- the two-lane **lane divider** with its bridges and the **can end stop**, on a belt conveyor's frames
+- the **swing-arm case stop**
+- whether our `caseTaper` and `caseErector` (Phase 4 step 6) cover the reference's top taper and erector tunnel, or need params
+
+### Step 6: case-packing conveyor fixtures, `inlineTaper` (done)
+
+Step 5 approved by the owner (2026-11-23: "start phase 5 step 6").
+
+**Changed**
+- **`laneDivider`** (`lib/components/fixtures/laneDivider.js`): the blade that splits a belt into two lanes, hung from bridges standing on the conveyor's side frames. From the reference `createInputConveyor` (LaneDivider).
+  - params `length` (2.66 m), `span` (frame spacing, 0.58 m for a 0.52 m belt)
+  - bridges spread along the blade; with two they stand at 30 % / 70 % of it, within 3 cm of the reference's (−1.58 / −0.52 m against −1.6 / −0.55 m)
+- **`beltEndStop`** (`lib/components/fixtures/beltEndStop.js`): a yellow bar with a rubber bumper on posts on the frames, where units accumulate. Origin at the stop face; port `stop` at belt height.
+- **`swingStop`** (`lib/components/fixtures/swingStop.js`): a bracket on one side frame, a rotary actuator, and a blade swinging across the belt (`open` 0 → 1 swings it clear along the frame). The bumper face is the stop face, x = 0; param `reach`; port `stop` (`case`).
+- The three stand on a conveyor's frames like `photoEye` (mount `surface`, y = 0 = frame top, 1 cm above a `beltConveyor`'s belt).
+- **`inlineTaper`** (`lib/components/machines/inlineTaper.js`), from the reference station-2 top taper:
+  - a bridge over the case conveyor with a fixed taping head (cover, tape roll with index mark, web, wipe rollers) at the case-top height; the case is taped as it is conveyed under it
+  - params `caseHeight`, `beltWidth`; port `work` (`case`)
+  - motion `feed` (`wrap`, one tape-roll turn = 2π · 0.09 m of tape, `travel` set so conveyor ops can scroll it with the case); the wipe rollers turn with it
+- **Reused, not new:**
+  - the reference erector tunnel is a `conveyorTunnel` with `clearHeight: 0.7`
+  - our `caseTaper` (Phase 4 step 6) is a different machine (its head travels over a standing carton), so it stays as it is next to `inlineTaper`
+- Tests (in `tests/components/packing.test.js`, now 12), all on a real 0.52 m `beltConveyor`:
+  - divider bridges standing on both frames, blade clear of the belt, two cans in the reference lanes (z ±0.13) clear of the blade and of the conveyor's guides (`guideGap` 0.46)
+  - a can's leading face resting on the end-stop bumper, the stop port at belt height
+  - the swing stop's blade crossing the case path closed and lying along the frame open
+  - a closed reference case passing between the taper columns, wipe rollers 2 mm above its top; `feed` turning roll and rollers
+- The generic checks cover all four at default / min / max (72).
+- Golden images: `laneDivider`, `beltEndStop`, `swingStop`, `inlineTaper`.
+
+**Fixes / differences vs the reference (deliberate)**
+1. **End stop:** the bar stopped 2 cm short of its posts (on nothing). It now reaches them.
+2. **Divider bridges and end-stop posts:** they hung 2.5 cm outside the conveyor frames. As components they stand on the frames.
+3. **Swing-stop bracket:** it hung beside the frame, reaching 15 cm below the belt, attached to nothing. It now stands on the frame top.
+4. **Taping head:** the cover, wipe rollers and web touched neither each other nor the hanger; only the tape roll did. A side plate and a top bar now carry them all, and the roll has an axle.
+
+**Results**
+- `npm test`: 32 files, 1224 tests passed.
+- `npm run golden laneDivider beltEndStop swingStop inlineTaper`: 4 written and checked by eye.
+
+**Phase 5 components so far:**
+- station-1 (filling): `beltConveyor`, `conveyorTunnel`, `filler`, `capper`, `supplyTank`, `photoEye`, products `jerryCan`; station connections (riser)
+- station-2 (case packing): `packingGantry`, `caseCloser`, `laneDivider`, `beltEndStop`, `swingStop`, `inlineTaper`; the case is our `carton`
+
+**Next:** Phase 5 step 7: station-3 (palletizing). From `station-3/` (`ProceduralConveyor`, `ProceduralPallet`, `ProceduralBox`, `ProceduralBoxSourceMachine`, `AssetWrapMachine`, `ProceduralWorker`), first mapping what we already have (`blockPallet`, `carton`, `beltConveyor`) and what is new (box source, stretch wrapper, worker). Then the factory pieces (`SupplyRack`, `TransferLines`).
+
+### Step 7a: `palletizerRobot` (done)
+
+Step 6 approved by the owner (2026-11-23: "start phase 5 step 7").
+
+**Decisions asked and answered** (Claude.md §13), now in the decision list at the top:
+- palletizing robot: **both** (procedural default plus the ABB as an optional component)
+- stretch wrapper: **procedural**
+
+Step 7 is split accordingly:
+- **7a** palletizer robot (this step)
+- **7b** procedural stretch wrapper with the reference spiral film
+- **7c** case source machine and the pallet-moving worker
+- **7d** the ABB IRB 6760 port
+
+**Mapped, no new component needed:**
+- the station-3 pallet = `blockPallet` (Phase 4 step 6, from the same `ProceduralPallet.js`)
+- the case = `carton` (0.62 × 0.42 × 0.42)
+- the station-3 wide belt (1.05 m) is close to `beltConveyor`, whose `beltWidth` stops at 1.0 m today; I'll widen that range when station 3 is written, if needed
+
+**Changed**
+- **`palletizerRobot`** (`lib/components/robots/palletizerRobot.js`), procedural, not a port:
+  - pedestal, turret (axis 1), lower arm (axis 2), upper arm (axis 3) with a parallelogram crank and rod that keep the wrist level, wrist turn (axis 6), vacuum pad gripper (6 cups, vacuum lamp)
+  - params `shoulderHeight` (1.05), `lowerArm` (1.2), `upperArm` (1.35): reach 3.0 m, like an IRB 660; `padLength` / `padWidth`; `color`
+  - **driven like the gantries**: motions `x` / `y` / `z` / `yaw` are the tool point (centre of the cup faces) and the tool's turn in the robot frame, solved by closed-form IK (elbow up) inside the component, plus `grip` (vacuum 0 off / 1 on) and anchor `tool`. That is the tool interface `pickPlace` checks, so the generic pick-and-place ops can drive it.
+  - a target out of reach is clamped to the limit (no crash mid-cycle); `palletizerReach(params, point)` reports reach for tests and, later, the Phase 7 reviewer. `palletizerIK` is exported as well.
+- Tests `tests/components/palletizing.test.js` (5):
+  - the tool point lands exactly on reachable targets with the commanded yaw, and stays level
+  - link lengths held, parallelogram rod ∥ lower arm, crank ∥ upper arm
+  - out of reach clamped and reported
+  - **every cell of a reference 3 × 3 × 3 pattern** of 0.62 × 0.42 × 0.42 cases on a 0.144 m pallet beside the robot (stack centre 2 m away), the clearance over the full stack, and a pick from a 0.82 m conveyor are all reachable
+  - the pick-and-place tool interface; turning the tool moves only the flange
+- The generic checks cover it at default / min / max, every motion through its range (18).
+- Golden image: `palletizerRobot`.
+
+**Results**
+- `npm test`: 33 files, 1247 tests passed.
+- `npm run golden palletizerRobot`: written and checked by eye: pedestal, turret, arm with its parallelogram rod, level wrist, vacuum pad.
+
+**Not yet:** `pickPlace` actually driving the palletizer in a station (dry plan and run). I checked the interface, not a full pick. That comes with the station-3 data.
+
+**Next:** Phase 5 step 7b: procedural turntable stretch wrapper (turntable, mast, film carriage) with the reference spiral film (`createSpiralFilm` / `rectPerimeterLoop` from `AssetWrapMachine.js`).
+
+### Step 7b: `stretchWrapper` (done)
+
+Step 7a approved by the owner (2026-11-23: "next 7b continue").
+
+**Changed**
+- **`stretchWrapper`** (`lib/components/machines/stretchWrapper.js`), procedural (owner's decision: no `Wrapping.STEP`, no `occt-import-js`):
+  - turntable base and turning deck (index stripes), a floor arm to the mast, the mast with its cap, a control box with a stack light (`beacon` motion), and a film carriage (plate, film roll on its spindle, pre-stretch rollers) riding the mast
+  - the **spiral film is a port of the reference** `createSpiralFilm` / `rectPerimeterLoop` (`AssetWrapMachine.js`): a ribbon around the load's rectangle, corners exact, 1.5 base turns, a constant-pitch rise with overlapping passes (pitch = 0.55 × band), top turns, a little growth per layer, revealed by draw range with the head vertex moved to the exact wrap point
+  - params: `deckRadius` (0.9), `deckHeight` (0.44, the reference deck top), load size (`loadLength` / `loadWidth` / `loadHeight`, reference stack 1.9 × 1.3 × 1.26), `loadBottom` (film starts at the pallet top, 0.144, as the reference), pallet size for the sweep clearance (2.06 × 1.46)
+  - port and anchor `deck` (`pallet`): what is attached to it turns with it
+  - motion `wrap` 0 → 1 plays a whole wrap: the deck turns, the carriage follows the film band, the roll pays out, the film grows to its head, and a film web runs from the roll to the head
+- `blockPallet`: `length` range up to 2.2 m (the reference station-3 pallet is 2.06 m: stack + 8 cm overhang per side).
+- `tests/helpers/componentChecks.js`: meshes marked `userData.restsOnLoad` are left out of the "nothing floats" check. Film lies on the load the machine holds, not on the machine; with no load it really is in the air. Only the film and the web are marked.
+- Tests (in `tests/components/palletizing.test.js`, now 10):
+  - spiral: whole turns, last band at the top, no gaps between passes
+  - a wrap: deck back to its start orientation after more than one turn, carriage at the bottom band and then the top band, film complete, web cut at the end
+  - the film around a **reference 3 × 3 × 3 stack**: 12 mm off the case faces (plus layer growth), from the pallet top to the stack top
+  - a 2.06 × 1.46 pallet with the stack, attached to the deck and turned through a whole wrap, never comes within 5 cm of the roll, rollers, carriage or mast
+  - the film web always spans from the mast side
+- The generic checks cover it at default / min / max (18).
+- Golden images: `stretchWrapper`, `blockPallet` (re-rendered; its default size is unchanged).
+
+**Differences vs the reference (deliberate)**
+1. **Procedural frame** instead of the STEP model (owner's decision). It doesn't look like the reference CAD wrapper (no inbound ramp).
+2. **Whole turns:** the turn count is rounded up to a whole number (extra top turns), so a wrapped load stops facing the way it came. Ops placing or picking it then need no correction.
+3. **The load turns with the deck.** In the reference only the turntable turned under a standing stack, and the film was static. Here the film lives in the deck frame and anything attached to the `deck` anchor turns with it, so the film's contact point stays on the mast side, as on a real wrapper.
+4. **Mast position:** it follows the load and pallet sweep, so the film roll is 6 cm outside the circle the load's corners sweep. My first version had the roll 1 cm inside it; I worked that out before testing, moved the mast, and the sweep test covers it now.
+
+**Open, for the station step:** a wrapped load leaves the deck, but the film is the wrapper's. Moving a whole stacked pallet between machines (palletizer → wrapper → outbound) is a station-level question, and so is handing the film over with it. Those come when station 3 is written as data.
+
+**Results**
+- `npm test`: 33 files, 1270 tests passed.
+- Screenshots:
+  - `screenshots/wrapper-mid.png` (`#/gallery/stretchWrapper?wrap=0.62`): overlapping film bands turned with the deck, the web from the roll, the carriage partway up
+  - `screenshots/palletizer-low.png`: the palletizer reaching low and turned, vacuum on
+- `npm run golden stretchWrapper blockPallet`: 2 written.
+
+**Next:** Phase 5 step 7c: the case source machine (`ProceduralBoxSourceMachine.js`) and the pallet-moving worker with pallet jack (`ProceduralWorker.js`).
+
+### Step 7c: `caseSource`, `palletJackWorker` (done)
+
+Step 7b approved by the owner (2026-11-23: "next").
+
+**Changed**
+- **`caseSource`** (`lib/components/machines/caseSource.js`), from the reference `ProceduralBoxSourceMachine.js`, on the shared material library:
+  - cabinet body, front plates around the exit opening, exit chute lined dark, trim frame, lip and hazard stripes, frame rails and rear posts, side window, control cabinet with panel and status lamp (`beacon` motion), roof motor housing and vent
+  - params `depth` / `width` / `height`, `openingWidth` / `openingHeight`, `caseHeight` (the opening is centred on it at belt height); port `output` (`case`) at the belt
+- **`palletJackWorker`** (`lib/components/robots/palletJackWorker.js`), from the reference `ProceduralWorker.js`:
+  - a worker (hard hat, vest band) walking behind a high-lift pallet truck (body, steer wheel, tiller, pump lever, lift mast, fork carriage, forks with tip wheels)
+  - it moves, so its travel is motions in its own placement frame: `x` / `z` (within `travel`, default ±6 m), `heading`, `forks` (0.045 → 0.6 m: the reference lifts 0.55 m to clear the 0.44 m wrapper deck), `stride` (one walking cycle)
+  - anchor `cargo`: the pallet centre over the forks (0.55 m ahead of the fork roots, as the reference), where ops attach the load
+- Tests (in `tests/components/palletizing.test.js`, now 14):
+  - **lowered forks slide under a reference 2.06 × 1.46 block pallet** centred on the cargo point touching nothing: between its blocks, 1.6 mm under its stringers
+  - raised 10 cm the forks are above the stringer undersides, so they lift it; carried at full height the pallet clears a 0.44 m deck and touches no part of the truck or worker
+  - driving and turning carry the cargo anchor along; the legs swing
+  - a reference case leaves the source's chute onto a 0.82 m belt touching nothing
+- The generic checks cover both at default / min / max.
+- Golden images: `caseSource`, `palletJackWorker`.
+
+**Fixes / differences vs the reference (deliberate)**
+1. **The source's "exit trim" was a solid plate across the exit opening**, so cases would have had to pass through it. It's now a frame of bars around the opening.
+2. **Worker figure floated:**
+   - Its legs ended 22 cm above the boots and its torso stood 3 cm above the hips. The legs now reach the boots and the torso reaches the hips.
+   - Its head sat 6 cm above the shoulders. A neck now joins them.
+3. **Walking:** a stiff swinging leg reaches lower than a standing one, so a toe dipped 1.3 cm into the floor. The figure now rises by exactly that much as it strides.
+4. **The truck:**
+   - In the reference the forks rose on nothing (no lift mechanism). There's now a lift mast with a fork carriage, as on a high-lift truck.
+   - The truck body stood 1 cm into a pallet centred on the cargo point. The body, mast and carriage now all stand behind the pallet's back end, and the forks run back to the carriage between the pallet blocks (no crossbar under the pallet).
+5. **Case source on small sizes:** the roof parts and side window now fit a shallow cabinet (the reference sizes were fixed).
+
+**My own mistakes found by tests this step:** two footprints were too small. They missed the swinging boots, the worker's turning radius, the status lamp, and the roof parts on a small cabinet. One test measured a lifted pallet without updating transforms. All are fixed; the numbers above are after the fixes.
+
+**Results**
+- `npm test`: 33 files, 1310 tests passed.
+- `npm run golden caseSource palletJackWorker`: 2 written. `screenshots/worker-lifted.png`: forks at full height, mid-stride, hands on the tiller. All checked by eye.
+
+**Next:** Phase 5 step 7d: the optional ABB IRB 6760 (owner's decision "both"). Copy read-only from the local reference repo: `src/assets/robot.glb` (4.3 MB), `src/motion/InverseKinematics.js` + test, `src/motion/Rig.js`, `src/rigs/abbIrb6760.js` (+ `abbRobotStudio.js` if the rig needs it), `src/loaders/ModelLoader.js`. Then wrap them as a catalog component with the same tool interface as `palletizerRobot` (x / y / z / yaw / grip, anchor `tool`), loaded asynchronously.
+
+### Step 7d: the optional ABB IRB 6760 (done)
+
+Step 7c approved by the owner (2026-11-23: "ok next").
+
+**Copied read-only from the local reference repo** (`git archive station-agent`; its working tree untouched):
+- `src/motion/Rig.js` → `lib/motion/Rig.js` and `src/motion/InverseKinematics.js` (+ test) → `lib/motion/` and `tests/motion/`, unchanged apart from a header line. The generic rig engine and the damped-least-squares IK (its retries use its own seeded generator, so it's deterministic).
+- `src/rigs/abbRobotStudio.js` and `abbIrb6760.js` → `lib/components/robots/abb/` (`abbIrb6760Rig.js`)
+- `src/assets/robot.glb` → **`lib/assets/abbIrb6760.glb`** (4.3 MB; plain glTF, no compression extensions)
+- Not ported: `ModelLoader.js`, because only one GLB is needed and three's `GLTFLoader` parses it directly (also in Node, so the tests use the real model). The other rigs and models aren't needed either.
+
+**Changed**
+- **`lib/core/assets.js`**: model assets for the few components built from a file:
+  - `loadAsset(name)` caches the parsed glTF (fetch in the browser, file read in Node), names unnamed glTF nodes after their parent, and marks geometry and materials `userData.shared`
+  - `instantiate(name)` gives a clone
+  - `preloadComponentAssets(registry, types?)` loads what components need
+- **Registry**:
+  - components may declare `assets: ['x.glb']`; building one before its model is loaded fails with a clear message (what to call)
+  - the generic dispose leaves `userData.shared` geometry and materials alone, so disposing one robot never frees the cached model the others use
+- **Preloading added where components are built**: the gallery (before its first build), compiled lines, the IR line demo, and the two test files that build every component.
+- **`vacuumPad`** (`lib/components/tools/vacuumPad.js`): the palletizer's pad as a tool component and builder (`buildVacuumPad`). `palletizerRobot` uses it, with the same geometry as before; pad width now at least 0.18 m (the tool changer is 0.16 m).
+- **`abbIrb6760`** (`lib/components/robots/abb/abbIrb6760.js`):
+  - the reference model, rigged with the reference rig (six axes with the reference limits; the balancer cylinder and rod follow axis 2)
+  - a vacuum pad seated on the flange as the reference `mountOnFlange` does
+  - **the same interface as `palletizerRobot`**: motions `x` / `y` / `z` / `yaw` (tool point, tool pointing down) solved by the ported IK, axis 6 setting the yaw, `grip` (vacuum), anchor `tool`. So the same ops and station data can use either robot.
+  - out of reach: the closest pose found, and `root.userData.lastSolve.reached` is false
+  - live solves are capped at 60 iterations; a nearby target converges in a few
+- `vite.config.js`: `three` and `GLTFLoader` added to `optimizeDeps.include`. Without it Vite pre-bundled the loader separately with its own copy of three ("Multiple instances of Three.js being imported" in the browser).
+- Tests:
+  - `tests/motion/InverseKinematics.test.js` (18, ported, pass unchanged)
+  - `tests/components/abb.test.js` (6):
+    - reference limits and links
+    - **the pad on reachable targets within 2 mm, pointing down within 1°, yaw within 1°**
+    - **all 27 cells of a reference 3 × 3 × 3 pallet pattern** reachable
+    - out of reach finite and reported
+    - two robots sharing the cached model, disposing one freeing nothing of the other's
+    - a component with an unloaded model refusing to build
+  - the generic checks cover `abbIrb6760` and `vacuumPad` at default / min / max, every motion through its range
+- Golden images: `abbIrb6760`, `vacuumPad`.
+
+**Notes**
+- The generic "every motion through its range" check now has a 20 s time limit. For the ABB it runs about 50 real IK solves and took about 2.3 s alone, but over Vitest's 5 s default under full-suite load.
+- The rule-6 guard caught the component's name in a comment in `lib/core/assets.js`; I reworded it.
+- **`lib/assets/abbIrb6760.glb` (4.3 MB) is a binary in the repo.** It's yours to commit; it's needed for the ABB component and its tests.
+- `npm run build` works and emits the GLB (`dist/assets/abbIrb6760-…glb`).
+
+**Results**
+- `npm test`: 35 files, 1370 tests passed.
+- Golden `abbIrb6760` and `screenshots/abb-pallet-reach.png` (turned, reaching down and back to a pallet spot, vacuum on): checked by eye. No browser warnings after the dedupe fix.
+
+**Phase 5 station-3 components are complete:**
+- `palletizerRobot` (default) / `abbIrb6760` (optional)
+- `stretchWrapper`, `caseSource`, `palletJackWorker`, `vacuumPad`
+- with `blockPallet`, `carton`, `beltConveyor`
+
+**Next:** Phase 5 step 8: the factory pieces from `factory/`: `SupplyRack.js` and `TransferLines.js` (the conveyors and transfers that join the three lubricant stations), then the lubricant line as data.
+
+### Step 8: factory pieces from `SupplyRack.js` and `TransferLines.js` (done)
+
+Step 7d approved by the owner (2026-11-23: "ok").
+
+**Changed**
+- **`palletRack`** (`lib/components/fixtures/palletRack.js`), from `createRackFrame`:
+  - uprights with base plates and frame braces, step beams and wire decks, in bays, on the shared materials
+  - evenly spaced decks (`levels`, `firstDeck`, `deckSpacing`), uprights `topClearance` above the top deck. That way no combination of params is invalid; my first version with a free deck list failed the generic min-size build.
+  - default = the reference can rack (decks 0.14 / 0.74 / 1.34 m, uprights 1.95 m); the carton rack is noted in the code
+  - ports `deck1…deckN` at the deck tops
+- **`lib/core/instancedStock.js`**: `createInstancedStock`, a port of the reference supply stock. Identical items (a built product) drawn as one InstancedMesh per template mesh, `take()` / `refill()` / `remaining`, plus `dispose()`, and it refuses a template with no visible meshes.
+- **`signBoard`** (`lib/components/station/signBoard.js`), from `createSign`: an area sign on a tall post (title, subtitle, accent bar). Two faces back to back instead of one double-sided plane, which reads mirrored from behind.
+- **`sidePusher`** (`lib/components/fixtures/sidePusher.js`), from the can transfer's row former: a pneumatic pusher on a floor stand beside a belt. Motion `face` is where the rubber pad's surface is, measured from the belt centre line (−0.04 … 0.3; retracted 0.25 as the reference).
+- **`guideRails`** (`lib/components/fixtures/guideRails.js`), from the single-file guides: rail pairs at a clear gap (default 0.20 m = the reference can + 5 mm each side), on posts standing on the conveyor frames (mount `surface`).
+- **`caseSource`**: option `rearPort`, the reference infeed port on the back of the station-3 cabinet (dark opening, trim, strip curtain) and an `input` port, where the case transfer feeds it.
+- **Reused:** the transfer belts are `beltConveyor` (0.52 m), the can transfer's divider is `laneDivider`, the pallet-jack bay is `bayMarking`.
+- Tests `tests/components/factory.test.js` (6):
+  - the reference can rack, decks and ports
+  - **108 reference cans (6 × 6 per deck) as instanced stock** inside the rack and under each next deck, under 20 draw calls, take / refill
+  - a can passing 5 mm clear between the guide rails, posts on the frames
+  - the pusher on a 0.52 m belt: retracted clear of the belt guides; pushed, its pad exactly where it shifts a centred can into the reference lane (z −0.13); the rod still in its cylinder
+  - the sign facing both ways
+  - a case entering the rear port
+- The generic checks cover the four new components and `caseSource` with the port.
+- Golden images: `palletRack`, `signBoard`, `sidePusher`, `guideRails`, `caseSource`.
+
+**Fixes / differences vs the reference (deliberate)**
+1. **Guide rails:** they hung on arms reaching past the conveyor frames to nothing, and the lower rail had no arms at all. There are now posts on the frames with an arm to each rail.
+2. **Pusher:**
+   - its stand stopped 1 cm under the cylinder barrel; it now reaches the cylinder axis
+   - its pad stood 3 mm in front of the plate's face value; the pad surface is now exactly at `face`
+3. **Sign:**
+   - one double-sided plane, mirrored from behind, 5 mm off its post; now two faces, 2 mm off the post
+   - at the first try the faces sat exactly on the post faces and z-fought (a line through the board in the golden image); fixed
+
+**Not in this step, for the line step:** showing rack stock being used up as a line releases units (a station-level "supply" built on `createInstancedStock`). The can transfer's row-forming sequence (pairs pushed into two lanes) is the line's work too.
+
+**Results**
+- `npm test`: 36 files, 1448 tests passed.
+- Golden images for the five components written and checked by eye.
+
+**Next:** Phase 5 step 9: the lubricant line as data. `lubricant-line.factory.json`: station 1 (filling and capping), station 2 (case packing), station 3 (palletizing and wrapping), the can and case transfers, written as IR. It will need the station-level pieces this phase left open:
+- ops for the filler, capper, multi-item pick, row forming and wrapping
+- batches of units on one station
+- the supply stock
+- moving a stacked pallet to the wrapper
+
+I'll propose how to split that work before starting it.
+
+### Step 9: plan for the lubricant line as data (agreed 2026-11-23)
+
+Owner's choices (decision list at the top): indexing station for station 1, the ABB in station 3, timing + screenshots as for the printer line.
+
+How the reference differs from our runtime (one unit per station: intake → process → output):
+1. **Station 1 is an indexing line.** Up to 5 batches of 4 cans on one belt (staging, filling, buffer, capping, outfeed). Each machine cycle: one shared index, then output, filling and capping on the batches present.
+2. **Station 2 merges units.** 4 cans arrive in two lanes (formed by the transfer's pushers) and are packed into a case; from there the case flows on.
+3. **Station 3 builds a pallet** (fixed-time robot moves), then a worker carries the stacked pallet to the wrapper.
+
+Sub-steps:
+- **9a**
+  - record the reference lubricant timing (`scripts/reference-timing.mjs` extended; the STEP wrapper stubbed, its wrap is a constant 12 s)
+  - the indexing station in the runtime
+  - station 1 as data: fill / cap ops on the filler / capper motions and the can's fill routine and cap feature, batches of 4, photo-eyes
+- **9b**
+  - the can transfer (single-file guides, row-forming pushers, lane divider)
+  - station 2: gather 4 cans, multi-can pick with `packingGantry`, case erected, packed, closed, taped
+  - the case becomes the unit that flows on
+- **9c**
+  - station 3: case source with rear port, conveyor, ABB pick and place onto the pallet stack
+  - outbound: worker carries the pallet to the wrapper, wrap
+- **9d**
+  - `lubricant-line.factory.json` complete and compiled
+  - timing compared station by station with the reference
+  - screenshots compared with the reference rendered in our viewer
+
+### Step 9a (part 1): the reference lubricant timing, recorded (done)
+
+Step 9 plan approved by the owner (2026-11-23: "ok").
+
+**Result first:** the reference lubricant line now has a recorded timing target, as the printer line has. It's reproducible: two runs give identical files.
+
+| Run | Finished | Notes |
+|---|---:|---|
+| Station 1 stand-alone (factory can), 8 batches of 4 out | 199.76 s | 11 machine cycles |
+| Station 2 stand-alone, 6 cases | 189.10 s | about 31.5 s per case |
+| **Whole factory to a 27-case pallet** | **1010.52 s** | first case packed at 140.76 s, then one every about 31.5 s; each case on the pallet 19.4 s after packing |
+
+Station 1 is the indexing line we agreed on:
+- each machine cycle runs these phases in turn, skipping empty positions: index (3.05 s) → output (3.1 s) → filling (9.9 s) → capping (5.3 s)
+- batches move staging → filling → buffer → capping → outfeed, one position per index
+- steady state 21.35 s per batch of 4; the first cycles are `index fill`, `index fill`, `index fill cap`, then `index output fill cap`
+
+**Changed**
+- **`scripts/reference-timing-lubricant.mjs`** (`npm run reference:timing:lubricant`) → `benchmarks/expected/lubricant-line-reference-timing.json` (183 kB). It records:
+  - station 1 and station 2 stand-alone, and the whole `LubricantFactory` to a finished pallet
+  - every step's start time, state, label and duration, per station, plus the can transfer's steps and the "case packed / on the pallet" events
+  - re-check steps of a waiting station (0.1 s, thousands of them) folded into one entry with a total and a `repeats` count
+- How it runs:
+  - in a Vite SSR module graph (as `npm run compile`), because the factory imports images by `?url` and station 3 loads assets
+  - a small plugin stands in for what isn't exported or can't load in Node:
+    - **the stretch wrapper**: a stub with the same interface and the reference's nominal bay. Its wrap is a fixed 12 s step and the outbound moves are fixed times, so timing is unaffected; only worker positions at the wrapper are nominal.
+    - **the label and logo PNGs**: dummy URLs
+  - **station 3 runs the real reference cycle** with the same IRB 6760 model (our `lib/assets/abbIrb6760.glb` = its `robot.glb`), placed as the reference `AssetManager` does (bounding box centred, resting on the floor) and rigged with the reference rig and IK. Its own placement checks passed for all 27 cases (it logs them; the script now keeps that quiet).
+- Tests `tests/spec/lubricant-reference.test.js` (2): the runs are present and complete (27 cases); station 1's first five machine cycles and steady-state phase times show the indexing pattern.
+
+**My mistakes this part (fixed before the results above):**
+- my first test expected 1010.5 s (the rounded console value) and 9.7 s for filling; the data says 1010.52 s and 9.9 s
+- the first recording held 1.1 MB of 0.1 s re-checks, before folding
+
+**Results**
+- `npm test`: 37 files, 1450 tests passed.
+- The reference repo untouched; only `reference/_src` (git-ignored) is read.
+
+**Next:** step 9a part 2: the **indexing station** in the runtime:
+- positions along one conveyor, a batch of units per position, one synchronous index per machine cycle
+- then each phase's ops on the batch at its position, skipping phases with nothing there
+- batches enter at the first position (stand-alone spawn, or from upstream) and leave from the last
+
+Then 9a part 3: station 1 as data on it (fill / cap ops, photo-eyes, the supply tank and riser), compared with the station 1 recording.
+
+### Step 9a (part 2): the indexing station in the runtime (done)
+
+Part 1 approved by the owner (2026-11-23: "next"). The work was interrupted by the owner's usage limit and resumed after the reset ("continue working on the step").
+
+**Result first:** an indexing station reproduces the reference filling line's machine cycles exactly. Given the reference step times (fill and cap as stand-in waits, until part 3), the playing station:
+- matches all **196 steps** of the recorded reference station 1 (same state, label and duration, in order)
+- starts every step within 0.05 s of the recording (its 0.02 s quantisation)
+- puts **8 batches out at 199.76 s**, as recorded
+
+The dry plan gives the steady machine cycle: index 3.05 + exit 3.1 + filling 9.9 + capping 5.3 = **21.35 s**.
+
+**Changed**
+- **`lib/station/indexing.js`** (data and planning, no `StationCycle` import):
+  - the `indexing` block of a station: `members` per batch and `pitch`; evenly spaced named `positions` in flow order; `enter` and `exit`; the `index` ops; the `exitOps`; `work` ops per position; optional phase `order`; `preload` positions (the reference starts with a batch waiting at staging)
+  - validation: known positions, flow order, even spacing (one index moves every batch the same distance), known phases
+  - `planIndexing`: a dry plan shaped like `planStation`'s (intake = index phase, process = work phases, output = exit phase, `cycleTime` = one full machine cycle), so timing tables and takt checks read it unchanged
+  - **`createBatch`**: a batch is N units at a pitch that ops treat as THE product. Stages, features and routines act on every member (a `fill` fills all four cans); refs are the first member's, in the batch frame. So the ordinary ops work on batches as they are.
+- `lib/station/indexingSpec.js`: the schema alone (zod only), used by the factory schema without loading three.js.
+- **`lib/station/IndexingCycle.js`** (extends `StationCycle`; ports, signals, HMI status, stock and connections are reused). Each machine cycle runs the phases in turn and skips a phase with nothing to do:
+  - **index**: takes a new batch in at `enter` if that place is free, then runs the index ops. It's skipped when there is no batch at all, and held while the last position is still occupied.
+  - **exit**: the batch at `exit` runs the exit ops and leaves through the output port; held and re-checked while downstream is busy
+  - **work**: the batch at that position runs that position's ops
+  - stand-alone, it makes batches and discharged ones leave the cell; in a line, batches come and go through its ports
+- **Ops `indexBatches` / `dischargeBatch`** (`lib/ops/named/indexBatches.js`): move every batch one position, or carry the exit batch away, with smooth motion over a fixed time, scrolling the belts of the conveyors named. They reach the station through a new optional `indexer` hook on `OpCycle` (like `stacks` and `restock`). Outside an indexing station the dry plan accepts them (durations only), but playing one stops the station in ALARM: "indexBatches only works in an indexing station".
+- **Wired in:**
+  - `planStation` hands indexing stations to `planIndexing`
+  - `Line` plays a station with `indexing` with an `IndexingCycle`
+  - the station specs (runtime and `factory.json`) accept `indexing`, and `process` defaults to empty; `spec/factory.schema.json` regenerated
+  - `compiler/expand.js` passes `indexing` through (left out for single-unit stations, so `generated/printer-line/` is unchanged; the on-disk test passes)
+- `app/dev/lines/indexing.json`: dev check line (`#/twin?demo=line&line=indexing`), an indexing station with the reference positions and times and stand-in fill / cap waits.
+- Tests `tests/station/indexing.test.js` (11):
+  - data validation
+  - the 21.35 s plan
+  - the batch ops refused outside an indexing station
+  - a `factory.json` with an indexing station passing the full check (station time 21.35 s in the timing table) and compiling (the station file carries the block)
+  - **the reference station 1, step for step and at 199.76 s**
+  - batches moving one position per index (four cans at 0.4 m), the discharged batch leaving
+  - holding while downstream is busy and not indexing past an occupied last position
+  - fill / cap feature on a batch acting on all four cans
+  - `Line` choosing `IndexingCycle`
+- `tests/line/line.test.js`: the dev-line check allows an indexing station one machine cycle per position a batch travels (the first version assumed one cycle per station).
+
+**My mistakes this part (fixed before the results above):**
+- My first run missed the reference's preloaded batch at staging. The first difference was at step 3, which led to `preload`.
+- One test checked a dry plan "not throwing", which proved nothing. It now tests the ALARM when the op is played in the wrong kind of station.
+
+**Results**
+- `npm test`: 38 files, 1461 tests passed.
+- `screenshots/indexing-station.png` (dev line at t = 72 s): batches of four cans at staging, filling, buffer and capping under the filler and capper; "released 5/12 · done 2 · FILLING". The cans aren't filled or capped yet; that's part 3.
+
+**Next:** step 9a part 3: station 1 as data on the indexing station:
+- **fill**: filler head down, jets to the oil surface, the cans' `fill` routine, head up
+- **cap**: capper down and spin, caps handed to the cans, cap feed
+- the photo-eyes following the batches
+- the supply tank and riser connection
+- the timing again equal to the recording
+
+### Step 9a (part 3): station 1 as data, real filling and capping (done)
+
+Part 2 approved by the owner (2026-11-23: "next"). The owner also asked for a plain-language summary of Phase 5 so far; it was given in the chat.
+
+**Result first:** `spec/examples/lubricant-line.factory.json` now holds **station 1, filling & capping**, written as data on the indexing station with the real `fill` and `cap` ops, and it matches the recorded reference station 1:
+- **all 196 steps** (state, label, duration, in order)
+- start times within 0.05 s
+- **8 batches out at 199.76 s**
+- the compiled files (`generated/lubricant-line/`, takt 21.35 s) play the same as the IR
+
+While it plays:
+- the filler's tips go 45 mm into the necks; the jets fall from the tips and land on the oil surface as it rises; all four cans fill alike to 0.9 (the reference two-stage curve); the head goes up
+- the capper's chucks screw the caps down by the thread lead while turning 3 turns; at torque the cans carry their own caps; fresh caps are fed into the chucks
+- the photo-eyes go blocked when a batch stands at them
+- the tank level drops 0.04 per fill
+
+**Changed**
+- **Named op `fill`** (`lib/ops/named/fill.js`), from the reference `planFilling`:
+  - in position → head down → nozzles engaged → valves open (the jet front falls with gravity) → dispense (two-stage curve) → valves close (the jet tail drops away) → drip → head up → complete (stage `filled`, the supply's level drawn down)
+  - step times and texts default to the reference (texts from `units` / `liquid`: "Cans in position", "Dispensing oil")
+  - generic by roles: the machine's `headTravel` / `jetStart` / `jetEnd` and anchor `tip`; the product's `fill` routine, ref `liquidSurface`, stage `filled`; optional `supply` (machine and level)
+- **Named op `cap`** (`lib/ops/named/cap.js`), from the reference `planCapping`:
+  - in position → head down to the threads (`engageAt`) → caps engaging → tighten (head to the seat and the chucks `turns` turns, both easing out) → torque reached (chucks empty, the product shows its cap, stage `capped`) → head up → fresh caps fed
+  - generic by roles: `headTravel` / `spin` / `caps` / `capFeed`; the product's feature `cap` and stage `capped`
+- **Presence sensors** (`lib/station/sensorSpec.js`; station field `sensors`, runtime and factory schema): a machine motion set to `blocked` while a unit's body spans the sensor along X (within `across` m), `clear` otherwise, updated on every refresh. Checked in the dry plan (known machine, a switch motion with both values).
+- Small additions:
+  - `filler`: anchor `tip` (the nozzle tips); `ops: ['fill']`
+  - `capper`: `ops: ['cap']`
+  - `jerryCan`: ref `liquidSurface` (live)
+- **Station 1 data**, on the reference geometry:
+  - slab (reference bounds, walkway at z 0.9) and rear fence
+  - main belt (8.4 m) and outfeed belt (4.74 m), with guide gap 0.20 m (the can + 5 mm each side)
+  - infeed and outfeed tunnels; filler (tips 0.323 m above the belt) and capper (seat 0.358 m) centred on the can necks
+  - supply tank with the riser **connection** to the filler
+  - four photo-eyes at the lead can of staging, filling, capping and outfeed, as sensors
+  - operator panel (HMI) with the batch, batches out, machine cycles and batches on the line
+  - beacon on the filler
+  - indexing: 6 positions 1.6 m apart, batches of 4 at 0.4 m, preload at staging
+- Tests:
+  - `tests/spec/lubricant-line.test.js` (6): valid file and the 21.35 s plan; **step for step against the recording**; filling (tips in the necks, jets on the surface, levels, head up); capping (head at the seat, hand-over, cap feed); photo-eyes and the tank level; compiled = IR
+  - `tests/station/connections.test.js`: the expected anchor list now includes `tip`
+
+**Differences vs the reference (deliberate)**
+1. **Tank refill:** the reference refills the tank gradually over time once it drops below 0.35. Here it refills at once at the end of a fill (to 0.88). Its level is visual only and doesn't affect timing.
+2. **Outfeed belt:** drawn without its gear motor, because the outfeed tunnel covers its discharge end (noted in step 2).
+3. **Jet width:** the reference narrows the jet during the top-off (`widthScale`). The filler's jets keep one width.
+
+**Results**
+- `npm test`: 39 files, 1467 tests passed.
+- `npm run compile`: `generated/lubricant-line/` written (2 files); `generated/printer-line/` unchanged.
+- Screenshots:
+  - `screenshots/s1-filling.png` (t = 8 s): head down, golden jets into the four cans, oil rising, hose, tank, gauge, photo-eyes
+  - `screenshots/s1-capping.png` (t = 41.5 s): the capper tightening, the filled batches behind, the panel live
+
+**Phase 5 status:** step 9a is done (station 1 matches the reference). Next is **9b**: the can transfer (single-file guides, row-forming pushers, lane divider) and station 2 (case packing: gather 4 cans in 2 lanes, multi-can pick with the packing gantry, case erected, packed, closed and taped; the case becomes the unit that flows on).

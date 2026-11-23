@@ -1,0 +1,200 @@
+{
+  "about": "Dev check (#/twin?demo=line&line=indexing): an indexing station (lib/station/IndexingCycle.js) with the reference filling line's positions and step times. Fill and cap are stand-in waits until station 1 is written as data (Phase 5 step 9a part 3).",
+  "camera": {
+    "position": [
+      4.5,
+      3.2,
+      6.2
+    ],
+    "target": [
+      0.6,
+      0.9,
+      0
+    ]
+  },
+  "factory": {
+    "version": 1,
+    "line": {
+      "id": "indexingDemo",
+      "title": "Indexing station check",
+      "runSize": 12,
+      "conventions": {
+        "beltHeight": 0.86
+      }
+    },
+    "product": {
+      "kind": "catalog",
+      "type": "jerryCan",
+      "params": {
+        "height": 0.33
+      }
+    },
+    "stations": [
+      {
+        "id": "fill",
+        "title": "Filling & capping",
+        "conveyor": "main",
+        "ports": {
+          "output": {
+            "machine": "outfeed"
+          }
+        },
+        "equipment": [
+          {
+            "id": "main",
+            "type": "beltConveyor",
+            "params": {
+              "length": 8.4,
+              "guideGap": 0.22
+            },
+            "position": [
+              -0.1,
+              0,
+              0
+            ]
+          },
+          {
+            "id": "outfeed",
+            "type": "beltConveyor",
+            "params": {
+              "length": 4.74,
+              "guideGap": 0.22
+            },
+            "position": [
+              6.53,
+              0,
+              0
+            ]
+          },
+          {
+            "id": "filler",
+            "type": "filler",
+            "params": {},
+            "position": [
+              0.075,
+              0,
+              0
+            ]
+          },
+          {
+            "id": "capper",
+            "type": "capper",
+            "params": {},
+            "position": [
+              3.275,
+              0,
+              0
+            ]
+          }
+        ],
+        "signals": {
+          "beacon": {
+            "machine": "filler",
+            "motion": "beacon"
+          }
+        },
+        "indexing": {
+          "members": 4,
+          "pitch": 0.4,
+          "positions": [
+            {
+              "name": "spawn",
+              "x": -3.2
+            },
+            {
+              "name": "staging",
+              "x": -1.6
+            },
+            {
+              "name": "filling",
+              "x": 0
+            },
+            {
+              "name": "buffer",
+              "x": 1.6
+            },
+            {
+              "name": "capping",
+              "x": 3.2
+            },
+            {
+              "name": "outfeed",
+              "x": 4.8
+            }
+          ],
+          "enter": "spawn",
+          "exit": "outfeed",
+          "preload": [
+            "staging"
+          ],
+          "index": [
+            {
+              "op": "wait",
+              "state": "TRANSPORTING",
+              "label": "Conveyor starting",
+              "seconds": 0.35
+            },
+            {
+              "op": "indexBatches",
+              "state": "TRANSPORTING",
+              "label": "Indexing conveyor",
+              "seconds": 2.4,
+              "conveyors": [
+                "main",
+                "outfeed"
+              ]
+            },
+            {
+              "op": "wait",
+              "state": "TRANSPORTING",
+              "label": "Conveyor stopped",
+              "seconds": 0.3
+            }
+          ],
+          "exitOps": [
+            {
+              "op": "wait",
+              "state": "OUTPUT",
+              "label": "Outfeed starting",
+              "seconds": 0.3
+            },
+            {
+              "op": "dischargeBatch",
+              "state": "OUTPUT",
+              "label": "Discharging finished cans",
+              "seconds": 2.8,
+              "distance": 3.2,
+              "conveyors": [
+                "outfeed"
+              ]
+            }
+          ],
+          "work": [
+            {
+              "at": "filling",
+              "ops": [
+                {
+                  "op": "wait",
+                  "state": "FILLING",
+                  "label": "Filling (stand-in)",
+                  "seconds": 9.9
+                }
+              ]
+            },
+            {
+              "at": "capping",
+              "ops": [
+                {
+                  "op": "wait",
+                  "state": "CAPPING",
+                  "label": "Capping (stand-in)",
+                  "seconds": 5.3
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

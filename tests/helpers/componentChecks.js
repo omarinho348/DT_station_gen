@@ -55,13 +55,16 @@ export function lowestPoint(root) {
  * bounding boxes touch or overlap (2 mm tolerance). Returns the names of floating meshes.
  * Box contact is a coarse test (it can miss a gap inside overlapping boxes) but catches
  * parts hanging in the air, which is the common modelling mistake.
+ * Meshes marked userData.restsOnLoad (film lying on a held load) are not checked.
  * anchor 'top': for tools, which hang from a flange: everything must connect to the topmost part.
  */
 export function floatingMeshes(root, { floorY = 0, anchor = 'floor' } = {}) {
   root.updateMatrixWorld(true);
   const meshes = [];
   root.traverse((o) => {
-    if (o.isMesh && o.visible && isShown(o, root)) meshes.push({ name: o.name, box: new THREE.Box3().setFromObject(o, true).expandByScalar(TOL) });
+    // Meshes that lie on a load the machine holds (stretch film on a pallet) rest on that load, not
+    // on the machine: they are marked userData.restsOnLoad and left out.
+    if (o.isMesh && o.visible && !o.userData.restsOnLoad && isShown(o, root)) meshes.push({ name: o.name, box: new THREE.Box3().setFromObject(o, true).expandByScalar(TOL) });
   });
   const top = Math.max(...meshes.map((m) => m.box.max.y));
   const grounded = new Set(meshes.filter((m) => (anchor === 'top' ? m.box.max.y >= top - TOL : m.box.min.y <= floorY + TOL)));

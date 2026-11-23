@@ -339,6 +339,8 @@
             }
           },
           "process": {
+            "default": [],
+            "description": "The station's process as ops (an indexing station leaves it empty)",
             "type": "array",
             "items": {
               "type": "object",
@@ -352,8 +354,154 @@
                 "op"
               ],
               "additionalProperties": {}
+            }
+          },
+          "indexing": {
+            "description": "Indexing station: batches of units at positions along the conveyor, moved together one position per machine cycle",
+            "type": "object",
+            "properties": {
+              "members": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12,
+                "description": "Units per batch"
+              },
+              "pitch": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 2,
+                "description": "Distance between the units of a batch, along X (m)"
+              },
+              "positions": {
+                "minItems": 2,
+                "maxItems": 12,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-zA-Z0-9]*$"
+                    },
+                    "x": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "x"
+                  ]
+                },
+                "description": "Batch-centre places along the conveyor, in flow order, evenly spaced (station frame, m)"
+              },
+              "enter": {
+                "type": "string",
+                "pattern": "^[a-z][a-zA-Z0-9]*$",
+                "description": "Position where a new batch is taken in (before the index moves it on)"
+              },
+              "exit": {
+                "type": "string",
+                "pattern": "^[a-z][a-zA-Z0-9]*$",
+                "description": "Position the exit phase takes a batch from"
+              },
+              "index": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-zA-Z0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "op"
+                  ],
+                  "additionalProperties": {}
+                },
+                "description": "Ops of the index phase; one indexBatches moves the batches"
+              },
+              "exitOps": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-zA-Z0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "op"
+                  ],
+                  "additionalProperties": {}
+                },
+                "description": "Ops that take the batch at `exit` away (e.g. dischargeBatch)"
+              },
+              "work": {
+                "default": [],
+                "description": "Work at positions, e.g. filling, capping",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-zA-Z0-9]*$"
+                    },
+                    "ops": {
+                      "minItems": 1,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "op": {
+                            "type": "string",
+                            "pattern": "^[a-z][a-zA-Z0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "op"
+                        ],
+                        "additionalProperties": {}
+                      }
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "ops"
+                  ]
+                }
+              },
+              "order": {
+                "description": "Phase order in a machine cycle: \"index\", \"exit\" and work positions (default: index, exit, then work in order)",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                }
+              },
+              "preload": {
+                "default": [],
+                "description": "Positions that hold a batch when the station is reset (the reference filling line starts with one at staging)",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                }
+              }
             },
-            "description": "The station's process as ops"
+            "required": [
+              "members",
+              "pitch",
+              "positions",
+              "enter",
+              "exit",
+              "index",
+              "exitOps"
+            ]
           },
           "output": {
             "description": "Default: release, convey to output",
@@ -532,6 +680,187 @@
                 "rows",
                 "layers",
                 "layerHeight"
+              ]
+            }
+          },
+          "sensors": {
+            "default": [],
+            "description": "Presence sensors: a machine motion that reads blocked while a unit crosses it (photo-eyes)",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "machine": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$",
+                  "description": "The sensor (e.g. a photo-eye standing on the conveyor)"
+                },
+                "motion": {
+                  "default": "beam",
+                  "description": "Its motion with the two values below",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                },
+                "clear": {
+                  "default": "clear",
+                  "type": "string",
+                  "minLength": 1
+                },
+                "blocked": {
+                  "default": "blocked",
+                  "type": "string",
+                  "minLength": 1
+                },
+                "across": {
+                  "default": 0.75,
+                  "description": "Units within this distance across the conveyor (Z) count (m)",
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 3
+                }
+              },
+              "required": [
+                "machine"
+              ]
+            }
+          },
+          "connections": {
+            "default": [],
+            "description": "Pipes and hoses between machine anchors (\"machine.anchor\"), e.g. from a supply pump to a machine inlet",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$"
+                },
+                "from": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*\\.[a-z][a-zA-Z0-9]*$",
+                  "description": "Start: \"machine.anchor\""
+                },
+                "to": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*\\.[a-z][a-zA-Z0-9]*$",
+                  "description": "End: \"machine.anchor\""
+                },
+                "kind": {
+                  "default": "pipe",
+                  "description": "Rigid pipe run, or flexible hose",
+                  "type": "string",
+                  "enum": [
+                    "pipe",
+                    "hose"
+                  ]
+                },
+                "radius": {
+                  "description": "Outer radius (m); default 0.026 pipe, 0.018 hose",
+                  "type": "number",
+                  "minimum": 0.003,
+                  "maximum": 0.1
+                },
+                "material": {
+                  "description": "Default stainless (pipe), hose (hose)",
+                  "type": "string",
+                  "enum": [
+                    "stainless",
+                    "brushed",
+                    "aluminium",
+                    "hose",
+                    "airLine",
+                    "frame",
+                    "cableBlack"
+                  ]
+                },
+                "route": {
+                  "default": "up",
+                  "description": "Pipe: rise to the end height first, or run across first",
+                  "type": "string",
+                  "enum": [
+                    "up",
+                    "across"
+                  ]
+                },
+                "flanges": {
+                  "default": true,
+                  "description": "Pipe: a flange at each end",
+                  "type": "boolean"
+                },
+                "sag": {
+                  "default": [
+                    0,
+                    -0.1,
+                    0
+                  ],
+                  "description": "Hose: offset of its middle from the straight line (m)",
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "startTangent": {
+                  "default": [
+                    0,
+                    -0.12,
+                    0
+                  ],
+                  "description": "Hose: direction it leaves `from` (m)",
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "endTangent": {
+                  "default": [
+                    0,
+                    0.12,
+                    0
+                  ],
+                  "description": "Hose: direction it arrives at `to`, from the end (m)",
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "id",
+                "from",
+                "to"
               ]
             }
           },
@@ -777,8 +1106,7 @@
         },
         "required": [
           "id",
-          "title",
-          "process"
+          "title"
         ]
       }
     },

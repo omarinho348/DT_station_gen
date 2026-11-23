@@ -1,0 +1,26 @@
+{
+  "about": "Dev check (#/twin?demo=line&line=oil-supply): the reference oil station's supply side as data. Belt, filler and supply unit, joined by a station connection (the product riser from the pump discharge to the filler's rear inlet). The process is a stand-in until the lubricant station is written.",
+  "camera": { "position": [3.2, 2.6, 3.4], "target": [-0.4, 1.2, -0.7] },
+  "factory": {
+    "version": 1,
+    "line": { "id": "oilSupply", "title": "Oil supply check", "runSize": 1, "conventions": { "beltHeight": 0.86 } },
+    "product": { "kind": "catalog", "type": "jerryCan", "params": {} },
+    "stations": [
+      {
+        "id": "fill",
+        "title": "Filling",
+        "conveyor": "belt",
+        "equipment": [
+          { "id": "belt", "type": "beltConveyor", "params": { "length": 8.4 }, "position": [-0.1, 0, 0] },
+          { "id": "filler", "type": "filler", "params": {}, "position": [0.075, 0, 0] },
+          { "id": "supply", "type": "supplyTank", "params": { "pumpOffset": 0.975 }, "position": [-1.3, 0, -1.5] }
+        ],
+        "connections": [
+          { "id": "riser", "from": "supply.discharge", "to": "filler.rearInlet" }
+        ],
+        "process": [{ "op": "wait", "seconds": 2 }],
+        "signals": { "beacon": { "machine": "filler", "motion": "beacon" } }
+      }
+    ]
+  }
+}

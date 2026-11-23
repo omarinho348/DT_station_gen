@@ -13,6 +13,7 @@
     "screenshot": "node scripts/screenshot.js",
     "golden": "node scripts/golden.js",
     "reference:timing": "node scripts/reference-timing.mjs",
+    "reference:timing:lubricant": "node scripts/reference-timing-lubricant.mjs",
     "schema": "node scripts/schema.mjs",
     "compile": "node scripts/compile.mjs",
     "visual": "node scripts/visual-compare.mjs"

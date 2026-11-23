@@ -196,15 +196,23 @@ describe('line', () => {
 });
 
 describe('dev line files (app/dev/lines)', () => {
-  it('every dev line builds and moves its first unit into the second station', async () => {
+  it('every dev line builds and moves its first unit into the second station (one-station lines: through the station)', async () => {
     const { createLineDemo, lineNames } = await import('../../app/dev/lineDemo.js');
     expect(lineNames().length).toBeGreaterThan(0);
     for (const name of lineNames()) {
       const demo = createLineDemo({ line: name });
       const [first, second] = demo.line.layout.order.map((id) => demo.line.byId.get(id));
-      demo.skip(first.cycle.timing.cycleTime + demo.line.transfers[0].duration + CONVENTIONS.lift.duration + 1);
-      expect(demo.line.stations.every((s) => s.cycle.error === null), name).toBe(true);
-      expect(second.cycle.status.unit, name).not.toBe('—');
+      if (second) {
+        demo.skip(first.cycle.timing.cycleTime + demo.line.transfers[0].duration + CONVENTIONS.lift.duration + 1);
+        expect(demo.line.stations.every((s) => s.cycle.error === null), name).toBe(true);
+        expect(second.cycle.status.unit, name).not.toBe('—');
+      } else {
+        // An indexing station needs one machine cycle per position a batch travels.
+        const cycles = first.cycle.station.indexing ? first.cycle.station.indexing.positions.length + 1 : 1;
+        demo.skip(first.cycle.timing.cycleTime * cycles + 1);
+        expect(first.cycle.error, name).toBe(null);
+        expect(demo.line.status.exited, name).toBeGreaterThan(0);
+      }
       demo.dispose();
     }
   }, 60000);

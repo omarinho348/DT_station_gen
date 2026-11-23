@@ -8,6 +8,9 @@ import { createRegistry, RegistryError } from '../../lib/registry.js';
 import { StepSequencer } from '../../lib/core/StepSequencer.js';
 import { createMaterials } from '../../lib/core/materials.js';
 import { smoother, trapezoidDuration, trapezoidTravel } from '../../lib/core/motion.js';
+import { preloadComponentAssets } from '../../lib/core/assets.js';
+
+await preloadComponentAssets(registry); // every component is built below, the ABB model included
 
 const BASIC = ['move', 'rotate', 'grip', 'release', 'toolOn', 'transform', 'transfer', 'wait', 'decide'];
 const materials = createMaterials();

@@ -4,12 +4,15 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { registry } from '../../lib/components/index.js';
 import { paramSamples } from '../../lib/registry.js';
 import { createMaterials, disposeMaterials } from '../../lib/core/materials.js';
+import { preloadComponentAssets } from '../../lib/core/assets.js';
 import {
   unnamedObjects, nonFiniteMeshes, footprintViolations, lowestPoint, floatingMeshes,
 } from '../helpers/componentChecks.js';
 
 const materials = createMaterials();
 afterAll(() => disposeMaterials(materials));
+// Components built from a model (the ABB robot) need it loaded before they can be built.
+await preloadComponentAssets(registry);
 
 const defs = registry.components();
 
@@ -63,7 +66,7 @@ for (const def of defs) {
               expect(floatingMeshes(inst.root, { anchor })).toEqual([]);
             }
           }
-        });
+        }, 20000); // robots driven by iterative IK (the ABB) solve at every one of these ~50 steps
 
         it('disposes cleanly', () => {
           expect(() => inst.dispose()).not.toThrow();

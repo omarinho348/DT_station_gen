@@ -1,0 +1,379 @@
+{
+  "$schema": "../factory.schema.json",
+  "version": 1,
+  "line": {
+    "id": "lubricantLine",
+    "title": "Lubricant line",
+    "runSize": 27,
+    "conventions": {
+      "beltHeight": 0.86
+    }
+  },
+  "product": {
+    "kind": "catalog",
+    "type": "jerryCan",
+    "params": {
+      "height": 0.33
+    }
+  },
+  "stations": [
+    {
+      "id": "filling",
+      "code": "S1",
+      "title": "Filling & Capping",
+      "conveyor": "main",
+      "inputStage": "empty",
+      "ports": {
+        "output": {
+          "machine": "outfeed"
+        }
+      },
+      "equipment": [
+        {
+          "id": "slab",
+          "type": "floorSlab",
+          "params": {
+            "length": 14.2,
+            "depth": 4.4,
+            "walkway": 0.75
+          },
+          "position": [
+            2.2,
+            0,
+            -0.2
+          ]
+        },
+        {
+          "id": "fence",
+          "type": "guardFence",
+          "params": {
+            "length": 13.6
+          },
+          "position": [
+            2.2,
+            0,
+            -2.15
+          ]
+        },
+        {
+          "id": "main",
+          "type": "beltConveyor",
+          "params": {
+            "length": 8.4,
+            "beltWidth": 0.34,
+            "guideGap": 0.2
+          },
+          "position": [
+            -0.1,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "outfeed",
+          "type": "beltConveyor",
+          "params": {
+            "length": 4.74,
+            "beltWidth": 0.34,
+            "guideGap": 0.2,
+            "drive": false
+          },
+          "position": [
+            6.53,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "infeedTunnel",
+          "type": "conveyorTunnel",
+          "params": {
+            "length": 1.95,
+            "beltWidth": 0.34,
+            "open": "+X"
+          },
+          "position": [
+            -3.375,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "outfeedTunnel",
+          "type": "conveyorTunnel",
+          "params": {
+            "length": 1.8,
+            "beltWidth": 0.34,
+            "open": "-X"
+          },
+          "position": [
+            8.05,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "filler",
+          "type": "filler",
+          "params": {
+            "heads": 4,
+            "pitch": 0.4,
+            "tipHeight": 0.323,
+            "stroke": 0.25
+          },
+          "position": [
+            0.075,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "capper",
+          "type": "capper",
+          "params": {
+            "heads": 4,
+            "pitch": 0.4,
+            "seatHeight": 0.358,
+            "stroke": 0.26
+          },
+          "position": [
+            3.275,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "supply",
+          "type": "supplyTank",
+          "params": {
+            "pumpOffset": 0.975
+          },
+          "position": [
+            -1.3,
+            0,
+            -1.5
+          ]
+        },
+        {
+          "id": "eyeInfeed",
+          "type": "photoEye",
+          "params": {
+            "span": 0.4
+          },
+          "position": [
+            -1,
+            0.87,
+            0
+          ]
+        },
+        {
+          "id": "eyeFilling",
+          "type": "photoEye",
+          "params": {
+            "span": 0.4
+          },
+          "position": [
+            0.6,
+            0.87,
+            0
+          ]
+        },
+        {
+          "id": "eyeCapping",
+          "type": "photoEye",
+          "params": {
+            "span": 0.4
+          },
+          "position": [
+            3.8,
+            0.87,
+            0
+          ]
+        },
+        {
+          "id": "eyeOutfeed",
+          "type": "photoEye",
+          "params": {
+            "span": 0.4
+          },
+          "position": [
+            5.4,
+            0.87,
+            0
+          ]
+        },
+        {
+          "id": "panel",
+          "type": "hmi",
+          "params": {},
+          "position": [
+            -2.1,
+            0,
+            1.35
+          ],
+          "rotationY": 0.35
+        }
+      ],
+      "connections": [
+        {
+          "id": "riser",
+          "from": "supply.discharge",
+          "to": "filler.rearInlet"
+        }
+      ],
+      "sensors": [
+        {
+          "machine": "eyeInfeed"
+        },
+        {
+          "machine": "eyeFilling"
+        },
+        {
+          "machine": "eyeCapping"
+        },
+        {
+          "machine": "eyeOutfeed"
+        }
+      ],
+      "home": {
+        "supply": {
+          "level": 0.88
+        }
+      },
+      "status": {},
+      "signals": {
+        "beacon": {
+          "machine": "filler",
+          "motion": "beacon"
+        },
+        "display": {
+          "machine": "panel",
+          "rows": [
+            [
+              "Batch",
+              "unit"
+            ],
+            [
+              "Batches out",
+              "completed"
+            ],
+            [
+              "Machine cycles",
+              "cycles"
+            ],
+            [
+              "On the line",
+              "batchesOnLine"
+            ]
+          ]
+        }
+      },
+      "indexing": {
+        "members": 4,
+        "pitch": 0.4,
+        "positions": [
+          {
+            "name": "spawn",
+            "x": -3.2
+          },
+          {
+            "name": "staging",
+            "x": -1.6
+          },
+          {
+            "name": "filling",
+            "x": 0
+          },
+          {
+            "name": "buffer",
+            "x": 1.6
+          },
+          {
+            "name": "capping",
+            "x": 3.2
+          },
+          {
+            "name": "outfeed",
+            "x": 4.8
+          }
+        ],
+        "enter": "spawn",
+        "exit": "outfeed",
+        "preload": [
+          "staging"
+        ],
+        "index": [
+          {
+            "op": "wait",
+            "state": "TRANSPORTING",
+            "label": "Conveyor starting",
+            "seconds": 0.35
+          },
+          {
+            "op": "indexBatches",
+            "state": "TRANSPORTING",
+            "label": "Indexing conveyor",
+            "seconds": 2.4,
+            "conveyors": [
+              "main",
+              "outfeed"
+            ]
+          },
+          {
+            "op": "wait",
+            "state": "TRANSPORTING",
+            "label": "Conveyor stopped",
+            "seconds": 0.3
+          }
+        ],
+        "exitOps": [
+          {
+            "op": "wait",
+            "state": "OUTPUT",
+            "label": "Outfeed starting",
+            "seconds": 0.3
+          },
+          {
+            "op": "dischargeBatch",
+            "state": "OUTPUT",
+            "label": "Discharging finished cans",
+            "seconds": 2.8,
+            "distance": 3.2,
+            "conveyors": [
+              "outfeed"
+            ]
+          }
+        ],
+        "work": [
+          {
+            "at": "filling",
+            "ops": [
+              {
+                "op": "fill",
+                "machine": "filler",
+                "state": "FILLING",
+                "supply": {
+                  "machine": "supply"
+                }
+              }
+            ]
+          },
+          {
+            "at": "capping",
+            "ops": [
+              {
+                "op": "cap",
+                "machine": "capper",
+                "state": "CAPPING",
+                "engageAt": 0.953846
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "graph": {
+    "edges": []
+  }
+}

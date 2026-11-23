@@ -3,6 +3,8 @@
 // #/twin?line=printer-line (?t=<s> frozen at that moment, ?speed=<n>, ?cam=x,y,z,tx,ty,tz).
 import { createMaterials } from '../../../lib/core/materials.js';
 import { playLine } from './linePlayer.js';
+import { preloadComponentAssets } from '../../../lib/core/assets.js';
+import { registry as catalog } from '../../../lib/components/index.js';
 
 const MODULES = Object.fromEntries(Object.entries(import.meta.glob('../../../generated/*/line.js'))
   .map(([path, load]) => [path.match(/generated\/([^/]+)\/line\.js$/)[1], load]));
@@ -16,6 +18,7 @@ export async function loadCompiledLine(name, { speed = 1, onStatus = null } = {}
     throw new Error(`No compiled line "${name}" (compiled: ${compiledLineNames().join(', ') || 'none'}; run npm run compile)`);
   }
   const mod = await load();
+  await preloadComponentAssets(catalog); // a line may use a component built from a model
   const materials = createMaterials();
   const line = mod.createLine({ materials });
   return { ...playLine(line, { materials, name, speed, onStatus }), module: mod };

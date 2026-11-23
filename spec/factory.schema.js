@@ -13,6 +13,9 @@
 // in depth by the deterministic reviewer (Phase 7). Generated JSON Schema: spec/factory.schema.json.
 import { z } from 'zod';
 import { id, opEntry } from '../lib/ops/args.js';
+import { Connections } from '../lib/station/connectionSpec.js';
+import { IndexingSpec } from '../lib/station/indexingSpec.js';
+import { Sensors } from '../lib/station/sensorSpec.js';
 
 export const FACTORY_VERSION = 1;
 
@@ -85,7 +88,8 @@ export const Station = z.object({
   inputStage: z.string().optional().describe('Product stage a unit arrives in'),
   ports: z.record(id, PortRef).default({}),
   intake: z.array(opEntry).optional().describe('Default: raise stop, convey to work, locate'),
-  process: z.array(opEntry).describe('The station\'s process as ops'),
+  process: z.array(opEntry).default([]).describe('The station\'s process as ops (an indexing station leaves it empty)'),
+  indexing: IndexingSpec.optional().describe('Indexing station: batches of units at positions along the conveyor, moved together one position per machine cycle'),
   output: z.array(opEntry).optional().describe('Default: release, convey to output'),
   home: z.record(id, z.record(id, statusValue)).default({}),
   stock: z.record(id, z.object({
@@ -106,6 +110,8 @@ export const Station = z.object({
     layerHeight: z.number().positive().max(2).describe('Height of one layer (m)'),
     gap: z.number().min(0).max(0.05).default(0).describe('Clearance above the surface / layer below (m)'),
   })).default({}).describe('Stacks the station builds across units (cases on a pallet); facts <stack>Slot and <stack>Fills'),
+  sensors: Sensors.describe('Presence sensors: a machine motion that reads blocked while a unit crosses it (photo-eyes)'),
+  connections: Connections.describe('Pipes and hoses between machine anchors ("machine.anchor"), e.g. from a supply pump to a machine inlet'),
   status: z.record(statusKey, statusValue).default({}),
   signals: z.object({
     beacon: z.object({ machine: id.optional(), motion: id.optional() }).optional(),

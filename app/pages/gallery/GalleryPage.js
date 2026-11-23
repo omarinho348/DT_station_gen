@@ -11,6 +11,7 @@ import { registry } from '../../../lib/components/index.js';
 import { paramFields } from '../../../lib/registry.js';
 import { createMaterials, disposeMaterials } from '../../../lib/core/materials.js';
 import { smoother } from '../../../lib/core/motion.js';
+import { preloadComponentAssets } from '../../../lib/core/assets.js';
 
 const CATEGORY_LABELS = {
   conveyor: 'Conveyors', robot: 'Robots', machine: 'Machines', fixture: 'Fixtures', station: 'Station furniture',
@@ -311,8 +312,15 @@ export function GalleryPage(outlet, route) {
     return view;
   }
 
-  select(route.sub, route.query);
-  applyMotionQuery(route.query);
+  // Components built from a model (the ABB robot) need it loaded first; the rest don't wait long.
+  let started = false;
+  preloadComponentAssets(registry).catch((e) => showError(`Model assets: ${e.message}`)).finally(() => {
+    started = true;
+    select(route.sub, route.query);
+    applyMotionQuery(route.query);
+    // Golden shots show every lamp/motion at its default; ready once the first frames are drawn.
+    requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
+  });
 
   /** URL query sets motions, e.g. #/gallery/<type>?<motion>=<value> (for screenshots of a state). */
   function applyMotionQuery(query = {}) {
@@ -324,11 +332,9 @@ export function GalleryPage(outlet, route) {
     }
     renderPanel(getDef(inst.type));
   }
-  // Golden shots show every lamp/motion at its default; ready once the first frames are drawn.
-  requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
-
   return {
     update(r) {
+      if (!started) return; // the first build follows the asset preload
       if (r.sub !== inst?.type) select(r.sub, r.query);
       applyMotionQuery(r.query);
     },

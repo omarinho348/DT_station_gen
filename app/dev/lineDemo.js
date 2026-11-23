@@ -11,6 +11,7 @@ import { Line } from '../../lib/line/index.js';
 import { expandFactory } from '../../compiler/expand.js';
 import { createMaterials } from '../../lib/core/materials.js';
 import { playLine } from '../pages/twin/linePlayer.js';
+import { preloadComponentAssets } from '../../lib/core/assets.js';
 
 const LINES = Object.fromEntries(Object.entries(import.meta.glob('./lines/*.json', { eager: true, import: 'default' }))
   .map(([path, data]) => [path.match(/([^/]+)\.json$/)[1], data]));
@@ -20,6 +21,9 @@ for (const [path, factory] of Object.entries(import.meta.glob('../../spec/exampl
 }
 
 export const lineNames = () => Object.keys(LINES);
+
+/** Loads the model assets any component may need (call before createLineDemo). */
+export const preloadLineAssets = () => preloadComponentAssets(registry);
 
 export function createLineDemo({ line: name = 'printer', speed = 1, onStatus } = {}) {
   const data = LINES[name];
