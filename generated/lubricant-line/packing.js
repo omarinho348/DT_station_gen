@@ -3,7 +3,7 @@
 // Do not edit: change the factory.json and compile again (npm run compile).
 //
 // Cycle 31.55 s (intake 7.05 + process 18.05 + output 6.45), 27 steps
-// (a decision on a fact only known while a unit plays is timed by its longest branch).
+// (a decision on a fact only known while a unit plays is timed by its planAs branch, else its longest).
 // Equipment, in the station's own frame (metres; product flows +X, conveyor on z = 0, walkway +Z):
 //   id         type            from     position              turn
 //   slab       floorSlab       station  [0.55, 0, 0]
@@ -25,6 +25,8 @@
 //   eyeCase    photoEye        station  [-0.15, 0.87, -0.75]
 //   eyeTaper   photoEye        station  [1.85, 0.87, -0.75]
 //   panel      hmi             station  [-1.7, 0, 1.75]       0.35 rad
+//   caseRack   palletRack      station  [-5.85, 0, -0.75]
+//   caseSign   signBoard       station  [-5.85, 0, -1.7]
 import * as THREE from 'three';
 
 /** What the station does (played by lib/station/StationCycle.js): ports, process ops, status, signals. */
@@ -199,6 +201,23 @@ export const station = {
     { machine: 'eyeCase', motion: 'beam', clear: 'clear', blocked: 'blocked', across: 0.3 },
     { machine: 'eyeTaper', motion: 'beam', clear: 'clear', blocked: 'blocked', across: 0.3 },
   ],
+  supplies: {
+    cases: {
+      machine: 'caseRack',
+      decks: ['deck1', 'deck2'],
+      product: {
+        type: 'carton',
+        params: { length: 0.62, width: 0.42, height: 0.42, wall: 0.006, flap: 0.005, foam: 0 },
+        stage: 'closed',
+      },
+      columns: [-0.665, -0.235, 0.235, 0.665],
+      rows: [-0.32, 0.32],
+      layers: 2,
+      layerHeight: 0.422,
+      turn: 1.5707963267948966,
+      draws: { made: 'case' },
+    },
+  },
   status: {
     inputConveyor: 'STOPPED',
     boxConveyor: 'STOPPED',
@@ -382,6 +401,27 @@ export function build({ registry, ctx }) {
   equipment.panel.root.position.set(-1.7, 0, 1.75);
   equipment.panel.root.rotation.y = 0.35;
   root.add(equipment.panel.root);
+
+  // caseRack: Selective pallet rack (uprights, step beams, wire decks) in one or more bays...
+  equipment.caseRack = registry.buildComponent('palletRack', {
+    length: 1.8,
+    depth: 1.4,
+    levels: 2,
+    firstDeck: 0.15,
+    deckSpacing: 1,
+    topClearance: 1.05,
+  }, ctx);
+  equipment.caseRack.root.position.set(-5.85, 0, -0.75);
+  root.add(equipment.caseRack.root);
+
+  // caseSign: Area sign on a tall post, readable from both sides: title, subtitle and an...
+  equipment.caseSign = registry.buildComponent('signBoard', {
+    title: 'CARTON SUPPLY',
+    subtitle: 'Empty cases for packing',
+    accent: '#b8793c',
+  }, ctx);
+  equipment.caseSign.root.position.set(-5.85, 0, -1.7);
+  root.add(equipment.caseSign.root);
 
   return { root, equipment };
 }

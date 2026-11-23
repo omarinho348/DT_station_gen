@@ -3,7 +3,7 @@
 // Do not edit: change the factory.json and compile again (npm run compile).
 //
 // Cycle 21.35 s (intake 3.05 + process 15.20 + output 3.10), 21 steps
-// (a decision on a fact only known while a unit plays is timed by its longest branch).
+// (a decision on a fact only known while a unit plays is timed by its planAs branch, else its longest).
 // Equipment, in the station's own frame (metres; product flows +X, conveyor on z = 0, walkway +Z):
 //   id             type            from     position         turn
 //   slab           floorSlab       station  [2.2, 0, -0.2]
@@ -21,6 +21,8 @@
 //   eyeCapping     photoEye        station  [3.8, 0.87, 0]
 //   eyeOutfeed     photoEye        station  [5.4, 0.87, 0]
 //   panel          hmi             station  [-2.1, 0, 1.35]  0.35 rad
+//   canRack        palletRack      station  [-6, 0, 0]
+//   canSign        signBoard       station  [-6, 0, -0.95]
 import * as THREE from 'three';
 
 /** What the station does (played by lib/station/StationCycle.js): ports, process ops, status, signals. */
@@ -110,6 +112,18 @@ export const station = {
     { machine: 'eyeCapping', motion: 'beam', clear: 'clear', blocked: 'blocked', across: 0.75 },
     { machine: 'eyeOutfeed', motion: 'beam', clear: 'clear', blocked: 'blocked', across: 0.75 },
   ],
+  supplies: {
+    cans: {
+      machine: 'canRack',
+      decks: ['deck1', 'deck2', 'deck3'],
+      columns: [-0.75, -0.45, -0.15, 0.15, 0.45, 0.75],
+      rows: [-0.5125, -0.3075, -0.1025, 0.1025, 0.3075, 0.5125],
+      layers: 1,
+      layerHeight: 0,
+      turn: 0,
+      draws: 'units',
+    },
+  },
   status: {},
   signals: {
     beacon: { machine: 'filler', motion: 'beacon' },
@@ -249,6 +263,20 @@ export function build({ registry, ctx }) {
   equipment.panel.root.position.set(-2.1, 0, 1.35);
   equipment.panel.root.rotation.y = 0.35;
   root.add(equipment.panel.root);
+
+  // canRack: Selective pallet rack (uprights, step beams, wire decks) in one or more bays...
+  equipment.canRack = registry.buildComponent('palletRack', {}, ctx);
+  equipment.canRack.root.position.set(-6, 0, 0);
+  root.add(equipment.canRack.root);
+
+  // canSign: Area sign on a tall post, readable from both sides: title, subtitle and an...
+  equipment.canSign = registry.buildComponent('signBoard', {
+    title: 'RAW MATERIALS',
+    subtitle: 'Empty HDPE jerry cans',
+    accent: '#8fa3ae',
+  }, ctx);
+  equipment.canSign.root.position.set(-6, 0, -0.95);
+  root.add(equipment.canSign.root);
 
   return { root, equipment };
 }

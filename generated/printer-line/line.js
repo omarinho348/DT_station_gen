@@ -18,7 +18,8 @@
 //   st5.output → st6.input: 2.40 m, 5.68 s
 // Takt 74.81 s (bottleneck: station st3); one unit through the line 289.84 s;
 // A run of 8 about 813.52 s. Decisions on facts only known while a unit
-// plays (a verdict) are timed by their longest branch here.
+// plays (a verdict) are timed by their planAs branch, else their longest, here; one-off branches
+// (a full pallet leaving) are not in the estimate.
 import { registry as catalog } from '../../lib/components/index.js';
 import '../../lib/products/index.js';
 import '../../lib/ops/index.js';

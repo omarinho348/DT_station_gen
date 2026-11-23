@@ -1894,7 +1894,7 @@ Step 9b part 2 approved by the owner (2026-11-23: "next"). 9c is split like 9a a
 - all with the reference step times (approach 2.4, insert 0.72, lift 1.0, transport 4.2, place 1.8, lower 0.9, release 0.5, withdraw 2.4, stow 0.6, wrap 12)
 - the whole line finishing at the recorded 964.82 s
 
-### Step 9c (part 2): station 3's outbound, the wrap, and the whole line to its end (done)
+### Step 9c (part 2): station 3's outbound, the wrap, and the whole line to its end (approved)
 
 Part 1 approved by the owner (2026-11-23: "next").
 
@@ -1948,3 +1948,91 @@ Part 1 approved by the owner (2026-11-23: "next").
 - screenshot comparison with the reference lubricant factory rendered in our viewer, as Phase 4 step 8 did for the printer line (`npm run visual`, golden images)
 - a look at the compiled files
 - the Phase 5 wrap-up
+
+### Step 9d: the lubricant line compared with the reference by eye and by pixel, supply racks, Phase 5 wrap-up (done)
+
+Step 9c part 2 approved by the owner (2026-11-23: "continue with phase 5 step 9d").
+
+**Result first:** the compiled lubricant line and the hand-built reference factory, rendered in the same viewer from the same cameras at the same moments, match. In all 14 views (t = 0 to 959 s; every station close-up, the can transfer, line and wide views) every station, machine, rack, sign, HMI, can and case is in the same place and the moving parts are in the same pose:
+- filler jets at 8 s
+- the gantry over the open case at 100 s
+- the robot with the 11th case over a pallet of 10 at 426.6 s
+- the worker and the full pallet at 944 s, the wrap at 959 s
+
+Differing pixels:
+
+| Views | Differing pixels |
+|---|---:|
+| wide | 2.9–3.0 % |
+| line | 4.5 % |
+| station 1 | 4.7–4.9 % |
+| can transfer | 6.2–6.4 % |
+| station 2 | 8.3–8.4 % |
+| **station 3** | **32–39 %** |
+
+Station 3 is high for known reasons, not misplacement:
+- our cell stands on a floor slab; the reference cell stands on the bare floor (about a third of those views)
+- our worker is parked in its bay all the time
+- our station-3 belt is the catalog belt conveyor
+
+Full table and the list of differences: `benchmarks/results/lubricant-line-visual.md`.
+
+With the timing match of 9a–9c, **the lubricant line rebuilds from JSON at reference quality (Claude.md §9's second regression test).**
+
+**Found on the way:** the reference station 3 really does need the world origin (its own layout note says so). In a Node check, the reference factory moved by our layout's offset never gripped a case (0 instead of 10 on the pallet at 426.6 s). So our line is moved to the reference frame, not the reference to ours. That this is allowed is now a test of rule 4: shifted, our line plays exactly the same.
+
+**Changed**
+- **Supply stock** (`lib/station/supplySpec.js`; station field `supplies`, runtime and factory schema, passed through by `compiler/expand.js`). The reference factory's jerry-can and carton racks, drawn down as the line runs:
+  - identical items on a machine's deck ports, in a grid (columns, rows, layers, a turn)
+  - drawn as instanced stock (`lib/core/instancedStock.js`, step 8): 108 cans in a few draw calls
+  - `draws: 'units'` takes one item per unit or batch member the station brings in (the line's released batches); `draws: { made: item }` takes one each time an op makes that item (`spawn`; `OpCycle.onSpawn` now gets the item name)
+  - refilled on reset; checked in the dry plan (known machine and deck ports)
+  - visual only: an empty supply doesn't hold the line (the run size decides)
+- **`lubricant-line.factory.json`**, reference geometry:
+  - station 1: can rack (`palletRack` defaults = the reference can rack) at x −6.0 with **108 empty cans** (3 decks × 6 × 6), sign "RAW MATERIALS"
+  - station 2: carton rack at (−5.85, −0.75) with **32 closed cartons** (2 decks × 2 layers × 2 × 4, turned 90°), sign "CARTON SUPPLY"
+  - over a run the cans run out exactly (27 batches of 4) and 5 cartons are left, as in the reference
+- **The reference factory in our viewer** (dev only): `app/dev/referenceLubricant.js`, `#/twin?demo=reference&line=lubricant-line`:
+  - loads `LubricantFactory` from the read-only export
+  - builds station 3 with the same IRB 6760 model and rig
+  - steps it like the timing recording (0.02 s, world matrices updated after every update)
+- **Wrapper stand-in:** `app/dev/referenceWrapStub.js`. `vite.config.js` points the reference's `AssetWrapMachine.js` import at it (browser only; the SSR timing script keeps its own stub). It builds **our** wrapper from the factory.json, so the wrapper itself is not compared.
+- **Assets:** the reference's two label PNGs copied read-only into the git-ignored `reference/_src/src/assets`.
+- **Twin page:** `?shift=x,y,z` moves the whole line; the reference demo picks the lubricant factory with `&line=lubricant-line`.
+- **Visual script per line:** views and pages moved to `scripts/visual-views.js`. `scripts/visual-compare.mjs --line lubricant-line [views]` (default the printer line, unchanged). Writes goldens to `tests/golden/lines/lubricant-line/`, diffs to `benchmarks/results/visual/lubricant-line/`, numbers to `benchmarks/results/lubricant-line-visual.json`. From PowerShell, call `node` directly (npm drops the options).
+- **Compiled headers:** they said a decision is "timed by its longest branch". Since 9c, station 3 is planned by its `planAs` branch, so the text now says "planAs branch, else the longest", and the line header notes that one-off branches (the full pallet leaving) are not in the run estimate. Only comments changed in `generated/printer-line/`.
+- **Tests:**
+  - `tests/station/supplies.test.js` (5): slot order; problems (unknown machine / deck, also through `checkFactory`); the two racks (capacity, on the decks, instanced); drawn as batches are released and cases made, 0 cans / 5 cartons left after the run, refilled on reset; compiled files carry the supplies
+  - `tests/spec/lubricant-line-visual.test.js` (17):
+    - the shift equals our palletizing station's layout position
+    - **rule 4**: the shifted line plays the same as the unshifted one (status and every unit's position in the line frame, every 10 s for 140 s)
+    - a result for every view, views in time order
+    - each view within its limit (`benchmarks/expected/lubricant-line-visual-limits.js`, about one point above what was measured); the stored images re-diff to the recorded numbers
+
+**The compiled files, looked at** (`generated/lubricant-line/`, 5 files, 1,231 lines): headers list the stations with cycle times, steps and placement, the transfer (3.21 m, 5.85 s), takt 31.55 s, and each station's equipment table. Code lines stay within 100 columns (only header comments with long catalog summaries are longer, as in the printer line).
+- **Run estimate:** the header says about 911.55 s. The real run takes 964.72 s, because the estimate leaves out station 3's once-per-pallet outbound (14.87 s + 12 s wrap) and station 1's start-up cycles. The header now says the estimate leaves out one-off branches.
+
+**Differences vs the reference (deliberate):** in `benchmarks/results/lubricant-line-visual.md`. New in this step: the cartons in the rack are our closed `carton`; the reference drew plain boxes with a tape line.
+
+**My mistakes this step (fixed before the results above):**
+- I first moved the reference factory to our frame, which jams its station 3 (a stray case in my first screenshot gave it away)
+- two schema descriptions with an unescaped apostrophe broke 14 test files until fixed
+- the reference loader named the robot model file and the rig file, which trips rule 6; both are now found through our data or a pattern
+- my first supply test treated `checkFactory` errors as strings
+
+**Results**
+- `npm test`: 45 files, **1532 tests passed**
+- `npm run compile`: `generated/lubricant-line/` 5 files, takt 31.55 s; `generated/printer-line/` header comments only
+- `npm run schema` regenerated
+- `node scripts/visual-compare.mjs --line lubricant-line`: 14 views × 2 renders (ours 186 s, reference about 5 min)
+
+**Open question for the owner:** keep station 3's floor slab (every station on a slab, as the printer line) or remove it to match the reference cell? Removing it is one equipment entry; the station 3 views would then drop to roughly the station 2 level.
+
+## Phase 5 status: done
+
+Lubricant components and adapters (steps 1–8) and the lubricant line as data (step 9) are done:
+- `lubricant-line.factory.json` compiles and runs from the first empty can to a wrapped pallet
+- timing matches the recorded reference station by station (stations 1, 2 and the transfer within 0.05 s, station 3 and the line's end within 0.1 s)
+- the screenshots match the reference factory in place and pose, with the differences listed
+
+**Next:** Phase 6 (generic level): basic frames / axes / tools / transport / buffers, `composite` equipment in the IR and compiler, `genericMachine`, graph shapes (reject branch, merge, parallel station, buffer), parametric and GLB products. I'll propose how to split it before starting.

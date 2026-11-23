@@ -3,7 +3,7 @@
 // Do not edit: change the factory.json and compile again (npm run compile).
 //
 // Cycle 33.35 s (intake 5.61 + process 22.49 + output 5.26), 48 steps
-// (a decision on a fact only known while a unit plays is timed by its longest branch).
+// (a decision on a fact only known while a unit plays is timed by its planAs branch, else its longest).
 // Equipment, in the station's own frame (metres; product flows +X, conveyor on z = 0, walkway +Z):
 //   id         type              from                position                        turn
 //   slab       floorSlab         shell assemblyCell  [0, 0, -0.04999999999999993]

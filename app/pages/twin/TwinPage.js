@@ -70,6 +70,13 @@ export function TwinPage(outlet, route) {
     if (!alive) { player.dispose(); return; }
     demo = player;
     viewer.content.add(demo.root);
+    // ?shift=x,y,z: the whole line moved (the visual tests stand our line where a reference line,
+    // which must stay at its origin, stands). Stations are station-local, so nothing else changes.
+    const shift = route.query.shift?.split(',').map(Number);
+    if (shift?.length === 3 && shift.every(Number.isFinite)) {
+      demo.root.position.fromArray(shift);
+      demo.root.updateMatrixWorld(true);
+    }
     // ?t=<seconds>: frozen at that moment (screenshots); otherwise it plays.
     if (route.query.t) demo.skip(Number(route.query.t));
     else viewer.onFrame(demo.update);
@@ -107,10 +114,14 @@ export function TwinPage(outlet, route) {
       if (alive) showLine(createLineDemo({ line: route.query.line ?? 'printer', station: route.query.station, ...lineOptions }));
     });
   }
-  // The hand-built reference line, for the visual acceptance test (dev only; app/dev/referenceLine.js).
+  // The hand-built reference lines, for the visual acceptance tests (dev only): the printer line
+  // (app/dev/referenceLine.js, the default) or, with &line=lubricant-line, the lubricant factory
+  // (app/dev/referenceLubricant.js).
   if (route?.query?.demo === 'reference') {
-    import('../../dev/referenceLine.js')
-      .then(({ loadReferenceLine }) => loadReferenceLine(lineOptions))
+    const load = route.query.line === 'lubricant-line'
+      ? import('../../dev/referenceLubricant.js').then(({ loadReferenceLubricant }) => loadReferenceLubricant(lineOptions))
+      : import('../../dev/referenceLine.js').then(({ loadReferenceLine }) => loadReferenceLine(lineOptions));
+    load
       .then(showLine)
       .catch((error) => {
         console.error(error);

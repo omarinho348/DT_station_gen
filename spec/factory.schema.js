@@ -17,6 +17,7 @@ import { Connections } from '../lib/station/connectionSpec.js';
 import { IndexingSpec } from '../lib/station/indexingSpec.js';
 import { BatchSpec } from '../lib/station/batchSpec.js';
 import { Sensors } from '../lib/station/sensorSpec.js';
+import { Supplies } from '../lib/station/supplySpec.js';
 
 export const FACTORY_VERSION = 1;
 
@@ -119,6 +120,7 @@ export const Station = z.object({
     gap: z.number().min(0).max(0.05).default(0).describe('Clearance above the surface / layer below (m)'),
   })).default({}).describe('Stacks the station builds across units (cases on a pallet); facts <stack>Slot and <stack>Fills'),
   sensors: Sensors.describe('Presence sensors: a machine motion that reads blocked while a unit crosses it (photo-eyes)'),
+  supplies: Supplies.describe('Supply stock on the decks of a machine (a rack of empty containers, flat cases), drawn one by one as the station brings units in or makes items'),
   connections: Connections.describe('Pipes and hoses between machine anchors ("machine.anchor"), e.g. from a supply pump to a machine inlet'),
   status: z.record(statusKey, statusValue).default({}),
   signals: z.object({

@@ -89,6 +89,7 @@ export function expandStation(registry, station, ctx = {}) {
     batch: station.batch, // undefined (left out) unless units arrive as batches
     indexing: station.indexing, // undefined (left out) for single-unit stations
     sensors: station.sensors?.length ? station.sensors : undefined,
+    supplies: Object.keys(station.supplies ?? {}).length ? station.supplies : undefined, // left out when there are none
     status: station.status,
     signals,
     feed: station.feed,

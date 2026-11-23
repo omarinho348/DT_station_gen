@@ -852,6 +852,128 @@
               ]
             }
           },
+          "supplies": {
+            "default": {},
+            "description": "Supply stock on the decks of a machine (a rack of empty containers, flat cases), drawn one by one as the station brings units in or makes items",
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9]*$"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "machine": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]*$",
+                  "description": "Machine holding the stock (a rack)"
+                },
+                "decks": {
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*$"
+                  },
+                  "description": "Its ports the stock stands on, filled in this order (lowest first)"
+                },
+                "product": {
+                  "description": "What the items are (default: the station's units, at its input stage)",
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "params": {
+                      "default": {},
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "stage": {
+                      "description": "Stage the stock items show",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                "columns": {
+                  "minItems": 1,
+                  "maxItems": 12,
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "Item offsets along the machine X (m)"
+                },
+                "rows": {
+                  "minItems": 1,
+                  "maxItems": 12,
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "Item offsets along the machine Z (m)"
+                },
+                "layers": {
+                  "default": 1,
+                  "description": "Items stacked on each deck",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 6
+                },
+                "layerHeight": {
+                  "default": 0,
+                  "description": "Height of one layer (m)",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                },
+                "turn": {
+                  "default": 0,
+                  "description": "Items turned about Y (rad)",
+                  "type": "number",
+                  "minimum": -3.141592653589793,
+                  "maximum": 3.141592653589793
+                },
+                "draws": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "const": "units",
+                      "description": "one item per unit (batch member) the station brings in from outside"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "made": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-zA-Z0-9]*$",
+                          "description": "one item each time an op makes an item of this name (spawn)"
+                        }
+                      },
+                      "required": [
+                        "made"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "machine",
+                "decks",
+                "columns",
+                "rows",
+                "draws"
+              ]
+            }
+          },
           "connections": {
             "default": [],
             "description": "Pipes and hoses between machine anchors (\"machine.anchor\"), e.g. from a supply pump to a machine inlet",

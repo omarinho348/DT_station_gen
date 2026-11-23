@@ -1,6 +1,23 @@
 import { defineConfig } from 'vite';
+import { fileURLToPath } from 'node:url';
+
+// Dev only: the reference lubricant factory (app/dev/referenceLubricant.js) loads its stretch
+// wrapper from a STEP file through occt-import-js, which this project does not carry. Its import of
+// AssetWrapMachine.js is pointed at our stand-in (our procedural wrapper, the same in both renders).
+const WRAP_STUB = fileURLToPath(new URL('./app/dev/referenceWrapStub.js', import.meta.url));
+const referenceStubs = {
+  name: 'reference-stubs',
+  enforce: 'pre',
+  resolveId(id, importer, options) {
+    // Browser only: scripts/reference-timing-lubricant.mjs (SSR) brings its own timing stub.
+    if (options?.ssr) return null;
+    if (id.endsWith('/AssetWrapMachine.js') && importer?.replace(/\\/g, '/').includes('/reference/_src/')) return WRAP_STUB;
+    return null;
+  },
+};
 
 export default defineConfig({
+  plugins: [referenceStubs],
   server: {
     port: 5173,
     strictPort: true,

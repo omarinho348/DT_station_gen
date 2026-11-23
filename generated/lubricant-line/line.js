@@ -12,7 +12,8 @@
 //   packing.output → palletizing.input: 3.21 m, 5.85 s
 // Takt 31.55 s (bottleneck: station packing); one unit through the line 91.25 s;
 // A run of 27 about 911.55 s. Decisions on facts only known while a unit
-// plays (a verdict) are timed by their longest branch here.
+// plays (a verdict) are timed by their planAs branch, else their longest, here; one-off branches
+// (a full pallet leaving) are not in the estimate.
 import { registry as catalog } from '../../lib/components/index.js';
 import '../../lib/products/index.js';
 import '../../lib/ops/index.js';
