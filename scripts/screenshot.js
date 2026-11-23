@@ -247,11 +247,28 @@ export async function screenshot(opts) {
     mark(`${opts.settle} frames settled`);
     // Pages may expose a hook that stops their render loop so the capture isn't starved.
     await cdp.send('Runtime.evaluate', { expression: 'window.__screenshotPrepare?.()', awaitPromise: true });
-    const { data } = await cdp.send('Page.captureScreenshot', { format: 'png' });
+    const capture = async (file) => {
+      const { data } = await cdp.send('Page.captureScreenshot', { format: 'png' });
+      const path = resolve(ROOT, file);
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, Buffer.from(data, 'base64'));
+      return path;
+    };
+    // opts.shots: [{ expr, out }], several captures from one page load. Each expr (awaited) puts
+    // the page in the next state, e.g. "window.__twinView({ t: 300, cam: [...] })".
+    if (opts.shots?.length) {
+      const outs = [];
+      for (const shot of opts.shots) {
+        const r = await cdp.send('Runtime.evaluate', { expression: shot.expr, awaitPromise: true, returnByValue: true });
+        if (r.exceptionDetails) throw new Error(`shot ${shot.out}: ${r.exceptionDetails.exception?.description ?? r.exceptionDetails.text}`);
+        outs.push(await capture(shot.out));
+        mark(`captured ${shot.out}`);
+      }
+      cdp.close();
+      return { out: outs[0], outs, url: target, logs: cdp.logs };
+    }
+    const out = await capture(opts.out);
     mark('captured');
-    const out = resolve(ROOT, opts.out);
-    await mkdir(dirname(out), { recursive: true });
-    await writeFile(out, Buffer.from(data, 'base64'));
     cdp.close();
     return { out, url: target, logs: cdp.logs };
   } finally {

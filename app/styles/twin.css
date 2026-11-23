@@ -89,3 +89,9 @@
     display: none;
   }
 }
+
+/* Golden / comparison screenshots (?golden=1): only the 3D view. */
+.twin.is-golden .hud-brand,
+.twin.is-golden .hud-hint {
+  display: none;
+}

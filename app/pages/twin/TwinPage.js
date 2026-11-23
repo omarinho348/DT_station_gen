@@ -7,7 +7,8 @@ import { APP_NAME } from '../../brand.js';
 export function TwinPage(outlet, route) {
   document.title = `Twin · ${APP_NAME}`;
   const root = document.createElement('div');
-  root.className = 'twin theme-dark';
+  // ?golden=1: no HUD text, just the 3D view (visual comparisons, scripts/visual-compare.mjs).
+  root.className = `twin theme-dark${route?.query?.golden === '1' ? ' is-golden' : ''}`;
   root.innerHTML = `
     <div class="viewport"></div>
     <header class="hud-brand">
@@ -78,6 +79,25 @@ export function TwinPage(outlet, route) {
       : demo.camera ?? { position: [0.5, 9.5, 15.5], target: [0, 0.9, -0.3] };
     viewer.camera.position.fromArray(view.position);
     viewer.controls.target.fromArray(view.target);
+    // Frozen pages (?t) can be moved on by scripts: __twinView({ t, cam: [x, y, z, tx, ty, tz] })
+    // jumps forward to moment t (never back), sets the camera and draws one frame. Lets
+    // scripts/visual-compare.mjs take many views from one page load.
+    if (route.query.t) {
+      let shownAt = Number(route.query.t);
+      window.__twinView = async ({ t = shownAt, cam = null } = {}) => {
+        if (t < shownAt - 1e-9) throw new Error(`__twinView: t ${t} is before the shown moment ${shownAt}`);
+        demo.skip(t - shownAt);
+        shownAt = t;
+        if (cam) {
+          viewer.camera.position.fromArray(cam.slice(0, 3));
+          viewer.controls.target.fromArray(cam.slice(3));
+        }
+        viewer.controls.update();
+        viewer.renderer.render(viewer.scene, viewer.camera);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return true;
+      };
+    }
     requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
   };
   const lineOptions = { speed: Number(route?.query?.speed ?? 1), onStatus: (text) => { hint.textContent = text; } };
@@ -85,6 +105,17 @@ export function TwinPage(outlet, route) {
     import('../../dev/lineDemo.js').then(({ createLineDemo }) => {
       if (alive) showLine(createLineDemo({ line: route.query.line ?? 'printer', ...lineOptions }));
     });
+  }
+  // The hand-built reference line, for the visual acceptance test (dev only; app/dev/referenceLine.js).
+  if (route?.query?.demo === 'reference') {
+    import('../../dev/referenceLine.js')
+      .then(({ loadReferenceLine }) => loadReferenceLine(lineOptions))
+      .then(showLine)
+      .catch((error) => {
+        console.error(error);
+        hint.textContent = error.message;
+        window.__appReady = true;
+      });
   }
   if (!route?.query?.demo && route?.query?.line) {
     import('./compiledLines.js')
@@ -115,6 +146,7 @@ export function TwinPage(outlet, route) {
       demo?.dispose();
       viewer.dispose();
       delete window.__screenshotPrepare;
+      delete window.__twinView;
       if (window.viewer === viewer) delete window.viewer;
       root.remove();
     },

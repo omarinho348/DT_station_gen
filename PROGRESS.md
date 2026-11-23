@@ -969,3 +969,86 @@ Step 6 approved by the owner moving on (2026-11-23).
 **Phase 4 status:** IR, expander, the hand-written printer line (timing = reference) and the compiler (compiled = IR, exactly) are done. Left for Phase 4: the **screenshot comparison with the reference repo**, i.e. golden views of each station and of the line rendered from the reference app and from ours.
 
 **Next:** Phase 4 step 8: the visual half of the acceptance test. Render fixed camera views (each station and the whole line, at set moments) from the reference app and from our compiled line, store them as goldens, and compare. This needs the reference app's scene entry for the printer line, beyond the `src/station` / `src/motion` export in `reference/_src`. If those files aren't there, I'll ask the owner for them.
+
+### Step 8: Visual comparison with the reference (done)
+
+Step 7 approved by the owner moving on (2026-11-23).
+
+**Result first:** the compiled printer line and the hand-built reference line, rendered in the same viewer from the same cameras at the same moments, match: every station, machine, sign, HMI and unit is in the same place and pose in all 17 views (t = 0, 262.3, 430, 500, 760 s; every station close-up twice, line and wide views). Differing pixels: **close-ups 3.5–4.4 %, line views 1.8–1.9 %, wide views 0.7–0.8 %**, and nearly all of it is known, deliberate differences from earlier steps (the visible fence mesh above all). With the timing match from step 6, **both halves of the Phase 4 key acceptance test are met.** Full table and the list of differences: `benchmarks/results/printer-line-visual.md`.
+
+**No files were needed from the owner.** The reference repo is on disk (its `main` and `station-agent` are the same commit), and the existing read-only export in `reference/_src` already holds `PrinterAssemblyLine.js`. The reference app has no URL to open a scene at a set moment, so instead of driving that app, its line is played inside our twin page.
+
+**Changed**
+- `app/dev/referenceLine.js` (dev only): loads the reference `PrinterAssemblyLine` from `reference/_src` through `import.meta.glob` (the app still builds without the export and shows a message), builds it, plays it, and skips with the same 0.05 s steps as ours. Its own `StationEnvironment` is not applied: our viewer applies the same room environment (`lib/core/environment.js` is its port), so both renders use one set of lights. Open with `#/twin?demo=reference` (`?t`, `?speed`, `?cam` as for compiled lines).
+- `app/pages/twin/TwinPage.js`:
+  - `?golden=1` hides the HUD (only the 3D view)
+  - frozen pages (`?t`) expose `window.__twinView({ t, cam })`, which jumps forward (never back), sets the camera and draws one frame, so a script can take many views from one page load
+- `scripts/screenshot.js`: `shots: [{ expr, out }]` option (several captures per page load).
+- `scripts/png.js`: dependency-free PNG decode (Chrome's 8-bit RGB / RGBA, every scanline filter), encode, and `diffImages` (share of differing pixels, mean difference, red diff image).
+- `scripts/visual-compare.mjs` (`npm run visual [views…]`): renders both lines (about 3 + 4.5 min), writes goldens `tests/golden/lines/printer-line/<view>.png` / `<view>.reference.png`, diff images `benchmarks/results/visual/printer-line/`, numbers `benchmarks/results/printer-line-visual.json`.
+- `benchmarks/expected/printer-line-visual-limits.js`: per-view limits (close-ups 5.5 %, line 3 %, wide 1.5 %), about one point above what was measured.
+- `vite.config.js`: `optimizeDeps.include` for the two `three/examples/jsm/…` add-ons the reference imports (we use `three/addons/…`). Without it Vite found them mid-load, re-optimised and cancelled the page load.
+- Tests:
+  - `tests/scripts/png.test.js` (4): round trip, RGB with all five filters, refusal, diff numbers and image
+  - `tests/spec/printer-line-visual.test.js` (18): a result for every view; each view within its limit; the stored images re-diff to the recorded numbers
+
+**Known differences (deliberate, from earlier steps):**
+1. fence wire mesh visible in ours, mip-mapped away in the reference (Phase 2 step 2)
+2. taller carton; the reference's foam and accessory box stick out of the closed flaps (Phase 4 step 6)
+3. ST5 label applicator column at z 1.02 instead of 0.70; same x, pad spot and timing (Phase 2 step 6e)
+4. lift carriage sleeves on the line-end lifts (Phase 2 step 1)
+5. ST6 carton labeller retract and foam magazine spares (Phase 4 step 6)
+
+**Not fixed:** the ST1 flow rack's shelves and totes sit 1–2 cm off the reference (a few pixels in the close-ups). The component was approved in Phase 2 step 5, so I left it alone.
+
+**Limits of the test**
+- `npm test` checks the recorded run; it does not render (that needs Chrome). Re-render with `npm run visual` after changing components or the line.
+- How sensitive the limits are was reasoned, not measured: I did not render a deliberately broken line to confirm that a moved machine goes over 5.5 %.
+- The reference renders (`*.reference.png`) are images of the reference repo's line. They sit under `tests/golden/`, which is not git-ignored, so committing them is your call.
+
+**Results**
+- `npm run visual`: 17 views × 2 lines rendered and compared (ours 183 s, reference 263 s).
+- `npm test`: 28 files, 954 tests passed.
+- Checked by eye: `st5-430`, `st6-760` and `st1-262` side by side with their diff images. The red areas are the differences above.
+
+**Phase 4 status:** done. IR, expander, hand-written printer line (timing = reference), compiler (compiled = IR, exactly) and the visual comparison (compiled ≈ reference, differences explained).
+
+**Next:** Phase 5 step 1: lubricant components. First the belt conveyor and the `jerryCan` product, from the reference `OilConveyor` / `ProceduralConveyor` and `JerryCan`. The lubricant files that aren't in `reference/_src` yet (`station-2`, `station-3` and `factory/` are there; I'll check what's missing first) can be exported from the local reference repo the same read-only way.
+
+## Phase 5: Lubricant components and adapters
+
+### Step 1: `beltConveyor` component and `jerryCan` product (done)
+
+Phase 4 step 8 approved by the owner (2026-11-23: "start phase 5 step 1").
+
+**No files were needed from the owner.** Every lubricant source Phase 5 needs is already in the read-only export `reference/_src` (station-1 filler, capper, tank, hoses, sensors, conveyor, can; station-2 case packer, robot, carton; station-3 pallet, box, conveyor, worker; factory supply rack, transfer lines).
+
+**Changed**
+- **`beltConveyor`** (`lib/components/conveyors/beltConveyor.js`), from the reference `OilConveyor.js` (`createBeltConveyor`):
+  - side frames, carry and return belt, head / tail drums with bearing housings, return rollers, legs with levelling feet and bracing, optional side guides, optional gear motor at the discharge end
+  - params `length` (0.8–12 m, default 4), `beltWidth` (0.34), `guides`, `guideGap` (clear width between the rails, 0.22; refused if wider than the belt + 2 cm), `drive`, `carries` (`unit | batch | case`, sets the port type)
+  - ports `input` / `output` at the belt ends, at belt height
+  - motion `belt`: phase within the 0.5 m texture tile (`wrap`, `travel` 0.5 m), like `palletConveyor`; drums and return rollers make whole turns per tile, so the phase can wrap 1 → 0 without a jump
+  - same counts as the reference: the 8.4 m main conveyor has 7 leg pairs and 9 return rollers
+- **`jerryCan`** product (`lib/products/jerryCan/`), from the reference `JerryCan.js` and the `OilMaterials` finishes and label:
+  - stages `empty → filled → capped`; routine `fill { to? }` raises the oil from its current level (default: `fillLevel`, 0.9); feature `cap` (`off | on`), so a capper can hand its cap over by switching it on
+  - refs `neckTop` (0.075, 0.398, 0), `capSeat` (0.075, 0.388, 0) and `grasp` (the handle grip, −0.054, 0.412, 0): the reference values. `api.level()` and `api.surfaceY()` give the oil surface for a filling stream.
+  - params: body size, corner radius, neck position / size, cap size, `fillLevel`, `look` (`natural`: translucent HDPE and blue cap, as the reference "classic"; `yellow`: opaque, the colours of the reference "branded" can, without its picture label), and the label's `grade` / `volume` text
+  - checks that refuse shapes that cannot be made: a cap smaller than the neck, a neck off the flat top or into the handle grip, oversized corners
+  - handle and label scale with the can length, so smaller cans keep a handle on their body
+  - finishes and the label texture: one set per shared material library and look / label (as the printer's materials); geometry cached per size. Many cans on a line share one label canvas instead of one each. `disposeJerryCanMaterials(shared)` frees them.
+- `lib/core/screwCap.js`: the reference ribbed screw cap (shell with grip ribs, top, tamper ring), shared so that next step's capper draws the same cap as the can.
+- Tests `tests/products/lubricant.test.js` (11): belt top and ports, reference leg / roller counts, guide gap and refusal, belt motion wrap, station-local build; can refs = reference, stages, fill routine and refusal, min / max sizes (no NaN, resting on its base, nothing floating), shape refusals, shared finishes and their disposal. The generic checks in `all-components.test.js` cover `beltConveyor` (18 more).
+- Golden images: `beltConveyor`, `jerryCan-empty`, `jerryCan-filled`, `jerryCan-capped`.
+
+**Fixes / differences vs the reference (deliberate)**
+1. **Drums had nothing holding them.** Their hubs sat beside the frames with no shaft, and the gear motor stood 1.25 cm off the bearing housing. The generic "nothing floats" check would refuse that. Drums now turn on shafts through the bearing housings, and the head shaft reaches the gearbox.
+2. Return rollers span the frames (the reference's stopped 2.5 mm short of them on each side).
+3. Drums turn 2 and return rollers 3 whole turns per 0.5 m of belt (true values 1.77 and 3.18), so the belt phase wraps without a visible jump. The slip can't be seen.
+4. The reference's "branded" look used a picture asset (`can-label.png`) and swapped materials globally at run time. It's left out; the `yellow` look gives the opaque colours with the drawn label.
+
+**Results**
+- `npm test`: 29 files, 983 tests passed.
+- `npm run golden beltConveyor jerryCan`: 4 written. Checked by eye: the conveyor with guides, drums and motor; the can empty, filled (oil visible through the body) and capped (blue cap on the neck).
+
+**Next:** Phase 5 step 2: the filling machine and the capping machine (from `FillingMachine.js` / `CappingMachine.js`), with the conveyor tunnel (`createConveyorTunnel`, in the same reference file as the conveyor). The capper uses `lib/core/screwCap.js`.

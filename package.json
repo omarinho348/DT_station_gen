@@ -14,7 +14,8 @@
     "golden": "node scripts/golden.js",
     "reference:timing": "node scripts/reference-timing.mjs",
     "schema": "node scripts/schema.mjs",
-    "compile": "node scripts/compile.mjs"
+    "compile": "node scripts/compile.mjs",
+    "visual": "node scripts/visual-compare.mjs"
   },
   "dependencies": {
     "lucide": "^1.73.0",
