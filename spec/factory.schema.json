@@ -41,6 +41,12 @@
           "minimum": 1,
           "maximum": 999
         },
+        "taktTarget": {
+          "description": "Wanted takt (s per unit); the reviewer reports a line slower than this, with its bottleneck",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 36000
+        },
         "speeds": {
           "default": [
             1,

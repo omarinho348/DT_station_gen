@@ -2413,7 +2413,7 @@ Step 6.6 approved by the owner (2026-11-24: "ok").
 
 Written as `factory.json`, checked, compiled, played and screenshot, to show the level holds together beyond the two reference lines. Then the Phase 6 wrap-up.
 
-### Step 6.8: a test line from the generic level only (done)
+### Step 6.8: a test line from the generic level only (approved)
 
 Step 6.7 approved by the owner (2026-11-24: "ok").
 
@@ -2487,3 +2487,62 @@ Throughout, both reference lines stayed exact: step-for-step timing, compiled fi
 - compiled files import and build headless
 
 I'll propose how to split it before starting.
+
+## Phase 7: Deterministic reviewer
+
+Phase 6 approved by the owner moving on (2026-11-24: "next").
+
+**Split** (proposed 2026-11-24; started on 7.1 under the "don't wait" rule):
+
+| Step | Content |
+|---|---|
+| 7.1 | Reviewer core: findings `{ check, severity, path, message, hint }`; schema, catalog, ops (every station on its own), graph, placeholders, takt target, op ↔ machine support; CLI `npm run review` |
+| 7.2 | Geometry: footprint overlaps within a station, between stations, transfers crossing stations or each other; mount rules so machines meant to sit over a conveyor aren't flagged; no false positives on the three example lines |
+| 7.3 | Edges and reach: port directions and flow types statically along each edge; robot and gantry reach against the points their ops aim at |
+| 7.4 | Compiled files imported and built headless; the first `/api/review` route (a small Vite dev plugin) |
+
+### Step 7.1: reviewer core (done)
+
+**Result first:** `npm run review` reviews factory.json files and lists **every** problem it can find, each with its check, its path in the file, a clear message and, where it helps, a hint. Exit code 1 if any file has an error; `--json` for machines (the Builder in Phase 8).
+- **The three example lines:** printer and lubricant clean; bottling ok with its two placeholders as warnings
+- **On broken copies of the bottling line** (tests), for example:
+  - `✗ [ops] stations[1].process[0]: station "cap": process › op #1 (move): machine "capper".lower must stay in [0, 0.25], got 0.9`, hint `capper.lower reaches [0, 0.25]: aim inside it, or give the machine a longer stroke / reach`
+  - `✗ [catalog] stations[1].equipment[0].type: unknown component type "warpBelt"`, hint: see the catalog, or build it as a composite, or stand in a genericMachine
+  - `! [takt] line.taktTarget: takt 10.48 s misses the target 5 s: the bottleneck is station "…"`, hint: shorten its steps by …, or run it as N parallel copies (`parallel: N`)
+
+**How it differs from `checkFactory`** (which stops at the first problem, often with the path "(compile)"):
+- **schema:** all issues at once, with paths
+- **catalog:** each equipment type, its params, shell, product, transport type and op name checked on its own, at its exact path. Zod issues are shown as "field: message", not raw JSON.
+- **ops:** **every station planned on its own**, so two bad stations give two errors. The plan's "process › op #1 › case "reject" › op #2" is turned into the JSON path `stations[i].process[0].cases.reject[1]`.
+- **graph:** the whole line (edges, ports, layout) once the stations are fine, at `(line)` when it names no field
+- **placeholder:** genericMachine stand-ins (warnings)
+- **takt:** against the new optional `line.taktTarget`. A miss is a warning (the line still plays) naming the bottleneck, with how much to shorten it or how many parallel copies would make it; a met target is a note.
+- **opSupport:** an op that needs its machine to declare it (`fill`, `cap`) on a machine that doesn't, a warning
+
+**Changed**
+- `agents/reviewer/deterministic.js`: `review(registry, factory)` → `{ ok, findings, counts, timing? }`; `formatFindings`; `stationOps` (every op of a station with its path: decide cases, indexing index / exit / work); `opPathFromMessage`
+- `scripts/review.mjs` (`npm run review [files…] [--json]`; from PowerShell call `node` directly)
+- `spec/factory.schema.js`: `line.taktTarget` (optional, seconds per unit); `spec/factory.schema.json` regenerated
+- Tests `tests/agents/reviewer.test.js` (8):
+  - the example lines (printer and lubricant without findings)
+  - schema (two issues at once)
+  - catalog (four problems, four paths, hint, readable params message)
+  - ops (two stations, two errors, one inside a decide case, the range hint)
+  - graph (a loop at `(line)`)
+  - takt (miss with bottleneck and copies; met as a note; a miss is not an error)
+  - opSupport (`fill` on a composite)
+  - helpers (paths from messages, indexing ops walked, the formatted summary)
+
+**My mistakes this step (fixed before the results above):**
+- passing `beltHeight: undefined` overrode the default belt height (NaN footprints, 2 false errors on the printer line)
+- I walked the indexing station's `work` as an object; it is a list of `{ at, ops }` (the lubricant line failed)
+
+**Results**
+- `npm test`: 55 files, **2036 tests passed**
+- `npm run review`: bottling ok (2 warnings), lubricant ok, printer ok
+
+**Next:** step 7.2, geometry:
+- footprints (placed and turned) overlapping within a station or between stations
+- transfer conveyors crossing stations or each other (the crossing seen in step 6.6's dev line)
+
+Mount rules keep the deliberate overlaps quiet: a tunnel or portal over its conveyor, a tool on its machine, a sensor on a belt frame. The three example lines must come out clean without exceptions written for them.

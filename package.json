@@ -16,7 +16,8 @@
     "reference:timing:lubricant": "node scripts/reference-timing-lubricant.mjs",
     "schema": "node scripts/schema.mjs",
     "compile": "node scripts/compile.mjs",
-    "visual": "node scripts/visual-compare.mjs"
+    "visual": "node scripts/visual-compare.mjs",
+    "review": "node scripts/review.mjs"
   },
   "dependencies": {
     "lucide": "^1.73.0",

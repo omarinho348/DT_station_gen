@@ -49,6 +49,7 @@ export const LineInfo = z.object({
   units: z.literal('m').default('m'),
   flow: z.literal('+X').default('+X'),
   runSize: z.number().int().min(1).max(999).default(8).describe('Units released per run'),
+  taktTarget: z.number().positive().max(36000).optional().describe('Wanted takt (s per unit); the reviewer reports a line slower than this, with its bottleneck'),
   speeds: z.array(z.number().positive().max(100)).min(1).max(6).default([1, 2, 10]).describe('Simulation speed choices'),
   conventions: Conventions.default({}),
 });
