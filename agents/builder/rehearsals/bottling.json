@@ -1,0 +1,41 @@
+{
+  "title": "Juice bottling (rehearsal)",
+  "about": "Scripted answers made from the hand-written stations of spec/examples/bottling-line.factory.json, encoded by the Builder's own schemas. No model is asked; the owner's comments are not read.",
+  "source": "spec/examples/bottling-line.factory.json",
+  "line": { "id": "bottlingRehearsal", "title": "Juice bottling (rehearsal)", "runSize": 8, "transport": { "type": "beltConveyor", "params": {} } },
+  "stations": [
+    {
+      "id": "fill",
+      "plan": { "title": "Filling", "does": "Fills each empty bottle with juice through a dosing nozzle", "steps": ["bottle in", "nozzle down, valve open, fill 6 s, valve closed, nozzle up", "bottle out"] },
+      "hints": {
+        "belt": { "place": "line", "at": "whole", "why": "carries the bottles" },
+        "doser": { "place": "overLine", "at": "work", "why": "doses the juice" }
+      }
+    },
+    {
+      "id": "cap",
+      "plan": { "title": "Capping", "does": "Screws a cap onto each filled bottle", "steps": ["bottle in", "cap set on and turned", "bottle out"] },
+      "hints": {
+        "belt": { "place": "line", "at": "whole", "why": "carries the bottles" },
+        "capper": { "place": "overLine", "at": "work", "why": "sets and turns the cap" }
+      }
+    },
+    {
+      "id": "inspect",
+      "plan": { "title": "Inspection", "does": "Checks each capped bottle with a camera and pushes rejects onto a lane", "steps": ["bottle in", "vision check", "rejects to the reject lane", "good bottles out"] },
+      "hints": {
+        "belt": { "place": "line", "at": "whole", "why": "carries the bottles" },
+        "vision": { "place": "overLine", "at": "work", "why": "camera and light over the belt" },
+        "rejectLane": { "place": "besideLine", "at": "work", "turned": true, "why": "takes the rejected bottles" }
+      }
+    },
+    {
+      "id": "pack",
+      "plan": { "title": "Case packing", "does": "Packs the good bottles into cases", "steps": ["bottle in", "packed", "case out"] },
+      "hints": {
+        "belt": { "place": "line", "at": "whole", "why": "carries the bottles" },
+        "machine": { "place": "overLine", "at": "work", "why": "case packer (placeholder)" }
+      }
+    }
+  ]
+}

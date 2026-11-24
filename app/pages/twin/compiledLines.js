@@ -17,7 +17,21 @@ export async function loadCompiledLine(name, { speed = 1, onStatus = null } = {}
   if (!load) {
     throw new Error(`No compiled line "${name}" (compiled: ${compiledLineNames().join(', ') || 'none'}; run npm run compile)`);
   }
-  const mod = await load();
+  return startModule(await load(), name, { speed, onStatus });
+}
+
+/**
+ * Loads and starts a Builder draft (generated/_draft/<line>/r<rev>/line.js, written by the dev server
+ * while the page is open, so not known to import.meta.glob): a plain dynamic import of its URL. Every
+ * draft revision has its own folder, so the browser never reuses an older draft's station files.
+ */
+export async function loadDraftLine(url, { speed = 1, onStatus = null } = {}) {
+  if (!/^\/generated\/_draft\/[\w-]+\/(r[\w-]+\/)?line\.js$/.test(url)) throw new Error(`not a draft line: ${url}`);
+  const mod = await import(/* @vite-ignore */ url);
+  return startModule(mod, url.split('/').slice(3, -1).join('/'), { speed, onStatus });
+}
+
+async function startModule(mod, name, { speed, onStatus }) {
   // A line may use a component built from a model, and its product may be the owner's GLB model.
   await preloadComponentAssets(catalog, null, [mod.product]);
   const materials = createMaterials();

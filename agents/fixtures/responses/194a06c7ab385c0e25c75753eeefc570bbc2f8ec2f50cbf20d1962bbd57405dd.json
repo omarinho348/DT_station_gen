@@ -1,0 +1,45 @@
+{
+  "key": "194a06c7ab385c0e25c75753eeefc570bbc2f8ec2f50cbf20d1962bbd57405dd",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T19:24:45.666Z",
+  "usage": {
+    "inputTokens": 5882,
+    "cachedInputTokens": 4864,
+    "outputTokens": 412
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Bottle filling",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "fillBelt",
+        "type": "beltConveyor",
+        "why": "Conveys bottles into and out of the filling position",
+        "place": "line",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "bottleFiller",
+        "type": "filler",
+        "why": "Volumetrically fills empty glass bottles with apple juice",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "fillBelt",
+    "ports": null,
+    "ops": [
+      "fill"
+    ]
+  }
+}

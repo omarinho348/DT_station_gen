@@ -1,0 +1,48 @@
+{
+  "key": "dbc093c47777db84d71bd3c19d92f1e87376f93a0271416a99fbffee4e96a598",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T19:24:16.915Z",
+  "usage": {
+    "inputTokens": 5694,
+    "cachedInputTokens": 0,
+    "outputTokens": 549
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Bottle filling",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Bottle filling",
+        "color": null,
+        "minZ": -0.9,
+        "maxZ": 1.2,
+        "walkwayZ": 1,
+        "panelX": 1.6,
+        "conveyorLength": 4,
+        "carrierLength": 0.5
+      }
+    },
+    "equipment": [
+      {
+        "id": "bottleFiller",
+        "type": "filler",
+        "why": "Volumetrically fills empty glass bottles with apple juice",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "fill"
+    ]
+  }
+}

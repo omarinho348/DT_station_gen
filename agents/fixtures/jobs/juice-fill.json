@@ -1,0 +1,13 @@
+{
+  "about": "Step 8.6: the first live Builder run. The first station of a new line (nothing hand-written before it), built by the model through the three gates; its answers are recorded in agents/fixtures/responses/ so mock mode replays them. POST this file's line, product and plan to /api/builder/start to replay it in the panel.",
+  "line": { "id": "juiceLine", "title": "Apple juice bottling", "runSize": 6, "conventions": { "beltHeight": 0.86 }, "transport": { "type": "beltConveyor", "params": {} } },
+  "product": { "kind": "parametric", "params": { "shape": "bottle", "length": 0.09, "width": 0.09, "height": 0.26, "finish": "glass", "liquid": "#d9a21b", "labelText": "APPLE JUICE", "rejectEvery": 4 } },
+  "plan": [
+    {
+      "id": "fill",
+      "title": "Filling",
+      "does": "Fills each empty glass bottle with apple juice through a nozzle lowered into its neck",
+      "steps": ["empty bottle conveyed in to the filling place", "nozzle lowers into the neck", "valve opens, about 6 s of filling, valve closes", "nozzle rises", "filled bottle conveyed out"]
+    }
+  ]
+}

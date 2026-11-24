@@ -3,6 +3,30 @@ import { Viewer } from '../../viewer/Viewer.js';
 import { icon } from '../../ui/icon.js';
 import { href } from '../../router.js';
 import { APP_NAME } from '../../brand.js';
+import { Box3, Vector3 } from 'three';
+
+/**
+ * Points the camera at a built line from the walkway side, far enough to see all of it in the part of
+ * the view not covered on the right (`inset` px: the Builder panel).
+ */
+function frameLine(viewer, object, { inset = 0 } = {}) {
+  const box = new Box3().setFromObject(object);
+  if (box.isEmpty()) return;
+  const size = box.getSize(new Vector3());
+  const centre = box.getCenter(new Vector3());
+  const width = viewer.renderer.domElement.clientWidth || 1;
+  const free = Math.max(0.3, (width - inset) / width);
+  const tanH = Math.tan((viewer.camera.fov * Math.PI) / 360) * viewer.camera.aspect;
+  const span = Math.max(size.x, size.z * 1.4, size.y * 1.8, 3);
+  // 1.5: room around it, and the near end of a line looks bigger than its middle.
+  const distance = (span / 2) / (tanH * free) * 1.5;
+  // Move the view so the line's centre sits in the middle of the free part.
+  const shift = (1 - free) * distance * tanH;
+  const target = new Vector3(centre.x + shift, Math.min(centre.y, 0.9), centre.z);
+  viewer.controls.target.copy(target);
+  viewer.camera.position.set(target.x, target.y + distance * 0.5, target.z + distance * 0.87);
+  viewer.controls.update();
+}
 
 export function TwinPage(outlet, route) {
   document.title = `Twin · ${APP_NAME}`;
@@ -25,7 +49,8 @@ export function TwinPage(outlet, route) {
   const viewer = new Viewer(root.querySelector('.viewport'), {
     onFirstFrame: () => {
       // A demo or a compiled line says it is ready itself, once it has been drawn.
-      if (!route?.query?.demo && !route?.query?.line) window.__appReady = true;
+      // So does the Builder panel (below), once its first state is drawn.
+      if (!route?.query?.demo && !route?.query?.line && route?.query?.golden === '1') window.__appReady = true;
     },
   });
   if (import.meta.env.DEV) window.viewer = viewer;
@@ -139,6 +164,51 @@ export function TwinPage(outlet, route) {
         window.__appReady = true;
       });
   }
+  // The app's own twin page (no demo, no compiled line asked for): the Builder's approval panel, its
+  // drafts loaded into the 3D view as they come (step 8.5).
+  let panel = null;
+  if (!route?.query?.demo && !route?.query?.line && route?.query?.golden !== '1') {
+    root.classList.add('has-panel');
+    let loading = Promise.resolve();
+    let stationCount = -1;
+    let unhook = null;
+    const loadDraft = (url) => {
+      loading = loading.then(async () => {
+        if (!alive) return;
+        unhook?.();
+        unhook = null;
+        demo?.dispose();
+        demo = null;
+        if (!url) { hint.textContent = 'Drag to orbit · Right-drag to pan · Scroll to zoom'; return; }
+        try {
+          const { loadDraftLine } = await import('./compiledLines.js');
+          const player = await loadDraftLine(url, lineOptions);
+          if (!alive) { player.dispose(); return; }
+          demo = player;
+          viewer.content.add(player.root);
+          unhook = viewer.onFrame(player.update);
+          // A new station in the line: frame the whole line; otherwise keep the owner's view.
+          const count = player.line.stations.length;
+          if (count !== stationCount) {
+            stationCount = count;
+            frameLine(viewer, player.root, { inset: root.querySelector('.bp')?.offsetWidth ? root.querySelector('.bp').offsetWidth + 32 : 0 });
+          }
+        } catch (error) {
+          console.error(error);
+          hint.textContent = `The draft did not load: ${error.message}`;
+        }
+      });
+      return loading;
+    };
+    import('./BuilderPanel.js').then(({ BuilderPanel }) => {
+      if (!alive) return;
+      panel = BuilderPanel(root, {
+        onDraft: (url) => loadDraft(url),
+        onReady: () => requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true))),
+      });
+    });
+  }
+
   if (route?.query?.demo === 'core') {
     import('../../dev/coreDemo.js').then(({ createCoreDemo }) => {
       if (!alive) return;
@@ -155,6 +225,7 @@ export function TwinPage(outlet, route) {
   return {
     unmount() {
       alive = false;
+      panel?.dispose();
       demo?.dispose();
       viewer.dispose();
       delete window.__screenshotPrepare;

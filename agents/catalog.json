@@ -1,0 +1,153 @@
+{
+  "version": "850647fa5e89",
+  "legend": [
+    "Components: type [mount] length(x)×depth(z)×height m at default params · ports · ops — summary.",
+    "Mount: floor unless shown; overConveyor / besideConveyor sit at a conveyor, surface on another component, tool on a robot.",
+    "Ports: name(in|out); others are work places; [unit|batch|case|pallet] is what they carry.",
+    "Ops: op(args), \"?\" optional; every op also takes label?, state?, status?. Ask for the detail of the types and ops you use (params, ranges, motions, all args)."
+  ],
+  "components": {
+    "axis": [
+      "linearAxis [surface] 1.3×0.1×0.1 m — Basic linear axis: profile with a carriage on a rail…",
+      "rotaryAxis [surface] 0.2×0.2×0.1 m — Basic rotary actuator",
+      "verticalAxis [surface] 0.1×0.2×0 m — Basic vertical slide"
+    ],
+    "buffer": [
+      "accumulationTable 1.3×1.3×1 m · ports input(in) output(out) [unit] — Basic rotary accumulation table",
+      "bufferLane 2×0.6×0.9 m · ports input(in) output(out) slot1 slot2 slot3 slot4 [unit] — Basic buffer lane: accumulating rollers with a pop-up…",
+      "flowRack 1.8×0.8×1.9 m — Gravity flow rack with sloped roller shelves and…"
+    ],
+    "conveyor": [
+      "beltConveyor 4×0.6×1.1 m · ports input(in) output(out) [unit] — Flat-belt conveyor for loose units",
+      "conveyorTunnel [overConveyor] 1.9×0.6×1.4 m · ports opening(out) [unit] — Sheet-metal tunnel hood over a belt conveyor, closed…",
+      "crossTransfer [overConveyor] 0.8×0.4×0.9 m · ports transfer(out) [unit] — Pop-up cross transfer",
+      "liftUnit [overConveyor] 1.4×0.8×1 m · ports top(in) bottom(out) [pallet] — Yellow portal lift unit that moves carriers between…",
+      "palletConveyor 4.4×0.7×0.9 m · ports input(in) work output(out) [pallet] — Twin-strand pallet conveyor on aluminium profiles…",
+      "rollerConveyor 1.8×1.3×0.9 m · ports input(in) output(out) [unit] — Roller conveyor section with side frames, legs…"
+    ],
+    "fixture": [
+      "beltEndStop [surface] 0.1×0.6×0.2 m · ports stop [unit] — Fixed end stop across a belt conveyor",
+      "blockPallet 1.2×0.8×0.1 m · ports top [case] — Wooden block pallet (deck boards, blocks, bottom…",
+      "guideRails [surface] 1.6×0.6×0.2 m — Single-file guide rails over a belt conveyor, on posts…",
+      "harnessBoard 1.4×0.3×1.5 m — Tilted harness board on two posts with cable harnesses…",
+      "laneDivider [surface] 2.7×0.6×0.5 m — Lane divider blade along the middle of a belt…",
+      "palletRack 2.1×1.5×1.9 m · ports deck1 deck2 deck3 [unit] — Selective pallet rack",
+      "partCradle 0.6×0.5×0.8 m · ports lane1(out) lane2(out) lane3(out) lane4(out) lane5(out) [unit] — Long-part cradle: a stand with two V-saddle bars and…",
+      "partNest 0.3×0.3×0.9 m · ports seat(out) [unit] — Part nest on a stand: corner posts for a stack of…",
+      "photoEye [surface] 0.1×0.5×0.2 m — Retro-reflective photo-eye across a conveyor on rods…",
+      "pickToLight [surface] 0.1×0×0 m — Pick-to-light module",
+      "sidePusher [besideConveyor] 0.7×0.9×1.2 m — Pneumatic side pusher on a floor stand beside a conveyor",
+      "swingStop [surface] 0.4×0.4×0.2 m · ports stop [case] — Swing-arm stop on a conveyor side frame",
+      "tote [surface] 0.2×0.1×0.1 m · ports inside [unit] — Open-top plastic tote for small parts",
+      "workTable 1.2×0.7×0.9 m · ports top [unit] — Plain work table with a steel top, four legs and side…"
+    ],
+    "frame": [
+      "cantileverFrame 0.3×1×1.6 m — Basic cantilever: a column on the equipment side with…",
+      "columnFrame 0.3×0.3×1.5 m — Basic column on a base plate, with mount points on its…",
+      "enclosureFrame 1.4×1×2 m · ports input(in) output(out) [unit] — Basic machine enclosure",
+      "portalFrame 0.2×1.2×1.7 m — Basic portal frame: two posts and a cross beam over…",
+      "tableFrame 1.2×0.7×0.9 m · ports surface [unit] — Basic machine table: a top on four braced legs; a…",
+      "turntableFrame 1.2×1.2×0.9 m · ports load [unit] — Basic rotary indexing table"
+    ],
+    "machine": [
+      "capper [overConveyor] 1.9×2.1×2.8 m · ports work(batch) head1(unit) head2(unit) head3(unit) head4(unit) · ops cap — Servo screw capper in a guarded portal over a belt…",
+      "caseCloser [overConveyor] 1×1.4×2.2 m · ports work [case] — Top-flap case closer over a case conveyor",
+      "caseErector 0.9×2×1.8 m · ports output(out) [case] — Case erector that folds flat carton blanks into open…",
+      "caseSource 1.6×1.8×2.1 m · ports output(out) [case] — Case source enclosure at the head of a conveyor",
+      "caseTaper [overConveyor] 1.5×0.5×1.5 m — Case taper bridge: a tape head on a travelling arm…",
+      "composite 0.2×1.1×1.6 m — A machine put together from parts",
+      "dockingUnit 0.2×0.9×1.1 m · ports connector [unit] — Pneumatic docking unit",
+      "filler [overConveyor] 2.1×1.2×2.8 m · ports work(batch) head1(unit) head2(unit) head3(unit) head4(unit) · ops fill — Volumetric multi-head filler in a guarded portal over…",
+      "genericMachine 1.6×1.2×2.3 m · ports input(in) work output(out) [unit] — Placeholder for a machine not in the catalog",
+      "inlineTaper [overConveyor] 0.3×1×1.7 m · ports work [case] — Inline top case taper",
+      "labelApplicator 0.2×0.9×1.6 m · ports pad [unit] — Tamp-pad label applicator",
+      "stretchWrapper 3.2×2.6×2.4 m · ports deck [pallet] — Turntable stretch wrapper",
+      "supplyTank 2×1×2.2 m — Liquid supply tank on legs with level sight glass and…",
+      "testCabinet 0.5×0.4×1.1 m · ports testLead [unit] — Floor-standing test cabinet",
+      "vibratoryFeeder [surface] 0.3×0.3×1.3 m · ports outlet(out) [unit] — Vibratory bowl feeder with escapement and optional…",
+      "visionScanner [overConveyor] 2.8×1.6×2.3 m — Vision scanning bridge"
+    ],
+    "robot": [
+      "abbIrb6760 7.2×7.2×4.2 m — ABB IRB 6760 six-axis robot",
+      "cartesianGantry 2×1.8×4.3 m — Overhead Cartesian gantry",
+      "packingGantry 0.8×3.6×3.5 m — Two-axis packing gantry",
+      "palletizerRobot 6.6×6.6×3 m — Four-axis palletizing robot",
+      "palletJackWorker 15×15×1.8 m — Worker with a high-lift pallet truck",
+      "scara 2.4×2.4×2.2 m — SCARA robot (two-link arm, vertical quill, tool roll)…"
+    ],
+    "station": [
+      "bayMarking 1.6×1.5×0 m — Translucent coloured floor marking for a bay",
+      "equipmentRack 0.6×0.5×1.8 m — Equipment rack cabinet with rack-mounted units on the…",
+      "floorSlab 4.7×3.6×0 m — Epoxy floor slab for a station cell with yellow…",
+      "guardFence 4.2×0.1×2 m — Safety guard fence: yellow posts and rails with…",
+      "hmi 0.6×0.3×1.5 m — Pedestal operator panel",
+      "keepOutRing 0.4×0.4×0 m — Keep-out marking painted on the floor around a robot",
+      "shutterEnclosure [overConveyor] 1.7×1.2×3 m — Closed enclosure over a conveyor with acrylic walls…",
+      "signBoard 2.2×0.1×3.5 m — Area sign on a tall post, readable from both sides",
+      "stackLight 0.1×0.1×2.1 m — Three-lamp signal tower on a floor pole",
+      "stationSign 2×0.1×3.3 m — Overhead double-sided station sign with the station…",
+      "statusMonitor 0.7×0.3×1.7 m — Floor-standing status monitor with a live dashboard"
+    ],
+    "tool": [
+      "dispenseNozzle [tool] 0.1×0.1×0.2 m — Basic dispensing nozzle",
+      "fingerGripper [tool] 0.1×0.3×0.2 m — Parallel two-finger gripper with rubber pads and a…",
+      "labelHead [tool] 0.3×0.1×0.4 m — Basic tamp label head",
+      "laserHead [tool] 0.1×0.1×0.2 m — Basic laser head (marking, cutting, welding): source…",
+      "machiningSpindle [tool] 0.2×0.1×0.3 m — Basic machining spindle",
+      "pressRam [tool] 0.1×0.1×0.4 m — Basic press: cylinder body, ram rod and a pressing…",
+      "screwdriver [tool] 0.2×0.1×0.3 m — Automatic screwdriver with servo spindle, screw feed…",
+      "vacuumPad [tool] 0.5×0.3×0.2 m — Vacuum pad gripper for cases",
+      "visionCamera [tool] 0.1×0.1×0.1 m — Basic vision camera looking down"
+    ],
+    "transport": [
+      "agvCart 1×0.7×0.9 m · ports input(in) output(out) deck [unit] — Basic AGV: a driverless cart with a roller deck at…",
+      "gravityChute 1.6×0.6×1.1 m · ports input(in) output(out) [unit] — Basic gravity roller chute sloping down along the flow",
+      "turntableTransfer 0.9×0.9×0.9 m · ports input(in) output(out) toRear(out) toFront(out) [unit] — Basic turntable transfer"
+    ]
+  },
+  "ops": [
+    "accumulate(items, speed?, ramp?, blend?, …) — Run accumulating conveyors",
+    "armPalletize(machine, item?, stack, top?, gap?, …) — Articulated robot with a vacuum tool",
+    "cap(machine, item?, units?, turns?, …) [machine with op cap] — Screw caps onto the product",
+    "closeCase(machine, item?, timing?, tools?, …) — Top-flap case closer: fold the end flaps (tuckers), tamp…",
+    "connectLead(from, to, connect?, seconds?, color?, …) — Plug a flexible lead from a machine port into a product…",
+    "decide(on, cases, otherwise?, planAs?) — Branch on a fact such as the quality verdict",
+    "dischargeBatch(seconds, distance, conveyors) — Indexing station: carry the batch at the exit position…",
+    "dispatch(stack, seconds?) — Ship a station stack: at the end of a timed step…",
+    "driveScrew(machine, screw, name?, centerX?, turns?, …) — Drive one screw of the product with a screw-driving robot…",
+    "fill(machine, item?, units?, liquid?, …) [machine with op fill] — Fill the product (every container of a batch) through a…",
+    "grip(machine, item, motion?, to, anchor?, alongside?, …) — Take hold of an item: attach it to a machine anchor (tool…",
+    "groupPickPlace(machine, items, grasp?, into, at?, slots, gap, openGap, gripMotion?, …) — Multi-gripper head: pick a group of items at once (each by…",
+    "haulStack(machine, stack, to, at, forks, strideLength?, timing?, labels?, …) — Pallet truck: take a station stack (its pallet with…",
+    "indexBatches(seconds, conveyors) — Indexing station: move every batch on by one position (the…",
+    "installPart(machine, part, name?, from?, mode?, gap, openGap, …) — Pick a part (from the product's kit or a stock copy) and…",
+    "move(machine, to?, by?, seconds?, …) — Move one or more axes of a machine together to target values",
+    "operate(machine, seconds) — A machine works for a fixed time",
+    "palletize(machine, item, from, stack, grasp?, name?, gap, openGap, gripMotion?, …) — Pick an item and set it on the next free spot of a station…",
+    "pickPlace(machine, item, from, to, name?, gap, openGap, gripMotion?, anchor?, …) — Pick an item at one place",
+    "push(machine, items, motion?, anchor?, to, rest?, …) — Side pusher: push items across a conveyor with its face…",
+    "release(machine, item?, motion?, to, onto?, …) — Let go of an item: open the grip motion; the item stays…",
+    "replenish(items?, seconds?) — Refill the station's stock locations",
+    "rotate(machine, motion, to?, by?, turns?, …) — Turn one axis to a value",
+    "routeCable(machine, cable, name?, safeHeight?, entry?, …) — Wire one product cable",
+    "runRoutine(item?, routine, args?, seconds, before?, …) — Let the product run one of its routines",
+    "spawn(items, seconds?) — Make items during the process",
+    "stopConveyors(conveyors, speed?, ramp?) — Running belts decelerate to a stop over the ramp time",
+    "swapUnit(item, seconds?) — From now on the station's unit is an item it made",
+    "toolOn(machine, motion, value, then?, seconds?) — Switch a tool or signal to a value, optionally hold it for…",
+    "transfer(conveyor, to, from?, item?, also?, …) — Convey an item between two places",
+    "transform(item?, stage?, set?, …) — Change a product to another of its stages, or switch one…",
+    "wait(seconds) — Wait for a fixed time"
+  ],
+  "products": [
+    "carton · stages erected → closed — Slotted shipping carton with bottom foam, flaps folded…",
+    "jerryCan · stages empty → filled → capped — HDPE jerry can for lubricants or chemicals",
+    "model · stages raw → processed → labelled — A product imported as a GLB model",
+    "packingFoam · stages ready — Top packing foam slab with an optional accessory box…",
+    "parametric · stages raw → processed → filled → capped → labelled · facts quality(pass|reject) — A product described by shape and size",
+    "printer · stages empty → kitted → framed → wired → tested → inspected · 14 parts · facts verdict(PASS|REJECT) — Open-frame 3D printer"
+  ],
+  "shells": [
+    "assemblyCell(code, title, color, minZ, maxZ, walkwayZ, panelX, conveyorLength, carrierLength) — Reference assembly cell"
+  ]
+}

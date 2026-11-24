@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 import { reviewApi } from './server/reviewApi.js';
+import { llmApi } from './server/llmApi.js';
+import { builderApi } from './server/builderApi.js';
 
 // Dev only: the reference lubricant factory (app/dev/referenceLubricant.js) loads its stretch
 // wrapper from a STEP file through occt-import-js, which this project does not carry. Its import of
@@ -18,10 +20,16 @@ const referenceStubs = {
 };
 
 export default defineConfig({
-  plugins: [referenceStubs, reviewApi()], // reviewApi: /api/review, the deterministic reviewer (dev server only)
+  // Dev server only: /api/review (the deterministic reviewer), /api/llm/status (budget, key, models),
+  // /api/builder (the Builder, one approval gate at a time).
+  plugins: [referenceStubs, reviewApi(), llmApi(), builderApi()],
   server: {
     port: 5173,
     strictPort: true,
+    // Builder drafts are written while the page shows an older one: each revision has its own folder
+    // (new URLs, loaded by dynamic import), so the watcher has nothing to reload there. The ledger,
+    // cache and session in .agent-cache/ are no app code either.
+    watch: { ignored: ['**/generated/_draft/**', '**/.agent-cache/**'] },
   },
   // Dependencies declared up front, so Vite never discovers them mid-load and re-optimises (which
   // cancels the page load). The reference line (app/dev/referenceLine.js, dev only) imports

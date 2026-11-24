@@ -89,6 +89,16 @@
   color: var(--brand);
 }
 
+/* Live mode without a key in .env: calls would fail. */
+.chip--warn {
+  border-color: #e3a008;
+  background: #fff8e6;
+}
+
+.chip--warn .icon {
+  color: #b07800;
+}
+
 /* ── Stepper ─────────────────────────────────────────────── */
 .stepper {
   display: flex;

@@ -1,0 +1,30 @@
+{
+  "key": "1a781372bedfaa47acb6ef95a38b4cbdcade549a465f28be2b731af1d8e81710",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T19:24:49.240Z",
+  "usage": {
+    "inputTokens": 5593,
+    "cachedInputTokens": 0,
+    "outputTokens": 172
+  },
+  "output": {
+    "params": {
+      "fillBelt": {
+        "length": null,
+        "beltWidth": null,
+        "guides": null,
+        "guideGap": null,
+        "drive": null,
+        "carries": "unit"
+      },
+      "bottleFiller": {
+        "heads": null,
+        "pitch": null,
+        "tipHeight": null,
+        "stroke": null
+      }
+    }
+  }
+}

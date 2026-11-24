@@ -1,5 +1,6 @@
-// Setup page (light theme): a stepper wizard. Phase 0 mock-up: static UI, no agents connected.
-// Values marked data-placeholder are filled by the server in Phase 8 (budget, key status, models).
+// Setup page (light theme): a stepper wizard. The LLM layer's state (mode, key found, models, budget,
+// spend per agent) comes from /api/llm/status (Phase 8 step 1); without the dev server's API the
+// values marked data-placeholder stay as drawn.
 import { icon } from '../../ui/icon.js';
 import { href } from '../../router.js';
 import { CREW, SETUP_STEPS } from '../../data/crew.js';
@@ -7,6 +8,9 @@ import { APP_NAME, APP_VERSION } from '../../brand.js';
 import { loadTheme, saveTheme, nextTheme } from '../../ui/theme.js';
 
 const PLACEHOLDER_TIP = 'Placeholder until the LLM layer is connected (Phase 8)';
+
+/** US dollars: "$4.50" (digits after the point: 2, or more for tiny amounts in tooltips). */
+const usd = (v, digits = 2) => `$${v.toFixed(digits)}`;
 
 export function SetupPage(outlet, route) {
   const root = document.createElement('div');
@@ -20,10 +24,10 @@ export function SetupPage(outlet, route) {
       </a>
       <nav class="stepper" aria-label="Setup steps"></nav>
       <div class="topbar__status">
-        <span class="chip" data-placeholder title="${PLACEHOLDER_TIP}">
+        <span class="chip" data-llm="mode" data-placeholder title="${PLACEHOLDER_TIP}">
           ${icon('KeyRound', { size: 14 })} OpenAI <b>mock</b>
         </span>
-        <span class="chip" data-placeholder title="${PLACEHOLDER_TIP}">
+        <span class="chip" data-llm="budget" data-placeholder title="${PLACEHOLDER_TIP}">
           ${icon('Wallet', { size: 14 })} <b>$4.50</b> left
         </span>
         <a class="icon-btn" href="${href('gallery')}" title="Component gallery" aria-label="Component gallery">${icon('LayoutGrid', { size: 16 })}</a>
@@ -94,8 +98,46 @@ export function SetupPage(outlet, route) {
         }
       </div>`;
 
+    applyStatus();
     window.__appReady = true;
   }
+
+  // The LLM layer's state, fetched once per visit; shown in the top bar and the crew table.
+  let llm = null;
+  function applyStatus() {
+    if (!llm) return;
+    const mode = root.querySelector('[data-llm="mode"]');
+    mode.removeAttribute('data-placeholder');
+    mode.innerHTML = `${icon('KeyRound', { size: 14 })} OpenAI <b>${llm.mode}</b>`;
+    mode.title = `LLM_MODE=${llm.mode} · API key ${llm.keyFound ? 'found' : 'missing'} in .env`;
+    mode.classList.toggle('chip--warn', llm.mode === 'live' && !llm.keyFound);
+    const budget = root.querySelector('[data-llm="budget"]');
+    budget.removeAttribute('data-placeholder');
+    budget.innerHTML = `${icon('Wallet', { size: 14 })} <b>${usd(llm.remaining.total)}</b> left`;
+    budget.title = `Total: ${usd(llm.spent.total, 4)} of ${usd(llm.caps.total)} spent · this session: ${usd(llm.spent.session, 4)} of ${usd(llm.caps.session)}`;
+    for (const el of root.querySelectorAll('[data-spend]')) {
+      el.removeAttribute('data-placeholder');
+      el.textContent = usd(llm.byAgent[el.dataset.spend] ?? 0);
+    }
+    for (const el of root.querySelectorAll('[data-runs-on]')) {
+      el.removeAttribute('data-placeholder');
+      el.value = llm.mode;
+      el.disabled = true;
+      el.title = 'Set for all agents in .env (LLM_MODE)';
+    }
+    for (const el of root.querySelectorAll('[data-model]')) {
+      el.removeAttribute('data-placeholder');
+      el.querySelector('[value="default"]').textContent = llm.models.default ?? 'Default model (not set)';
+      const strong = el.querySelector('[value="strong"]');
+      if (strong) strong.textContent = `${llm.models.strong ?? 'Strong model'} (plan.md only${llm.models.strongEnabled ? '' : ', off'})`;
+      el.disabled = true;
+      el.title = 'Models come from .env (LLM_MODEL_DEFAULT, LLM_MODEL_STRONG, LLM_STRONG_ENABLED)';
+    }
+  }
+  fetch('/api/llm/status')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((status) => { llm = status; applyStatus(); })
+    .catch(() => {}); // no dev server API (a static build): the placeholders stay
 
   render(route);
   return {
@@ -105,7 +147,7 @@ export function SetupPage(outlet, route) {
 }
 
 const LEDES = {
-  crew: 'Four agents work for you. They only write JSON and markdown; every line of code comes from fixed templates. Pick how each one runs.',
+  crew: 'Four agents work for you. They only write JSON and markdown; every line of code comes from fixed templates. How they run (mock or OpenAI), their model and the budget are set in .env.',
   brief: 'Tell the Spec agent what you make and how fast. It asks follow-up questions when something is missing.',
   docs: 'The Spec agent writes three documents. Approve each one before anything gets built.',
   build: 'The Builder lays out the line station by station in the 3D view. You approve every phase with a diff.',
@@ -129,7 +171,7 @@ const STEP_VIEWS = {
             ${
               m.llm
                 ? `<label class="select"><span class="sr-only">${m.name} runs on</span>
-                     <select data-placeholder><option>OpenAI</option><option>Mock (recorded)</option></select></label>`
+                     <select data-placeholder data-runs-on><option value="live">OpenAI</option><option value="mock">Mock (recorded)</option></select></label>`
                 : '<span class="tag tag--direct">direct</span>'
             }
           </div>
@@ -137,14 +179,14 @@ const STEP_VIEWS = {
             ${
               m.llm
                 ? `<label class="select"><span class="sr-only">${m.name} model</span>
-                     <select data-placeholder title="${PLACEHOLDER_TIP}">
-                       <option>Default model</option>
-                       ${m.strongAllowed ? '<option>Strong model (plan.md only)</option>' : ''}
+                     <select data-placeholder data-model title="${PLACEHOLDER_TIP}">
+                       <option value="default">Default model</option>
+                       ${m.strongAllowed ? '<option value="strong">Strong model (plan.md only)</option>' : ''}
                      </select></label>`
                 : '<span class="muted">No model, plain code</span>'
             }
           </div>
-          <div class="crew-spend" role="cell"><span class="crew-spend__label">Spent</span>${m.llm ? '<span data-placeholder>$0.00</span>' : '<span class="muted">free</span>'}</div>
+          <div class="crew-spend" role="cell"><span class="crew-spend__label">Spent</span>${m.llm ? `<span data-placeholder data-spend="${m.id}">$0.00</span>` : '<span class="muted">free</span>'}</div>
         </div>`,
         )
         .join('');

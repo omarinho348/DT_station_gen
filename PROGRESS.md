@@ -2714,7 +2714,7 @@ The bottling line keeps its **2 placeholder warnings** (rework bench, case packe
 
 **Next:** step 7.4, compiled files imported and built headless, and the first `/api/review` route.
 
-### Step 7.4: compiled files built headless, `/api/review` (done)
+### Step 7.4: compiled files built headless, `/api/review` (approved)
 
 Step 7.3b approved; the owner said to keep the bottling placeholders (2026-11-24: "no dont, continue next step").
 
@@ -2780,3 +2780,383 @@ It runs from `npm run review` and `/api/review`. Findings are `{ check, severity
 - a real stall that passes every earlier check has no example
 
 **Next:** Phase 8, the LLM layer and the Builder. It starts with a decision from Claude.md §13: which OpenAI model(s) to use and the budget caps. I'll propose the split of Phase 8 and ask that first.
+
+## Phase 8: LLM layer and Builder
+
+Phase 7 approved by the owner moving on (2026-11-24: "ok next").
+
+**Decisions** (Claude.md §13, asked 2026-11-24):
+- default model **gpt-5.4-nano** for every agent ($0.20 input / $1.25 output per 1M tokens, from OpenAI's announcement). Its cached-input price isn't in the announcement: **$0.02 assumed** (OpenAI's usual 10 %), to be checked on the pricing page.
+- strong model **off** (`LLM_MODEL_STRONG=gpt-5.4-mini` set for later, `LLM_STRONG_ENABLED=false`)
+- caps **$0.50 per session, $4.50 total** (the Claude.md defaults)
+- reasoning effort `low` and 4000 max output tokens per call (new `.env` settings; reasoning tokens are billed as output)
+- estimate: about $0.004 per Builder call and about $0.12 per line on nano (about 35 lines on the $4.50)
+
+**Split** (proposed 2026-11-24; started on 8.1 under the "don't wait" rule):
+
+| Step | Content |
+|---|---|
+| 8.1 | `agents/llm.js`: client, budget guard, response cache, mock mode, ledger; `/api/llm/status`; the setup page's chips from it |
+| 8.2 | `lib/catalog.js`: registry → `catalog.json` for the agents, under ~4k tokens (measured) |
+| 8.3 | Builder schemas: one Structured Outputs schema per phase (layout → machines → process), strict-mode compatible |
+| 8.4 | `agents/builder.js`: one station at a time, each phase reviewed, failures sent back (2 retries), drafts in `generated/_draft/<line>/`; mock mode |
+| 8.5 | Approval UI on the twin page: draft by dynamic import, change diff, approve / reject with a comment |
+| 8.6 | First live calls (with your OK first): one station of a brief, recorded as mock fixtures |
+
+### Step 8.1: the LLM layer (approved)
+
+**Result first:** `agents/llm.js` is the one door for model calls. In mock mode (the default, and in every test) nothing goes over the network. Live, every call:
+- **Structured Outputs** through the Responses API: `text.format = json_schema` with `strict: true`, the answer parsed as JSON. Agents get JSON back, never free text.
+- **response cache:** key = sha256 of the model, effort, max tokens, schema name, schema and messages. A repeated call costs $0. Live answers go to `.agent-cache/responses/` (git-ignored); `record(key)` copies one into `agents/fixtures/responses/` (committed), where mock mode finds it.
+- **budget guard:** before sending, the worst case (prompt tokens estimated at 3 characters each, at the input price, plus `LLM_MAX_OUTPUT_TOKENS` at the output price) must fit under both the session cap and the total cap. Otherwise the call is refused and nothing is sent:
+  `budget: this call could cost up to $0.0050, and $4.4980 of the $4.50 total cap is spent`
+- **ledger** `.agent-cache/usage.json`: total, per session, and every call (agent, model, schema, tokens, cached tokens, cost). Written before the answer is used, so a call that fails after it was paid for is still counted; it survives restarts.
+- **mock mode:** a call nobody recorded is an error naming its key: `mock mode: no recorded answer for this builder call (count, key 3f…)`
+- **the key:** read from env only and handed to the SDK. Errors have it replaced by `***`; it is never in the ledger, the cache or the status (tested with a 401 message containing it).
+- the strong model only when `LLM_STRONG_ENABLED=true`; an answer cut short (`status: incomplete`) is an error (and still in the ledger); `store: false` (OpenAI doesn't keep the conversation)
+
+**`/api/llm/status`** (`server/llmApi.js`, dev plugin): `{ mode, keyFound, models, caps, spent, remaining, byAgent, calls, session }`; one session per dev-server start. The **setup page** fills its chips from it:
+- "OpenAI **mock**", with a tooltip saying whether the key was found (amber in live mode without a key)
+- "**$4.50** left", with a tooltip giving total and session spend against the caps
+- each agent's model (gpt-5.4-nano) and spend
+- the runs-on and model selects are read-only now, since both are set in `.env`; the lede says so
+
+Live check: dev server, the status API answered (no `sk-` anywhere in it), and a screenshot of the setup page. The first screenshot showed "4.50 left" without the dollar sign: my shell had eaten the `$`. Fixed with a small `usd()` helper; the second screenshot is right.
+
+**Changed**
+- dependency `openai` 7.63.0 (pre-approved in Claude.md §5); 0 audit issues
+- `agents/llm.js` (new): `createLlm`, `llmConfig`, `costOf`, `cacheKey`, `estimateTokens`, `LlmError`
+- `server/llmApi.js` (new): `serverLlm`, `handleLlmStatus`, `llmApi()`; `vite.config.js` registers it
+- `app/pages/setup/SetupPage.js`, `app/styles/setup.css` (`.chip--warn`)
+- `.env`: the model names and prices above, `LLM_REASONING_EFFORT`, `LLM_MAX_OUTPUT_TOKENS` (the key line untouched; the temporary copy I made while editing was deleted)
+- `tests/agents/llm.test.js` (11): config and missing settings; cost; mock (unrecorded error, recorded free, no request sent); live with a fake client (request shape, cost in the ledger, cache hit free); ledger across sessions; both caps refuse before sending; strong only when enabled; cut-off answer; the key never leaks; record → mock replay; the status route
+
+**Results**
+- `npm test`: 60 files, **2073 tests passed**
+- no live call made yet; nothing spent (`.agent-cache/usage.json` doesn't exist yet)
+
+**Please check:** gpt-5.4-nano's **cached-input** price on OpenAI's pricing page (I assumed $0.02 per 1M). The total is $4.50 of your $5 so the last $0.50 stays as a margin against rounding in my estimates.
+
+**Next:** step 8.2, `catalog.json`: what the agents see of the library, measured against the ~4k-token target.
+
+### Step 8.2: the catalog the agents see (approved)
+
+Step 8.1 approved by the owner moving on (2026-11-24: "next").
+
+**Result first:** `lib/catalog.js` builds the agents' view of the library from the registry alone (no component named: the rule-6 test scans it). It has two levels, because a full catalog (77 components with 297 parameters, 32 ops, 6 products) is about **15k tokens**, nearly 4 times the ~4k target:
+
+| Level | What | Size |
+|---|---|---|
+| `catalogIndex` → `agents/catalog.json` (`npm run catalog`) | every component, op, product and shell on one line; always in the prompt's stable first part | **≈3865 tokens** (conservative: compact JSON ÷ 3) |
+| `catalogDetail(registry, { types, ops })` | the full contract of what one station uses: params with ranges and defaults, ports with places, motions with ranges, anchors; every op arg (required marked), its machine-op need; unknown names listed, not thrown | the 3 biggest components + 5 ops < 4000 tokens |
+
+This fits the Builder's three phases: **layout** picks types from the index; **machines** and **process** get the detail of those types and ops in the variable part of the prompt.
+
+Index lines, for example:
+- `capper [overConveyor] 1.9×2.1×2.8 m · ports work(batch) head1(unit) … · ops cap — Servo screw capper in a guarded portal over a belt…`
+- `beltConveyor 4×0.6×1.1 m · ports input(in) output(out) [unit] — Flat-belt conveyor for loose units`
+- `cap(machine, item?, units?, turns?, …) [machine with op cap] — Screw caps onto the product`
+- `printer · stages empty → kitted → framed → wired → tested → inspected · 14 parts · facts verdict(PASS|REJECT) — Open-frame 3D printer`
+
+**To get under 4k:**
+- `label`, `state` and `status` are on all 32 ops. The args every op takes are worked out from the registry and said once in the legend.
+- each op line shows every required arg and the first three optional ones (then "…")
+- summaries are cut to their first clause, at most 56 characters (ops 60), at a word
+- mount only when not `floor`; sizes to 0.1 m
+
+The index has a `version` (a hash of its content), so a change to it during a session would be visible: the prompt cache depends on it staying the same.
+
+**Changed**
+- `lib/catalog.js` (new): `catalogIndex`, `catalogDetail`, `catalogTokens`, `shortSummary`
+- `scripts/catalog.mjs` (new), `npm run catalog`; `agents/catalog.json` (generated, committed like `spec/factory.schema.json`)
+- `tests/agents/catalog.test.js` (9):
+  - under 4000 tokens and the file current
+  - every component, op, product and shell once
+  - component lines (mount, size, ports, ops)
+  - op lines (required args; shared args in the legend)
+  - deterministic with a version
+  - short summaries
+  - detail matches the schemas for every component
+  - op detail and unknown names
+  - a station's worth of detail stays small
+
+**Results**
+- `npm test`: 61 files, **2082 tests passed**
+- no UI in this step (nothing to screenshot); no LLM call
+
+**Note:** the token counts are my conservative estimate (characters ÷ 3), not OpenAI's tokenizer: a tokenizer would be a new dependency. The real counts will be in the ledger (`inputTokens`) from the first live call in 8.6, and I'll compare them then.
+
+**Next:** step 8.3, the Builder's schemas: one Structured Outputs schema per phase (layout → machines → process), from the IR's zod, made to fit OpenAI's strict mode.
+
+### Step 8.3a: strict schemas for the Builder's three phases (approved)
+
+Step 8.2 approved by the owner (2026-11-24: "ok"). I split step 8.3:
+- **8.3a** (this one): the strict-mode converter and the three phase schemas
+- **8.3b** (next): the deterministic placer that turns the layout phase's placement hints into positions
+
+**Result first:** the Builder's answers are typed as exactly as the library allows, built per call from the registry and the station so far:
+
+| Phase | The model answers | Typed by |
+|---|---|---|
+| layout (`layoutSchema`) | station id / code / title, shell (with its params) or null, machines as `{ id, type, why, place, at, on? }`, the conveyor, the ops the process will use | `type`: enum of the 77 catalog types; `place`: one of 8 placement hints (line, overLine, besideLine, rear, front, upstream, downstream, onTop); `at`: input / work / output / whole. **No coordinates.** |
+| machines (`machinesSchema`) | one property per machine id: its params | that component's own params schema (each type defined once, every machine a reference) |
+| process (`processSchema`) | intake (or null: the default), process, output (or null), inputStage | each op its own args schema; only the ops the layout chose; `machine` / `conveyor` args limited to the station's ids; ops inside a decision use the same op union (recursive) |
+
+**The converter** (`agents/strict.js`): OpenAI's strict mode takes a subset of JSON Schema, and the IR uses what it lacks (about 30 maps and unions across the op and IR schemas). `toStrict(z.toJSONSchema(…))` gives `{ schema, decode, encode }`. Changes, each undone by `decode`:
+- every property required, the optional ones "it or null" (nulls dropped, so zod defaults apply)
+- maps (`z.record`) as `[{ key, value }]` lists; tuples as fixed-length arrays
+- unknown values (`z.unknown()`: a composite's part params, routine args) as "string, number, switch or short list"
+- `default`, `minLength` / `maxLength`, `propertyNames` dropped (zod still checks them after decoding); `allOf` / `not` / `if` refused (none in the project)
+- `decode` picks a union's branch by its fixed (`const`) fields, e.g. an op by its `op` name
+- `checkStrict(schema)` checks strict mode's rules and OpenAI's limits (5000 properties, depth 10, 1000 enum values); every node must have a type
+- `encode` is the reverse (IR → answer form), so examples can be put in front of the model in answer form
+
+**Proof on the example lines:** for every station of the three lines, the machines and process schemas are strict-valid, and every param set and every intake / process / output list goes IR → answer form → IR **unchanged**. The decoded params still pass each component's schema.
+
+**Sizes** (conservative ÷3): layout schema ≈1.7k tokens; machines 0.8k–2.7k (printer ST1, 28 machines: 5.5k before each type was defined once); process 1.6k–8.5k (printer ST6, 9 ops). If OpenAI bills the schema as input, that's at most about $0.0017 per call on nano. The ledger will show the real figure in 8.6.
+
+**Changed**
+- `agents/strict.js` (new): `toStrict`, `checkStrict`, `ANY_VALUE`, `STRICT_LIMITS`
+- `agents/builder/schemas.js` (new): `layoutSchema`, `machinesSchema`, `processSchema`, `PLACES`, `ALONG`
+- `tests/agents/builder-schemas.test.js` (9):
+  - converter rules, decode / encode, refusals, `checkStrict`'s messages
+  - layout schema: strict, catalog types, hints, no coordinates, decoding
+  - machines and process schemas for every example station: strict, ids limited, round trip
+  - nested ops, unknown op
+  - limits
+
+**Scope:** the process phase covers single-unit stations (intake / process / output / inputStage). Indexing stations, batches, stacks, supplies, sensors and pipe connections stay hand-written for now. They are the lubricant line's specialities; the Builder's first target is printer- and bottling-like stations.
+
+**Results**
+- `npm test`: 62 files, **2091 tests passed**
+- no LLM call, no UI in this step
+
+**Next:** step 8.3b, `lib/station/place.js`: placement hints → station-local positions, from the machines' footprints (deterministic, checked by the geometry reviewer).
+
+### Step 8.3b: placing machines from hints (approved)
+
+Step 8.3a approved by the owner (2026-11-24: "ok").
+
+**Result first:** `lib/station/place.js` turns the layout phase's words into station-local positions. The model never writes a coordinate; the placer works from the machines' ports and real parts (rule 6: nothing named).
+
+| Hint | Placed |
+|---|---|
+| `line` | the station conveyor at the origin |
+| `overLine` at input / work / output / whole | a machine with a work port puts it on the conveyor's; any other its origin on the centre line (how components over a conveyor are built) |
+| `besideLine` (side equipment / walkway) | against the conveyor's edge; `turned`: rotated (exactly π/2) to run away from the line, its start at the edge (a reject lane) |
+| `rear` / `front` | clear of the conveyor by 0.3 m and of everything already there |
+| `upstream` / `downstream` | its out / in port meets the conveyor's input / output port |
+| `onTop` (on: id) | on that machine's top, centred |
+
+Machines sharing a place and an `at` stand side by side along X (0.15 m apart), centred there. `side` (equipment / walkway) is new in the layout schema, for `besideLine`.
+
+**Real parts, not footprints:** my first version kept machines clear of footprints. Rebuilding printer ST2 from hints put the presenter table **behind the fence** (z −2.13; hand-built −1.05), because the gantry's footprint is the portal's whole span. That's the step-7.2 lesson again: footprints are envelopes. Now beside / rear / front machines step outward 5 cm at a time until their real parts clear what is placed (the same mesh boxes and 2 cm tolerance as the reviewer; a machine built to sit at a conveyor may overlap conveyors, as in the reviewer). `solidsOf`, `penetration` and `deepestClash` moved to **`lib/core/solids.js`**, shared by the placer and the reviewer.
+
+**A note when the cell is too shallow:** a rear / front machine that only fits behind something running the station's length (a fence) is placed there with a note for the Builder: `"rack" only fits behind "fence" (guardFence), which runs along the station: make the cell deeper on that side or pick a smaller machine`.
+
+**Rebuilt from hints alone, then reviewed:**
+- **bottling line:** every machine exactly where it was hand-placed, except the reject lane, which steps 0.5 m clear of the camera frame's column. No clash; the run of 10 plays to the end in the same time (140.3 s).
+- **printer ST2–ST5**, inside their shells:
+  - presenter z −1.02 (hand: −1.05), inside the gantry's span
+  - harness board and tester in front of the fence
+  - ST4's rack, asked for at the work place behind the dock, gets the note above
+  - no clash; the run of 8 plays to the end (771.6 s)
+
+**Changed**
+- `lib/station/place.js` (new): `placeStation`, `PlacementError`, `GAP`, `SIDE_GAP`, `STEP`
+- `lib/core/solids.js` (new, moved from `agents/reviewer/geometry.js`, which re-exports it)
+- `agents/builder/schemas.js`: `side` for `besideLine`
+- `tests/station/place.test.js` (7):
+  - overLine (work port / origin)
+  - rear and front (gap, side by side, centring)
+  - besideLine (both sides, turned exactly)
+  - upstream / downstream ports meet; onTop
+  - six refusals with reasons
+  - the bottling line and printer ST2–ST5 rebuilt from hints and reviewed
+
+**Results**
+- `npm test`: 63 files, **2098 tests passed**
+- no LLM call, no UI in this step
+
+**Limits:** no turns other than `turned` (a monitor angled toward the walkway stays square); onTop of an onTop machine isn't supported; printer ST1's 28 kitting fixtures (totes in a pattern on a table) were not rebuilt from hints: the hint vocabulary can't express a tote layout.
+
+**Next:** step 8.4, `agents/builder.js`: one station at a time through the three phases in mock mode, each phase decoded, placed, checked by the deterministic reviewer, failures sent back (2 retries), drafts written to `generated/_draft/<line>/`.
+
+### Step 8.4: the Builder agent (approved)
+
+Step 8.3b approved by the owner (2026-11-24: "ok").
+
+**Result first:** `agents/builder/builder.js` builds one planned station at a time: `buildStation({ line, product, stations, plan })` → `{ ok, station, factory, notes, attempts, cost, findings }`. Per station:
+1. **layout** (model): station name, shell or none, machines by catalog type with placement hints, conveyor, extra ports (new in the schema: e.g. `reject`), ops. Checked in code: unique ids, not clashing with the shell's or other stations', conveyor and port machines exist, `onTop` has its `on`.
+2. **machines** (model): params; each checked against its component (`componentSpec`).
+3. **placement** (no model): `placeStation` with the shell's furniture as obstacles.
+4. **process** (model): intake / process / output / inputStage.
+5. **review:** the line so far (this station chained to the previous one, output → input, over the plan's transport) through the deterministic reviewer. Errors block, and so do geometry warnings (clashes). Once it passes, the run is played once (reach).
+
+A refusal goes back to **the phase it belongs to**:
+- a param → machines
+- a clash, an equipment or shell problem, or a hint the placer can't place → layout
+- anything else (ops, graph, play) → process
+
+The findings go back as a FEEDBACK section: `Your machines answer was refused. Fix these and keep the rest: - equipment[0].params (belt): …`. At most **2 retries per station**; then `ok: false` with the findings and what there is, for you. LLM-layer errors (budget, mock without a recording) are thrown, not retried: they need you.
+
+**Prompts** (`agents/prompts/builder.md` + the catalog): every call starts with the same bytes (instructions, then `CATALOG` with the index, ≈4.6k tokens, the part OpenAI can cache); the variable part follows: `PHASE …`, then LINE / PRODUCT (stages, facts) / PREVIOUS / IDS / PLAN / LAYOUT / STATION / DETAIL (only the chosen types and ops) / FEEDBACK. Measured for the capping station (conservative ÷3):
+
+| Call | Shared start | Own part | Schema | Answer |
+|---|---|---|---|---|
+| layout | 4636 | 170 | 2088 | 116 |
+| machines | 4636 | 1086 | 1328 | 323 |
+| process | 4636 | 1882 | 3094 | 589 |
+
+On gpt-5.4-nano that's about **$0.007–0.01 per station** (reasoning tokens included roughly), about $0.05 for a 6-station line without retries, below my 8.1 estimate.
+
+**Drafts:** `writeDraft(factory)` writes `factory.json` and its compiled files to `generated/_draft/<line>/` (lib at `../../../lib`), ready for the app to import (8.5).
+
+**Tested with a scripted model** whose answers are made by the schemas' own `encode()` from the bottling line's capping station, so they are exactly strict-mode answers:
+- three calls build the station the hand-written line has: the same machines, params, places (placed from hints), intake / process / output; reviewed, and a run of 4 played to the end
+- the prompts' shared start identical in every call; each phase's own sections
+- a belt length of 99: refused in code, back to machines with the reason, fixed
+- a motion value of 99: the reviewer's `ops` finding sent to the process phase, fixed
+- `onTop` of an unknown machine: the placer's error sent to the layout phase, fixed
+- wrong three times: handed back with `ok: false` after 2 retries, no further calls
+- the real LLM layer in mock mode with nothing recorded: the mock error reaches the caller
+- a draft written: factory.json, fill1.js, fill2.js, cap.js, line.js
+
+**Changed**
+- `agents/builder/builder.js` (new): `createBuilder` (`buildStation`, `writeDraft`, `assemble`, `factoryWith`), `phaseOf`, `BuilderError`
+- `agents/prompts/builder.md` (new): the Builder's standing instructions
+- `agents/builder/schemas.js`: extra station `ports` in the layout schema
+- `tests/agents/builder.test.js` (9)
+
+**Results**
+- `npm test`: 64 files, **2107 tests passed**
+- no live call yet (all tests scripted or mock); no UI in this step
+
+**Not yet:** the station plan is a small object (`{ title, does, steps }`); Phase 9's Spec agent will write plan.md and these come from it. Drafts per phase (layout-only preview) and the diffs come with the approval UI in 8.5.
+
+**Next:** step 8.5, approval on the twin page: a draft loaded by dynamic import, the change shown as a diff, approve / reject with a comment (a reject goes back to the Builder as FEEDBACK).
+
+### Step 8.5: approval on the twin page (approved)
+
+Step 8.4 approved by the owner moving on (2026-11-24: "continue working, phase 8 step 8.5").
+
+**Result first:** the twin page (`#/twin`, no demo or line asked for) now has the **Builder panel**. Each station is built in three gates: **layout → machines → process**. At each gate:
+- the draft is compiled into its own folder and loaded into the 3D view by dynamic import
+- the panel shows the change as **JSON Patch ops on factory.json** (against the last approved state), the reviewer's findings, placement notes, refusals sent back to the model, and the cost
+- **Approve** accepts it and builds the next gate
+- **Reject…** asks for a comment and sends it back to that phase with the previous answer, then rebuilds
+
+**Rehearsal (no live call yet):** with nothing recorded (that's 8.6), mock mode can't answer a Builder call. So the panel offers **"Rehearse: bottling"**: a scripted model whose answers are the hand-written bottling stations (fill, cap, inspect, pack), encoded by the Builder's own schemas, plus placement hints. Everything else is real: the Builder, the placer, the reviewer, the compiler and the play. It costs $0, and it's labelled "Rehearsal · scripted · $0" in the panel. It is **not** mock mode: mock replays recorded live answers, while a rehearsal makes them from hand-written data. A rehearsal can't read a rejection comment (it replays the same answer), and the reject form says so.
+
+Checked in the browser (dev server, the same API calls the panel makes; screenshots in `screenshots/builder-*.png`):
+- empty state; the layout, machines and process drafts of filling and capping
+- one rejection ("Make the belt longer") → the machines phase rebuilt (rev 3), the comment in the history
+- 11 more approvals → all 4 stations approved; the line plays (fill → cap → inspect → pack)
+- the camera frames the line in the space left of the panel, and re-frames only when a station is added (between phases the owner's view stays)
+
+**What each gate shows** (the bottling rehearsal):
+
+| Gate | Diff | Draft |
+|---|---|---|
+| layout | `+ stations › fill` (the whole station, folded) and, from the 2nd station, `+ graph › edges › [n]` | machines at **default params**, placed from the hints, no process yet (units just ride through); clashes listed, not refused (the params may change them) |
+| machines | `+/~ stations › fill › equipment › belt › params › length` … | real params, placed again; a clash is refused **before** the process call is paid for (sent back to layout) |
+| process | `+ stations › cap › process › [0]` … `intake`, `output`, `inputStage` | full review + one played run (the play finding is shown) |
+
+**Changed**
+- `agents/diff.js` (new): `diffJson` (RFC 6902), `applyPatch` (add / remove / replace / test, `-`), `labelPath` (array items by `id`: `stations › cap › equipment › belt`), `describeDiff`, `jsonEqual`, `valueAt`. Kept generic, ready for the Editor's patches (Phase 10).
+- `agents/builder/builder.js`:
+  - `advance(job, build, { stopAfter })` runs a build on to the next gate; `buildStation` is now `advance` with no stop (same behaviour, the 8.4 tests unchanged)
+  - `newBuild()`; `rejectGate(build, phase, comment)`: the owner's comment as FEEDBACK, a fresh retry allowance
+  - a retry prompt now also carries **PREVIOUS ANSWER** (the model was told "keep the rest" without seeing it)
+  - the machines phase reviews geometry before the process call
+  - `factoryOf(job, stations)`; `writeDraft(factory, { rev })` writes `generated/_draft/<line>/r<rev>/` and returns its `url`
+- `agents/builder/session.js` (new): `createBuildSession`: `next` / `approve` / `reject` / `view`, plain-JSON state, the diff base, a history log
+- `agents/builder/rehearsal.js` (new), `agents/builder/rehearsals/bottling.json` (new): `loadRehearsal`, `scriptedBuilderLlm`, `stationAnswers`, `opsUsed`
+- `server/builderApi.js` (new): `GET /api/builder`; `POST /api/builder/start | approve | reject | next | reset`
+  - one request at a time
+  - LLM-layer refusals → 409 with `code` (budget, mock)
+  - the session kept in `.agent-cache/builder/session.json` (survives a dev-server restart)
+  - the approved line written to `generated/_draft/<line>/approved.factory.json`
+  - old draft revisions pruned (last 6 kept)
+- `vite.config.js`: `builderApi()`; the watcher ignores `generated/_draft/` and `.agent-cache/`. Each revision has new URLs, so the browser never reuses an older draft's station files, and a draft written while the page is open triggers no reload.
+- `app/pages/twin/BuilderPanel.js` (new), `app/styles/builder.css` (new, imported in `app/main.js`)
+- `app/pages/twin/TwinPage.js`: the panel; drafts loaded and swapped (frame hooks unhooked); `frameLine`
+- `app/pages/twin/compiledLines.js`: `loadDraftLine(url)` (dynamic import, only `/generated/_draft/…/line.js` URLs)
+- tests (18 new):
+  - `tests/agents/diff.test.js` (7): ops and order, escaping, round trips between the three example lines, `applyPatch` errors, labels
+  - `tests/agents/session.test.js` (7): the rehearsal answers; one gate per phase with each diff applying exactly; the whole plan (12 gates, 4 stations, drafts on disk, run played); reject carries the comment and the previous answer; refusals; a failing gate can't be approved; a saved state goes on
+  - `tests/agents/builder-api.test.js` (4): routes and bad requests; start → approve → reject → reset with drafts pruned and the approved line saved; restart restores; a real run in mock mode → 409 `mock`, the session kept
+
+**Results**
+- `npm test`: 67 files, **2125 tests passed**
+- no live call, nothing spent
+
+**Limits**
+- The approved line lives in `generated/_draft/<line>/approved.factory.json` (git-ignored) and the session file. Where an approved `factory.json` should go for good (e.g. `lines/<line>.factory.json`) is open; the Editor's version history (Phase 10) will need it.
+- Linear lines only: each station is chained output → input. A reject port is built (inspect's reject lane) but not wired to anything yet.
+- A real run is started only through the API (`POST /api/builder/start { line, product, plan }`). The panel's start button comes with plan.md in Phase 9.
+- The rehearsal's filling station is single (the hand-written line runs it as two parallel copies; the layout schema has no `parallel` yet).
+
+**Next:** step 8.6, the first live calls (with your OK first): one station of a brief through the three gates on gpt-5.4-nano, recorded as mock fixtures, and the real token counts compared with my estimates.
+
+### Step 8.6: the first live calls (done)
+
+Step 8.5 approved by the owner (2026-11-24: "ok do the next step").
+
+**Result first:** the Builder built the first station of a new line on **gpt-5.4-nano**, with nothing hand-written before it, through the three gates. Every check passed and the run plays. Total spend **$0.00634** (5 billed calls; ledger `.agent-cache/usage.json`); **$4.4937 of the $4.50 cap left**.
+
+- **Job** (`agents/fixtures/jobs/juice-fill.json`): "Apple juice bottling", parametric glass bottle, plan item "Filling: fills each empty glass bottle with apple juice through a nozzle lowered into its neck", five steps.
+- **The model's station:** `filling` (ST1 "Bottle filling"), a `beltConveyor` plus the catalog **`filler`** (`overLine` at `work`), no shell, process `fill "Filling bottles"`. Played: a run of 6, every unit out after 120.9 s (estimated 122.6 s). Screenshot: `screenshots/builder-live-process.png`.
+- **Layout needed 2 refusals** (each sent back with the reason, as designed):
+  1. it chose the `assemblyCell` shell with `walkwayZ` 0.9 against `maxZ` 1.2 (the shell wants 0.2 m between them)
+  2. it then nudged walkwayZ to 1.0 but named a conveyor `stationConveyor` that doesn't exist (the shell's is `line`)
+  3. third answer: no shell, its own belt (accepted). Machines and process passed first time.
+- **Recorded:** the 5 answers are in `agents/fixtures/responses/` (no key in them, checked). Mock mode replays them:
+  - in a test (`tests/agents/builder-live.test.js`: 3 gates, 5 mock answers, 0 live)
+  - in the panel: POST the job's `line`, `product` and `plan` to `/api/builder/start`. Replayed in the browser for $0, identical result.
+
+**The live call found three bugs the offline tests could not:**
+1. **OpenAI wants a `type` beside every `const`** (and enum). The first request was refused with a 400 before the model ran, so nothing was billed. `toStrict` now adds the type (`integer` for whole numbers, a list for mixed enums), and `checkStrict` reports a bare const or enum. A test walks the real layout and process schemas for any left.
+2. **A shell whose params break its own cross-field rule crashed the Builder** (a RegistryError from `expandShell`) instead of being refused. It is now a layout refusal: `shell.params (assemblyCell): … walkwayZ must be at least 0.2 m inside maxZ`.
+3. **`/api/builder` kept its first module load forever**, so after an edit it ran stale agent code until a restart. Modules are now fetched per request from Vite's SSR graph (cached, fresh after an edit).
+
+**Real tokens against my estimates:**
+
+| Call | Input (billed) | Cached | Output (incl. reasoning) | My estimate (÷3) | Cost |
+|---|---|---|---|---|---|
+| layout #1 | 5694 | 0 | 549 | 6951 | $0.00183 |
+| layout #2 | 5875 | 4864 | 289 | 7161 | $0.00066 |
+| layout #3 | 5882 | 4864 | 412 | 7164 | $0.00082 |
+| machines | 5593 | 0 | 172 | 6483 | $0.00133 |
+| process | 6182 | 0 | 374 | 7285 | $0.00170 |
+
+- **Estimates run about 20 % high** (as intended: the budget guard errs on the safe side).
+- **Prompt caching works only within a phase.** A retry of the same phase got 4864 of ~5880 input tokens cached; the first machines and process calls got none. My reading: OpenAI puts the response schema ahead of the messages, so a new phase's schema breaks the shared prefix. Worth about $0.001 per station; not worth restructuring for now.
+- **Cost per station:** ≈ $0.005 with no retries, $0.006 with two. A 6-station line ≈ **$0.03–0.04** (my 8.4 estimate was $0.05), so about 110 lines fit in what's left.
+- **Speed:** 3–5 s per call.
+
+**Quality, honestly:** the station works but is plain. A 4-head lubricant filler stands over a single bottle (oversized for one unit), the input stage is a generic "processed", and the plan's nozzle steps sit inside the named `fill` op rather than being written out. A reviewer critique (Phase 11) or a fuller plan (Phase 9) is where such choices get questioned.
+
+**Changed**
+- `agents/strict.js`: types beside const and enum; `checkStrict` reports them
+- `agents/builder/builder.js`: shell param errors refused, not thrown
+- `server/builderApi.js`: modules per request (GLB models still once per registry)
+- `scripts/builder-live.mjs` (new), `npm run builder:live`:
+  - one plan item, live, through the three gates
+  - per call: tokens and cached tokens against the estimate, cost and time
+  - writes a draft and records the answers as fixtures
+  - an answered call is free on a rerun (cache)
+- `agents/fixtures/jobs/juice-fill.json`, `agents/fixtures/responses/*.json` (5, new, committed: what mock mode replays)
+- tests:
+  - `tests/agents/builder-live.test.js` (new): the replay
+  - `tests/agents/builder-schemas.test.js`: + const / enum types
+
+**Results**
+- `npm test`: 68 files, **2127 tests passed**
+- spent $0.00634 (one aborted 400 request, not billed)
+
+**Note for later:** the replay test is tied to the exact prompt. A change to the catalog, the Builder's instructions or its schemas changes the cache keys, so the test then fails with a mock-mode error naming the key. Re-recording costs about $0.005 (`npm run builder:live`).
+
+## Phase 8 status: done
+
+The LLM layer (budget guard, cache, mock mode, ledger, status in the UI), the agents' catalog, strict schemas for the three phases, the placer, the Builder with retries, the approval UI with diffs, and a first live station recorded for mock replay. Next phase: **Phase 9, the Spec agent and the SDD flow** (chat drawer, guided questions, templates, `.md` upload, constitution / brief / plan with approval). Its plan.md feeds the Builder's start button.
