@@ -6,13 +6,13 @@
 // (a decision on a fact only known while a unit plays is timed by its planAs branch, else its longest).
 // Equipment, in the station's own frame (metres; product flows +X, conveyor on z = 0, walkway +Z):
 //   id          type             from                position                        turn
-//   slab        floorSlab        shell assemblyCell  [0, 0, -0.375]
-//   fence       guardFence       shell assemblyCell  [0, 0, -2.1]
+//   slab        floorSlab        shell assemblyCell  [0, 0, -0.44999999999999996]
+//   fence       guardFence       shell assemblyCell  [0, 0, -2.25]
 //   line        palletConveyor   shell assemblyCell  [0, 0, 0]
 //   liftIn      liftUnit         shell assemblyCell  [-1.6, 0, 0]
 //   liftOut     liftUnit         shell assemblyCell  [1.6, 0, 0]
-//   sign        stationSign      shell assemblyCell  [0, 0, -1.9000000000000001]
-//   panel       hmi              shell assemblyCell  [-1.55, 0, 0.95]                0.30 rad
+//   sign        stationSign      shell assemblyCell  [0, 0, -2.05]
+//   panel       hmi              shell assemblyCell  [-1.8, 0, 0.95]                 0.30 rad
 //   beacon      stackLight       shell assemblyCell  [1.9500000000000002, 0, -0.55]
 //   scanner     visionScanner    station             [0, 0, 0]
 //   labeller    labelApplicator  station             [-0.15, 0, 1.02]
@@ -264,15 +264,15 @@ export function build({ registry, ctx }) {
   // slab: Epoxy floor slab for a station cell with yellow boundary lines and an... (shell assemblyCell)
   equipment.slab = registry.buildComponent('floorSlab', {
     length: 4.7,
-    depth: 3.95,
-    walkway: 0.8607594936708861,
+    depth: 4.1,
+    walkway: 0.8658536585365854,
   }, ctx);
-  equipment.slab.root.position.set(0, 0, -0.375);
+  equipment.slab.root.position.set(0, 0, -0.44999999999999996);
   root.add(equipment.slab.root);
 
   // fence: Safety guard fence: yellow posts and rails with wire-mesh panels, running... (shell assemblyCell)
   equipment.fence = registry.buildComponent('guardFence', { length: 4.1000000000000005 }, ctx);
-  equipment.fence.root.position.set(0, 0, -2.1);
+  equipment.fence.root.position.set(0, 0, -2.25);
   root.add(equipment.fence.root);
 
   // line: Twin-strand pallet conveyor on aluminium profiles, with optional work stop... (shell assemblyCell)
@@ -299,12 +299,12 @@ export function build({ registry, ctx }) {
     title: 'Quality Inspection',
     color: '#c8231d',
   }, ctx);
-  equipment.sign.root.position.set(0, 0, -1.9000000000000001);
+  equipment.sign.root.position.set(0, 0, -2.05);
   root.add(equipment.sign.root);
 
   // panel: Pedestal operator panel (HMI) with a live status screen, start/stop buttons... (shell assemblyCell)
   equipment.panel = registry.buildComponent('hmi', {}, ctx);
-  equipment.panel.root.position.set(-1.55, 0, 0.95);
+  equipment.panel.root.position.set(-1.8, 0, 0.95);
   equipment.panel.root.rotation.y = 0.3;
   root.add(equipment.panel.root);
 

@@ -25,7 +25,7 @@
 //   eyeCase    photoEye        station  [-0.15, 0.87, -0.75]
 //   eyeTaper   photoEye        station  [1.85, 0.87, -0.75]
 //   panel      hmi             station  [-1.7, 0, 1.75]       0.35 rad
-//   caseRack   palletRack      station  [-5.85, 0, -0.75]
+//   caseRack   palletRack      station  [-5.85, 0, -0.81]
 //   caseSign   signBoard       station  [-5.85, 0, -1.7]
 import * as THREE from 'three';
 
@@ -411,7 +411,7 @@ export function build({ registry, ctx }) {
     deckSpacing: 1,
     topClearance: 1.05,
   }, ctx);
-  equipment.caseRack.root.position.set(-5.85, 0, -0.75);
+  equipment.caseRack.root.position.set(-5.85, 0, -0.81);
   root.add(equipment.caseRack.root);
 
   // caseSign: Area sign on a tall post, readable from both sides: title, subtitle and an...

@@ -126,8 +126,8 @@ export const timing = {
   ],
 };
 
-/** The stations in flow order: each `{ station, build }`. */
-export const stations = [fill1, fill2, cap, inspect, pack, rework];
+/** The stations in the factory's order (the order the line builds and updates them): each `{ station, build }`. */
+export const stations = [fill1, fill2, cap, inspect, rework, pack];
 
 /**
  * Builds the line: every station from its file, laid out and chained through its ports.

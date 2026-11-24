@@ -17,9 +17,24 @@
 //   placeholder  genericMachine stand-ins (warnings)
 //   takt         the takt against line.taktTarget, with the bottleneck and what would help
 //   opSupport    an op that needs its machine to declare it (fill, cap) on one that doesn't
+// Step 7.2:
+//   geometry     the line built headless: equipment, stations and transfers clashing (geometry.js)
+// Step 7.3:
+//   edges        every edge on its own: ports exist, output → input, the same flow type at both ends,
+//                the edge's `carries`, a transport that carries it
+//   play         the run played headless: targets worked out at run time out of reach (robots,
+//                gantries), stations in ALARM, a run that stalls or loses units (play.js)
+// Step 7.4 (reviewAll, async):
+//   compiled     the compiled files import and build headless, the same line as the IR; files on
+//                disk not stale (compiled.js)
 // Nothing here knows a component by name (rule 6): it reads the registry and the data.
-import { checkFactory, factoryWarnings, mergeConventions } from '../../compiler/expand.js';
+import { checkFactory, factoryWarnings, mergeConventions, expandStation } from '../../compiler/expand.js';
 import { parseFactory } from '../../spec/factory.schema.js';
+import { parseStation, resolvePorts } from '../../lib/station/stationSpec.js';
+import { endpoint } from '../../lib/line/layout.js';
+import { reviewGeometry } from './geometry.js';
+import { reviewPlay } from './play.js';
+import { reviewCompiled } from './compiled.js';
 
 const PHASES = ['prepare', 'intake', 'process', 'output'];
 
@@ -76,8 +91,10 @@ function opHint(message) {
  * Reviews a factory.json. Returns { ok, findings, counts, timing? }: ok when there are no errors.
  * @param {object} registry  components, ops and products registered
  * @param {object} data      factory.json (parsed JSON)
+ * @param {object} [o]       { geometry: false skips the clash check, play: false skips playing the run
+ *                            (both build the line; without them only the fast checks run) }
  */
-export function review(registry, data) {
+export function review(registry, data, { geometry = true, play = true } = {}) {
   const findings = [];
   const add = (check, severity, path, message, hint) => findings.push({ check, severity, path, message, ...(hint ? { hint } : {}) });
 
@@ -153,16 +170,33 @@ export function review(registry, data) {
     });
   }
 
+  // ---- edges: every edge on its own, with the ports it joins -----------------------------------------
+  let edgesOk = stationsOk;
+  if (stationsOk) {
+    for (const f of edgeFindings(registry, factory, lineBelt)) {
+      add('edges', f.severity, f.path, f.message, f.hint);
+      if (f.severity === 'error') edgesOk = false;
+    }
+  }
+
   // ---- graph: the line as a whole -------------------------------------------------------------------
   let timing = null;
-  if (stationsOk) {
+  let expanded = null;
+  if (edgesOk) {
     const r = checkFactory(registry, data);
     if (r.ok) {
       timing = r.timing;
+      expanded = r.expanded;
     } else {
       for (const e of r.errors) add('graph', 'error', e.path === '(compile)' ? '(line)' : e.path, e.message);
     }
   }
+
+  // ---- geometry: the line built headless, its parts tested against each other ------------------------
+  if (expanded && geometry) findings.push(...reviewGeometry(registry, factory, expanded));
+
+  // ---- play: the run played headless (targets worked out at run time, stalls) ----------------------------
+  if (expanded && play) findings.push(...reviewPlay(registry, factory, expanded, timing));
 
   // ---- placeholders -------------------------------------------------------------------------------------
   for (const w of factoryWarnings(data)) add('placeholder', 'warning', w.path, w.message, 'the line plays with it; the Builder can try a composite of basic blocks');
@@ -201,6 +235,68 @@ export function review(registry, data) {
   });
 
   return finish(findings, timing);
+}
+
+/**
+ * The edges checked one by one against the ports they join (the stations already planned fine):
+ * [{ severity, path, message, hint? }]. Paths at the edge field the problem is about.
+ */
+export function edgeFindings(registry, factory, beltHeight) {
+  const out = [];
+  const error = (path, message, hint) => out.push({ severity: 'error', path, message, ...(hint ? { hint } : {}) });
+  const portsOf = new Map();
+  for (const s of factory.stations) {
+    const { equipment, ...station } = expandStation(registry, s, { beltHeight });
+    const specs = Object.fromEntries(equipment.map((e) => [e.id, registry.componentSpec(e.type, e.params ?? {}, { beltHeight: e.beltHeight ?? beltHeight })]));
+    portsOf.set(s.id, resolvePorts(parseStation(station), specs));
+  }
+  const what = { in: 'an input', out: 'an output', work: 'the work place' };
+  factory.graph.edges.forEach((e, k) => {
+    const at = `graph.edges[${k}]`;
+    const port = (field) => {
+      let end;
+      try { end = endpoint(e[field]); } catch (err) { error(`${at}.${field}`, err.message); return null; }
+      const ports = portsOf.get(end.station);
+      if (!ports) return null; // an unknown station: the schema said so
+      const p = ports[end.port];
+      if (!p) error(`${at}.${field}`, `station "${end.station}" has no port "${end.port}"`, `its ports: ${Object.keys(ports).join(', ')}`);
+      return p ?? null;
+    };
+    const from = port('from');
+    const to = port('to');
+    if (from && from.direction !== 'out') error(`${at}.from`, `"${e.from}" is ${what[from.direction]}, not an output`, 'an edge runs from an output port (output, or an extra one such as reject) to an input port');
+    if (to && to.direction !== 'in') error(`${at}.to`, `"${e.to}" is ${what[to.direction]}, not an input`, 'an edge runs from an output port to an input port (input)');
+    if (!from || !to) return;
+    if (from.carries !== to.carries) {
+      error(at, `"${e.from}" gives ${from.carries} but "${e.to}" takes ${to.carries}`, `put a station between them that turns ${from.carries} into ${to.carries} (packs units into cases, cases onto pallets), or join other ports`);
+      return;
+    }
+    if (e.carries && e.carries !== from.carries) error(`${at}.carries`, `the edge says ${e.carries} but its ports carry ${from.carries}`, `write carries: "${from.carries}" or leave it out`);
+    if (e.transport.kind !== 'direct' && e.transport.type) {
+      const spec = registry.componentSpec(e.transport.type, e.transport.params ?? {}, { beltHeight });
+      const carried = [...new Set(Object.values(spec.ports ?? {}).map((p) => p.carries))];
+      if (carried.length && !carried.includes(from.carries)) {
+        error(`${at}.transport.type`, `transport "${e.transport.type}" carries ${carried.join(' / ')}, not ${from.carries}`, 'pick a transport made for it (see the catalog: transport and conveyor components, their ports say what they carry)');
+      }
+    }
+  });
+  return out;
+}
+
+/**
+ * Everything: review() and then the compiled files (imported, so async). The CLI and /api/review use it.
+ * @param {object} registry
+ * @param {object} data   factory.json (parsed JSON)
+ * @param {object} [o]    review()'s options, and { compiled: false to skip, root, importModule, source }
+ *                        (reviewCompiled's; root is required for the compiled check)
+ */
+export async function reviewAll(registry, data, { compiled = true, root, importModule, source, ...options } = {}) {
+  const result = review(registry, data, options);
+  // Compiled files only for a line the data checks could plan (its timing is known); a line with
+  // errors at run time (play) still compiles, and its files are still worth checking.
+  if (!compiled || !result.timing) return result;
+  const more = await reviewCompiled(registry, data, { root, importModule, source });
+  return finish([...result.findings, ...more], result.timing);
 }
 
 function finish(findings, timing = null) {

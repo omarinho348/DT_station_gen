@@ -16,7 +16,7 @@
 //   beacon        stackLight       shell assemblyCell  [1.9500000000000002, 0, -0.55]
 //   gantry        cartesianGantry  station             [0, 0, 0]
 //   harnessBoard  harnessBoard     station             [0.9, 0, -1.1]
-//   tester        testCabinet      station             [-1.2, 0, -0.75]
+//   tester        testCabinet      station             [-1.37, 0, -0.75]
 import * as THREE from 'three';
 
 /** What the station does (played by lib/station/StationCycle.js): ports, process ops, status, signals. */
@@ -387,7 +387,7 @@ export function build({ registry, ctx }) {
 
   // tester: Floor-standing test cabinet (continuity, function test) with display, pass /...
   equipment.tester = registry.buildComponent('testCabinet', {}, ctx);
-  equipment.tester.root.position.set(-1.2, 0, -0.75);
+  equipment.tester.root.position.set(-1.37, 0, -0.75);
   root.add(equipment.tester.root);
 
   return { root, equipment };

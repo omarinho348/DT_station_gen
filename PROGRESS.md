@@ -2501,7 +2501,7 @@ Phase 6 approved by the owner moving on (2026-11-24: "next").
 | 7.3 | Edges and reach: port directions and flow types statically along each edge; robot and gantry reach against the points their ops aim at |
 | 7.4 | Compiled files imported and built headless; the first `/api/review` route (a small Vite dev plugin) |
 
-### Step 7.1: reviewer core (done)
+### Step 7.1: reviewer core (approved)
 
 **Result first:** `npm run review` reviews factory.json files and lists **every** problem it can find, each with its check, its path in the file, a clear message and, where it helps, a hint. Exit code 1 if any file has an error; `--json` for machines (the Builder in Phase 8).
 - **The three example lines:** printer and lubricant clean; bottling ok with its two placeholders as warnings
@@ -2546,3 +2546,237 @@ Phase 6 approved by the owner moving on (2026-11-24: "next").
 - transfer conveyors crossing stations or each other (the crossing seen in step 6.6's dev line)
 
 Mount rules keep the deliberate overlaps quiet: a tunnel or portal over its conveyor, a tool on its machine, a sensor on a belt frame. The three example lines must come out clean without exceptions written for them.
+
+### Step 7.2: geometry, clashes between equipment, stations and transfers (approved)
+
+Step 7.1 approved by the owner moving on (2026-11-24: "continue working, phase 7 step 7.2").
+
+**Result first:** `npm run review` now builds every line headless and tests the solid parts of every two pieces of equipment against each other: within a station, between stations, and the transfer conveyors.
+
+| Line | Geometry findings |
+|---|---|
+| bottling | none |
+| lubricant | 1 warning: `canTransfer`'s `pusherB` stand and `packing`'s case rack step beam (65 mm to clear, between two stations) |
+| printer | 17 warnings, all real clips the reference already had (it still plays: no errors) |
+
+A transfer running through equipment or another transfer is an **error**. Two machines going into each other is a **warning** with both ids, the two parts and how far one must move, e.g.
+`! [geometry] stations[1].equipment[1]: station "st2": "sign" (stationSign) and "presenter" (workTable) overlap (Sign post × Table top, 240 mm to clear)`
+
+**Why meshes, not footprints (a change from the plan):** a footprint is an envelope (a fence's whole run, a portal gantry's span over its belt, a robot's working area). Tested as boxes, the footprints on the three example lines overlap **about 300 times**, nearly all on purpose. The meshes are what is really there. Each mesh is an oriented box (its geometry's bounds in its own frame). Two parts clash when they would have to move more than 2 cm apart to clear each other (separating-axis test), so parts that only touch are fine. This is the "Box3 in Node" of Claude.md §7.3.
+
+**Overlaps that are meant**, told apart by the data, never by a component's name (rule 6):
+- `tool` parts ride on a robot: not tested here (reach comes in 7.3)
+- `overConveyor` / `besideConveyor` parts may overlap any conveyor or transport (a tunnel round its belt, a lift inside its conveyor, a diverter)
+- `surface` parts may overlap the component under their origin (a tote on its table, guide rails on a belt)
+- two components meet where one's in / out port lies on the other (an erector putting cases onto the carton line, a case source's chute over the belt tail)
+- a transfer meets the machines of the two ports its edge joins, and the transfers that share an end with it (a fan-in)
+
+No exceptions for the example lines: with these rules, bottling went from 6 hits to 0 and lubricant from 17 to 1.
+
+**The 17 printer-line clips:** I checked the deepest ones in the existing screenshots and they are really there. The two white sign posts go through the ST2 presenter table next to the feeder bowls (`screenshots/printer-st2.png`), and the ST3 gantry post stands inside the tester cabinet (`printer-st3-test.png`). They come from the reference positions (shell furniture: sign, fence, lifts; and the stations' own equipment). Fixing them means moving things away from the reference, so the pixel comparison and the byte-for-byte compiled files would change. **I left them for you to decide** (see the question below).
+
+**Paths** point into factory.json: equipment at `stations[i].equipment[j]` (a shell's furniture at `stations[i].shell`), a parallel copy's equipment at the station written once, and a repeated edge at the edge written once.
+
+**Changed**
+- `agents/reviewer/geometry.js` (new): `solidsOf` (visible meshes as oriented boxes; carried products left out), `penetration` (separating-axis distance to clear), `deepestClash`, `lineComponents`, `geometryFindings`, `reviewGeometry` (builds the line headless from the expanded factory, maps paths). A line that doesn't build headless is an error. If a GLB model isn't loaded, that's a note, not an error.
+- `agents/reviewer/deterministic.js`: the `geometry` check after the graph check; `review(registry, data, { geometry: false })` skips it (the fast checks only)
+- `scripts/review.mjs`: preloads the GLB models (the ABB in the lubricant line) before reviewing
+- Tests:
+  - `tests/agents/reviewer-geometry.test.js` (8):
+    - penetration: touching, apart, a post through a table top, turned boxes whose bounds overlap but which don't touch
+    - the example lines
+    - the printer line's clips as warnings, at the station's own equipment
+    - two cappers in one place
+    - a clash in a parallel station pointing at the station written once
+    - a cabinet under the reject transfer: an error at `graph.edges[3]`
+    - `geometry: false`
+  - `tests/agents/reviewer.test.js`: the step-7.1 checks run with `geometry: false`; new test: an unloaded model gives a note
+
+**Not covered yet**
+- crossing transfers that share no end are detected by the same code (transfer × transfer gives an error), but no test builds one: the layout doesn't produce one from the example graphs
+- moving parts are checked in their home pose only (a gantry's travel, a pusher's stroke). Sweeping their motion ranges belongs with reach in 7.3.
+- converging transfers in a fan-in overlap near their shared end. That's allowed, but it is how the layout draws a merge, not a modelled merge.
+
+**Results**
+- `npm test`: 56 files, **2045 tests passed**
+- `npm run review` (~6 s for the three lines): bottling ok (2 placeholder warnings), lubricant ok (1 geometry warning), printer ok (17 geometry warnings)
+
+**Question for you:** fix the 17 printer-line clips (move the sign, fence and the clashing equipment a few cm to tens of cm, then re-record the screenshots against the reference), or keep the line as a faithful copy of the reference and let the reviewer report them?
+
+**Next:** step 7.3, edges and reach: port directions and flow types checked statically along each edge; robot and gantry reach against the points their ops aim at (and, from this step, their motion sweep).
+
+### Step 7.3: edges and reach (approved)
+
+Step 7.2 approved by the owner moving on (2026-11-24: "onto the next step"). The question about the 17 printer-line clips went unanswered, so they stay as in the reference and the reviewer reports them as warnings (the default I gave).
+
+**Result first:** two new checks. With them, every check in Claude.md §7.3 runs except "compiled files import and build headless" (7.4).
+
+**`edges`** (static; each edge checked against the ports it joins, all problems at once):
+- ports exist (`station "cap" has no port "side"`, hint: its ports)
+- runs output → input (`"canTransfer.output" is an output, not an input`)
+- the same flow type at both ends (`"canTransfer.output" gives batch but "palletizing.input" takes case`, hint: a station between them that turns batch into case)
+- the edge's own `carries`; the transport carries it (`transport "beltConveyor" carries batch, not case`)
+
+Each finding sits at its field (`graph.edges[2].transport.type`). Before, only `Line.js` checked these, while building the line, and it stopped at the first one. The whole-line graph check now runs only once the edges are fine.
+
+**`play`** (reach): the line plays its run headless, with fixed 0.05 s steps.
+
+Why play: named ops aim robots and gantries at points worked out only when their step starts (a part's seat, a screw hole, a pallet slot). The dry plan checks every value an op writes, but not those. I looked for a static way and there isn't one: the points depend on where the product stands at that moment.
+- **a station in ALARM** is an error at the op it came from. For example, with the ST2 gantry moved 1.5 m away:
+  `✗ [play] stations[1].process[1]: station "st2" stopped in ALARM at 61.1 s of the run (unit 2 of 8 released): step "Moving to Z motor assy": machine "gantry" cannot reach x = 1.88 (range [-0.75, 0.75])`
+  hint: `move the machine closer to it (equipment position), or pick one with a longer x (reaches [-0.75, 0.75])`.
+  The op is found from the step label: an op's own `label`, or a named op's `name` (named ops label their steps from it).
+- **a run that does not finish** within 2 × the estimate + 120 s is an error naming the stations still holding units; **units lost** is an error
+- **a run that finishes** is a note: `played a run of 10: every unit left the line after 140.3 s (estimated 148.6 s)`
+
+All three example lines play to the end with no alarm:
+
+| Line | Units | Played | Estimate |
+|---|---|---|---|
+| bottling | 10 | 140.3 s | 148.6 s |
+| lubricant | 27 | 964.7 s | 911.5 s |
+| printer | 8 | 771.4 s | 813.5 s |
+
+**Changed**
+- `agents/reviewer/deterministic.js`: `edgeFindings` and the `edges` check; the `play` check; `review(…, { geometry, play })` (each `false` skips it)
+- `agents/reviewer/play.js` (new): `reviewPlay`, `opOfStep`
+- `scripts/review.mjs`: `--no-play` (the full review of the three examples takes about 33 s, 6 s without playing)
+- Tests:
+  - `tests/agents/reviewer-run.test.js` (6):
+    - four edge problems at once, each at its field
+    - an unknown port with the ports listed
+    - the examples without edge findings
+    - the bottling run as a note
+    - the moved gantry: no dry-plan error, an ALARM error at `stations[1].process[1]`
+    - a run cut short: an error naming where units are held
+  - `reviewer.test.js` and `reviewer-geometry.test.js` skip playing (each check has its own file); the unloaded-model test expects a note from both geometry and play
+
+**Not covered**
+- The run-not-finished test cuts the time limit short. I have no example of a real stall that passes every earlier check, because the graph and edge checks catch the usual causes first.
+- Moving parts are checked for reach (where they go), not for clashes along the way. Sampling the geometry while the line plays would multiply the review time, so I left it out.
+- Mapping a failed step to its op uses the step label. A named op without a `name`, whose steps carry their own labels, points at the station instead.
+
+**Results**
+- `npm test`: 57 files, **2051 tests passed**
+- `npm run review`: bottling ok (2 placeholder warnings, run played), lubricant ok (1 geometry warning, run played), printer ok (17 geometry warnings, run played)
+
+**Next:** step 7.4, compiled files (`generated/<line>/`) imported and built headless, and the first `/api/review` route (a small Vite dev plugin).
+
+### Step 7.3b: the reviewer's warnings fixed on the example lines (approved)
+
+Step 7.3 approved; the owner asked to "fix any warnings" (2026-11-24). That also answers the 7.2 question about the printer-line clips: fix them.
+
+**Result first:** `npm run review` shows printer **0 warnings** (was 17) and lubricant **0 warnings** (was 1). Both still play their runs to the end in exactly the same times (771.4 s and 964.7 s). The timing tables still match the reference step for step.
+
+The bottling line keeps its **2 placeholder warnings** (rework bench, case packer). Those are deliberate: step 6.8 built that line to show a line running with `genericMachine` stand-ins, and Claude.md §6.6.5 says the reviewer reports them. See the question below.
+
+**What moved** (factory.json only; no component, shell or code changed):
+
+| Station | Clash | Fix |
+|---|---|---|
+| printer ST1 | fence and sign posts through the flow rack | `minZ` −2.35 → −2.7 (fence and sign behind the rack) |
+| | input lift column through the frame nest | frame nest 4 cm back (its pick light with it) |
+| | tote table and part cradle tops overlapping | cradle 6 cm left |
+| ST2 | fence and sign post through the presenter table | `minZ` −1.5 → −1.8 |
+| | gantry post through the presenter table | table 0.42 m deep instead of 0.5 (the feeders stay in place) |
+| ST3 | gantry post inside the tester cabinet | tester x −1.2 → −1.37 |
+| ST4 | dock cylinder through the enclosure's rear panel | dock 18 cm back, stroke 0.37 → 0.46, docking to 0.456 instead of 0.366: the same contact point on the unit, same 0.55 s |
+| | dock cable inside the equipment rack | rack x −0.3 → −0.48 |
+| ST5 | fence through the reject lane's end | `minZ` −2.35 → −2.5 |
+| | HMI through the scanner post | `panelX` −1.8 |
+| ST6 | sign panel through the gantry's bridge beam; fence through its posts | `minZ` −3 → −3.5 |
+| | output lift carriage against a gantry post | gantry 8 cm along +X |
+| | carton line's rollers through the foam table's legs | foam table 0.5 m long at x 0.76 |
+| | carton line's legs through the pallet | pallet and dispatch bay 12 cm back (z −2.27); gantry `spanZ` 2.55 → 2.75 so it still reaches the far slots |
+| lubricant packing | can transfer's pusher stand through the case rack's beams | case rack 6 cm back (z −0.81) |
+
+**The reviewer checked my fixes:** the play check caught two reach errors I introduced on the way, and I fixed both before the results above.
+- the foam table first ended up 1 cm beyond the ST6 gantry's x reach (`cannot reach x = 0.71 (range [-0.7, 0.7])`)
+- the pallet moved back put its far slots outside the gantry's z reach (`cannot reach z = -1.375`): hence the longer `spanZ`
+
+**Visual comparison with the reference** (re-rendered with `npm run visual`, both lines): the picture moved away from the reference on purpose. The diff images show the red at the moved fences, signs and fixtures.
+- printer: close-ups 5.2–8.6 % (were 3.5–4.4 %), line views 3.7 %, wide views 2.3 %
+- lubricant: can-transfer views 8.0–8.1 % (were 6.2–6.4 %), station 2 9.0 % (was 8.3–8.4 %); the others unchanged
+- limits raised to keep about one point of headroom, as before: printer close-up 9.5 %, line 4.5 %, wide 3 %; lubricant can transfer 9 %, station 2 10 %
+- both write-ups (`benchmarks/results/*-visual.md`) list the fixes as a new known difference with the old and new numbers
+
+**Changed**
+- `spec/examples/printer-line.factory.json`, `spec/examples/lubricant-line.factory.json`; `generated/printer-line/st1–st6.js`, `generated/lubricant-line/packing.js` (recompiled)
+- goldens and results: `tests/golden/lines/{printer,lubricant}-line/`, `benchmarks/results/*-visual.{json,md}`, `benchmarks/results/visual/`; limits in `benchmarks/expected/*-visual-limits.js`
+- `tests/spec/printer-line.test.js`: the docked plug value (0.456) and the pallet's z (−2.27), with the reason
+- `tests/agents/reviewer-geometry.test.js`: the three example lines clean. The sign-through-table case is now built by putting ST2 back as in the reference.
+
+**Results**
+- `npm test`: 57 files, **2051 tests passed**
+- `npm run review`: printer ok, 0 warnings; lubricant ok, 0 warnings; bottling ok, 2 placeholder warnings
+
+**Question for you:** should the bottling line's two placeholders become composites (a bench from a table frame; a case packer from a portal, axes and a gripper)? That clears its last warnings, but the examples would then have no placeholder line left, and placeholders are only tested on broken copies.
+
+**Next:** step 7.4, compiled files imported and built headless, and the first `/api/review` route.
+
+### Step 7.4: compiled files built headless, `/api/review` (done)
+
+Step 7.3b approved; the owner said to keep the bottling placeholders (2026-11-24: "no dont, continue next step").
+
+**Result first:** every check in Claude.md §7.3's deterministic list now runs, from the CLI (`npm run review`) and from the API (`/api/review` on the dev server).
+
+**`compiled`** (async, in the new `reviewAll`):
+- the factory.json is compiled in memory and the files are written to `generated/_review/<line>-<hash>/` (git-ignored, removed after each check). That folder is one level deeper, so the copy is compiled with lib at `../../../lib`, as drafts are; the hash keeps two versions apart in the module cache.
+- `line.js` is imported and `createLine()` builds the line headless
+- the result is compared with the line built from the IR: same layout, same timing, every named object in the same place and shown or hidden alike. A difference is an error saying where (e.g. `scene object #473: …`).
+- when the factory.json has compiled files on disk, a stale folder is a warning naming the files (`npm run compile`)
+- results: printer 7 files, 2156 named objects; lubricant 5 files, 2120; bottling 7 files, 1052; all the same line as the IR, none stale
+
+**A real compiler difference the check found:** the compiled bottling line built its stations in flow order (… pack, rework), the IR in the factory's order (… rework, pack). Positions were the same, but `Line` updates stations in list order, so the two could play differently. Only the printer line had been compared before (in `emit.test.js`), and there the two orders are the same. Fixed: `line.js` exports `stations` in the factory's order; the header table stays in flow order for readers. Recompiled. The printer and lubricant files change only in that comment line.
+
+**`/api/review`** (`server/reviewApi.js`, a Vite dev plugin; no separate backend):
+- `GET /api/review?file=spec/examples/x.factory.json`, or `POST /api/review` with `{ "factory": … }`
+- options `play`, `geometry`, `compiled` (default on; `0` / `false` turns one off)
+- answers `{ ok, counts, findings, takt, file? }`: 200 also when the line has errors (the review worked); 400 bad request (no factory, not JSON, a path outside the project, not a `.factory.json`); 404 missing file; 405 other methods; 413 body over 2 MB; 500 if the reviewer itself fails
+- reviews run one at a time; the catalog, models and reviewer load once through the server's SSR module graph
+- tried live on the dev server: the printer line, everything included, came back ok with 0 warnings in 39 s (the first call also loads the catalog and models); a broken POST lists its schema errors; `?file=../x.factory.json` gets 400. The app still loads normally (screenshot of the setup page).
+
+**Changed**
+- `agents/reviewer/compiled.js` (new): `reviewCompiled`, `sceneOf`, `firstDifference`
+- `agents/reviewer/deterministic.js`: `reviewAll(registry, data, { compiled, root, importModule, source, …review options })`
+- `compiler/emit.js`: `stations` in the factory's order; `generated/*/line.js` recompiled
+- `server/reviewApi.js` (new): `handleReview`, `reviewApi()`; `vite.config.js` registers it
+- `scripts/review.mjs`: uses `reviewAll` (imports through Vite SSR), `--no-compiled`
+- `.gitignore`: `generated/_review/`
+- Tests:
+  - `tests/agents/reviewer-compiled.test.js` (6):
+    - the three examples' files build the same line, and no folder is left behind
+    - stale files on disk named
+    - files that don't import / don't build: errors
+    - a station moved in the built line: an error at that scene object
+    - a refused factory.json is not compiled
+    - `firstDifference`
+  - `tests/server/review-api.test.js` (5): GET, POST with errors, seven bad requests, a failing reviewer, the plugin mounts only in dev
+
+**Results**
+- `npm test`: 59 files, **2062 tests passed**
+- `npm run review`: printer ok (0 warnings), lubricant ok (0 warnings), bottling ok (2 placeholder warnings); every line plays and its compiled files build
+
+## Phase 7 status: done
+
+The deterministic reviewer of Claude.md §7.3 is complete:
+
+| Check | What |
+|---|---|
+| schema, catalog | every issue at its path, all at once |
+| ops | every station planned on its own; values in range |
+| edges | ports exist, output → input, flow types, the edge's carries, the transport |
+| graph | the whole line: layout, loops, one connected line |
+| geometry | the line built headless, parts that go into each other (mesh boxes, mount and port rules for what is meant) |
+| play | the run played headless: reach of targets worked out at run time, alarms, stalls |
+| takt | against `line.taktTarget`, with the bottleneck and what would help |
+| placeholder, opSupport | stand-ins, ops on machines not made for them |
+| compiled | the files import, build headless and are the IR's line; none stale |
+
+It runs from `npm run review` and `/api/review`. Findings are `{ check, severity, path, message, hint }`, the form the Builder (Phase 8) will read.
+
+**Open:**
+- moving parts are checked for reach, not for clashes along their path
+- a real stall that passes every earlier check has no example
+
+**Next:** Phase 8, the LLM layer and the Builder. It starts with a decision from Claude.md §13: which OpenAI model(s) to use and the budget caps. I'll propose the split of Phase 8 and ask that first.

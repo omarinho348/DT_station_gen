@@ -12,6 +12,9 @@ dist/
 # draft previews written by the Builder agent
 generated/_draft/
 
+# compiled files the reviewer imports and builds, removed after each check
+generated/_review/
+
 # screenshots from local runs (goldens live in tests/golden/)
 screenshots/
 

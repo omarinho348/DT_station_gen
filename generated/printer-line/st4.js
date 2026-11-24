@@ -15,9 +15,9 @@
 //   panel      hmi               shell assemblyCell  [-1.55, 0, 0.95]                0.30 rad
 //   beacon     stackLight        shell assemblyCell  [1.9500000000000002, 0, -0.55]
 //   enclosure  shutterEnclosure  station             [0, 0, 0]
-//   dock       dockingUnit       station             [-0.086, 0, -0.96]
+//   dock       dockingUnit       station             [-0.086, 0, -1.14]
 //   monitor    statusMonitor     station             [1.25, 0, 0.95]                 -0.35 rad
-//   rack       equipmentRack     station             [-0.3, 0, -1.15]
+//   rack       equipmentRack     station             [-0.48, 0, -1.15]
 import * as THREE from 'three';
 
 /** What the station does (played by lib/station/StationCycle.js): ports, process ops, status, signals. */
@@ -80,7 +80,7 @@ export const station = {
     {
       op: 'move',
       machine: 'dock',
-      to: { plug: 0.366 },
+      to: { plug: 0.456 },
       seconds: 0.55,
       label: 'Docking power & data connector',
       state: 'TESTING',
@@ -566,8 +566,8 @@ export function build({ registry, ctx }) {
   root.add(equipment.enclosure.root);
 
   // dock: Pneumatic docking unit: a cylinder on a floor stand pushes a power/data...
-  equipment.dock = registry.buildComponent('dockingUnit', { axisHeight: 0.92, stroke: 0.37 }, ctx);
-  equipment.dock.root.position.set(-0.086, 0, -0.96);
+  equipment.dock = registry.buildComponent('dockingUnit', { axisHeight: 0.92, stroke: 0.46 }, ctx);
+  equipment.dock.root.position.set(-0.086, 0, -1.14);
   root.add(equipment.dock.root);
 
   // monitor: Floor-standing status monitor with a live dashboard: title, step, gauge bars...
@@ -585,7 +585,7 @@ export function build({ registry, ctx }) {
     height: 1.8,
     depth: 0.5,
   }, ctx);
-  equipment.rack.root.position.set(-0.3, 0, -1.15);
+  equipment.rack.root.position.set(-0.48, 0, -1.15);
   root.add(equipment.rack.root);
 
   return { root, equipment };

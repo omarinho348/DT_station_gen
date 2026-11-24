@@ -7,9 +7,14 @@
 // benchmarks/results/printer-line-visual.md, the visible fence wire mesh above all. The limits leave
 // about one percentage point (close-ups) of headroom; a real regression (a machine missing or moved,
 // a unit in the wrong place) costs more than that.
-const CLOSE_UP = 0.055;
-const LINE = 0.03;
-const WIDE = 0.015;
+//
+// Re-measured 2026-11-24 after the reviewer's clash fixes (Phase 7 step 7.3; the owner asked for them):
+// deeper slabs, the fence and sign further back, a few fixtures moved clear of each other, so the
+// picture moved away from the reference on purpose. Close-ups 5.2–8.6 %, line views 3.7 %, wide views
+// 2.3 %; the limits keep about one percentage point of headroom as before.
+const CLOSE_UP = 0.095;
+const LINE = 0.045;
+const WIDE = 0.03;
 
 export const VIEW_LIMITS = {
   'line-wide-0': WIDE,

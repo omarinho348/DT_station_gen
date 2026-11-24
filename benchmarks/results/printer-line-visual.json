@@ -1,5 +1,5 @@
 {
-  "about": "Written by scripts/visual-compare.mjs (npm run visual). Our compiled printer line vs the reference line, same camera, moment and lights. Do not edit by hand.",
+  "about": "Written by scripts/visual-compare.mjs (npm run visual). Our compiled printer-line vs the reference, same camera, moment and lights. Do not edit by hand.",
   "size": {
     "width": 1600,
     "height": 900
@@ -16,8 +16,8 @@
         0.6,
         -0.3
       ],
-      "differing": 0.00738,
-      "meanDiff": 0.54
+      "differing": 0.02327,
+      "meanDiff": 1.961
     },
     "st1-262": {
       "t": 262.3,
@@ -29,8 +29,8 @@
         1,
         -0.2
       ],
-      "differing": 0.04102,
-      "meanDiff": 3.551
+      "differing": 0.06644,
+      "meanDiff": 6.129
     },
     "st2-262": {
       "t": 262.3,
@@ -42,8 +42,8 @@
         1,
         -0.2
       ],
-      "differing": 0.03974,
-      "meanDiff": 3.384
+      "differing": 0.06878,
+      "meanDiff": 6.342
     },
     "st3-262": {
       "t": 262.3,
@@ -55,8 +55,8 @@
         1,
         -0.2
       ],
-      "differing": 0.03626,
-      "meanDiff": 3.114
+      "differing": 0.05162,
+      "meanDiff": 4.735
     },
     "st4-262": {
       "t": 262.3,
@@ -68,8 +68,8 @@
         1,
         -0.2
       ],
-      "differing": 0.03541,
-      "meanDiff": 2.992
+      "differing": 0.07164,
+      "meanDiff": 6.48
     },
     "st5-262": {
       "t": 262.3,
@@ -81,8 +81,8 @@
         1,
         -0.2
       ],
-      "differing": 0.04235,
-      "meanDiff": 3.721
+      "differing": 0.07336,
+      "meanDiff": 6.594
     },
     "st6-262": {
       "t": 262.3,
@@ -94,8 +94,8 @@
         1,
         -0.2
       ],
-      "differing": 0.04294,
-      "meanDiff": 3.632
+      "differing": 0.08459,
+      "meanDiff": 7.501
     },
     "line-262": {
       "t": 262.3,
@@ -107,8 +107,8 @@
         0.9,
         -0.3
       ],
-      "differing": 0.01926,
-      "meanDiff": 1.493
+      "differing": 0.03734,
+      "meanDiff": 3.222
     },
     "st1-430": {
       "t": 430,
@@ -120,8 +120,8 @@
         1,
         -0.2
       ],
-      "differing": 0.03846,
-      "meanDiff": 3.329
+      "differing": 0.06392,
+      "meanDiff": 5.91
     },
     "st2-430": {
       "t": 430,
@@ -133,8 +133,8 @@
         1,
         -0.2
       ],
-      "differing": 0.03948,
-      "meanDiff": 3.381
+      "differing": 0.0692,
+      "meanDiff": 6.433
     },
     "st3-430": {
       "t": 430,
@@ -146,8 +146,8 @@
         1,
         -0.2
       ],
-      "differing": 0.04029,
-      "meanDiff": 3.482
+      "differing": 0.05508,
+      "meanDiff": 5.039
     },
     "st4-430": {
       "t": 430,
@@ -159,8 +159,8 @@
         1,
         -0.2
       ],
-      "differing": 0.03877,
-      "meanDiff": 3.252
+      "differing": 0.07486,
+      "meanDiff": 6.731
     },
     "st5-430": {
       "t": 430,
@@ -172,8 +172,8 @@
         1,
         -0.2
       ],
-      "differing": 0.04359,
-      "meanDiff": 3.795
+      "differing": 0.07433,
+      "meanDiff": 6.634
     },
     "st6-430": {
       "t": 430,
@@ -185,8 +185,8 @@
         1,
         -0.2
       ],
-      "differing": 0.03969,
-      "meanDiff": 3.322
+      "differing": 0.08564,
+      "meanDiff": 7.556
     },
     "line-wide-500": {
       "t": 500,
@@ -198,8 +198,8 @@
         0.6,
         -0.3
       ],
-      "differing": 0.00827,
-      "meanDiff": 0.6
+      "differing": 0.02287,
+      "meanDiff": 1.93
     },
     "st6-760": {
       "t": 760,
@@ -211,8 +211,8 @@
         1,
         -0.2
       ],
-      "differing": 0.0396,
-      "meanDiff": 3.343
+      "differing": 0.08562,
+      "meanDiff": 7.552
     },
     "line-760": {
       "t": 760,
@@ -224,8 +224,8 @@
         0.9,
         -0.3
       ],
-      "differing": 0.0182,
-      "meanDiff": 1.431
+      "differing": 0.03655,
+      "meanDiff": 3.183
     }
   }
 }

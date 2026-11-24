@@ -6,20 +6,20 @@
 // (a decision on a fact only known while a unit plays is timed by its planAs branch, else its longest).
 // Equipment, in the station's own frame (metres; product flows +X, conveyor on z = 0, walkway +Z):
 //   id                   type            from                position                        turn
-//   slab                 floorSlab       shell assemblyCell  [0, 0, -0.375]
-//   fence                guardFence      shell assemblyCell  [0, 0, -2.1]
+//   slab                 floorSlab       shell assemblyCell  [0, 0, -0.55]
+//   fence                guardFence      shell assemblyCell  [0, 0, -2.45]
 //   line                 palletConveyor  shell assemblyCell  [0, 0, 0]
 //   liftIn               liftUnit        shell assemblyCell  [-1.6, 0, 0]
 //   liftOut              liftUnit        shell assemblyCell  [1.6, 0, 0]
-//   sign                 stationSign     shell assemblyCell  [0, 0, -1.9000000000000001]
+//   sign                 stationSign     shell assemblyCell  [0, 0, -2.25]
 //   panel                hmi             shell assemblyCell  [-1.55, 0, 0.95]                0.30 rad
 //   beacon               stackLight      shell assemblyCell  [1.9500000000000002, 0, -0.55]
 //   scara                scara           station             [0.15, 0, -0.62]
 //   keepOut              keepOutRing     station             [0.15, 0, -0.62]
 //   toteTable            workTable       station             [0.25, 0, -1.1]
-//   cradle               partCradle      station             [-0.6, 0, -1.16]
+//   cradle               partCradle      station             [-0.66, 0, -1.16]
 //   bedNest              partNest        station             [0.8, 0, -0.6]
-//   frameNest            partNest        station             [-0.72, 0, -0.6]
+//   frameNest            partNest        station             [-0.72, 0, -0.64]
 //   flowRack             flowRack        station             [0.2, 0, -1.85]
 //   toteMotorZ           tote            station             [-0.25, 0.75, -0.97]
 //   lightMotorZ          pickToLight     station             [-0.25, 0.775, -0.897]
@@ -41,7 +41,7 @@
 //   lightLeadScrew       pickToLight     station             [-0.54, 0.721, -0.905]
 //   lightXGantry         pickToLight     station             [-0.45, 0.721, -0.905]
 //   lightBed             pickToLight     station             [0.8, 0.749, -0.43]
-//   lightBaseFrame       pickToLight     station             [-0.49, 0.729, -0.35]
+//   lightBaseFrame       pickToLight     station             [-0.49, 0.729, -0.39]
 import * as THREE from 'three';
 
 /** What the station does (played by lib/station/StationCycle.js): ports, process ops, status, signals. */
@@ -661,15 +661,15 @@ export function build({ registry, ctx }) {
   // slab: Epoxy floor slab for a station cell with yellow boundary lines and an... (shell assemblyCell)
   equipment.slab = registry.buildComponent('floorSlab', {
     length: 4.7,
-    depth: 3.95,
-    walkway: 0.8607594936708861,
+    depth: 4.300000000000001,
+    walkway: 0.8720930232558138,
   }, ctx);
-  equipment.slab.root.position.set(0, 0, -0.375);
+  equipment.slab.root.position.set(0, 0, -0.55);
   root.add(equipment.slab.root);
 
   // fence: Safety guard fence: yellow posts and rails with wire-mesh panels, running... (shell assemblyCell)
   equipment.fence = registry.buildComponent('guardFence', { length: 4.1000000000000005 }, ctx);
-  equipment.fence.root.position.set(0, 0, -2.1);
+  equipment.fence.root.position.set(0, 0, -2.45);
   root.add(equipment.fence.root);
 
   // line: Twin-strand pallet conveyor on aluminium profiles, with optional work stop... (shell assemblyCell)
@@ -696,7 +696,7 @@ export function build({ registry, ctx }) {
     title: 'Component Kitting',
     color: '#2c5d8f',
   }, ctx);
-  equipment.sign.root.position.set(0, 0, -1.9000000000000001);
+  equipment.sign.root.position.set(0, 0, -2.25);
   root.add(equipment.sign.root);
 
   // panel: Pedestal operator panel (HMI) with a live status screen, start/stop buttons... (shell assemblyCell)
@@ -741,7 +741,7 @@ export function build({ registry, ctx }) {
     height: 0.75,
     lanes: [-0.17, -0.08, 0, 0.06, 0.15],
   }, ctx);
-  equipment.cradle.root.position.set(-0.6, 0, -1.16);
+  equipment.cradle.root.position.set(-0.66, 0, -1.16);
   root.add(equipment.cradle.root);
 
   // bedNest: Part nest on a stand: corner posts for a stack of parts, or flat locators...
@@ -761,7 +761,7 @@ export function build({ registry, ctx }) {
     guideX: 0.16,
     guideZ: 0.18,
   }, ctx);
-  equipment.frameNest.root.position.set(-0.72, 0, -0.6);
+  equipment.frameNest.root.position.set(-0.72, 0, -0.64);
   root.add(equipment.frameNest.root);
 
   // flowRack: Gravity flow rack with sloped roller shelves and coloured stock bins; pick...
@@ -871,7 +871,7 @@ export function build({ registry, ctx }) {
 
   // lightBaseFrame: Pick-to-light module (housing and lamp) marking the next location to pick from
   equipment.lightBaseFrame = registry.buildComponent('pickToLight', {}, ctx);
-  equipment.lightBaseFrame.root.position.set(-0.49, 0.729, -0.35);
+  equipment.lightBaseFrame.root.position.set(-0.49, 0.729, -0.39);
   root.add(equipment.lightBaseFrame.root);
 
   return { root, equipment };

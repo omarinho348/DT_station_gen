@@ -6,22 +6,22 @@
 // (a decision on a fact only known while a unit plays is timed by its planAs branch, else its longest).
 // Equipment, in the station's own frame (metres; product flows +X, conveyor on z = 0, walkway +Z):
 //   id           type             from                position                        turn
-//   slab         floorSlab        shell assemblyCell  [0, 0, -0.7]
-//   fence        guardFence       shell assemblyCell  [0, 0, -2.75]
+//   slab         floorSlab        shell assemblyCell  [0, 0, -0.95]
+//   fence        guardFence       shell assemblyCell  [0, 0, -3.25]
 //   line         palletConveyor   shell assemblyCell  [0, 0, 0]
 //   liftIn       liftUnit         shell assemblyCell  [-1.6, 0, 0]
 //   liftOut      liftUnit         shell assemblyCell  [1.6, 0, 0]
-//   sign         stationSign      shell assemblyCell  [0, 0, -2.55]
+//   sign         stationSign      shell assemblyCell  [0, 0, -3.05]
 //   panel        hmi              shell assemblyCell  [-1.55, 0, 0.95]                0.30 rad
 //   beacon       stackLight       shell assemblyCell  [1.9500000000000002, 0, -0.55]
-//   gantry       cartesianGantry  station             [0, 0, -1.175]
+//   gantry       cartesianGantry  station             [0.08, 0, -1.175]
 //   cartonLine   rollerConveyor   station             [-0.9, 0, -1.15]
 //   erector      caseErector      station             [-1.85, 0, -1.15]
-//   foamTable    workTable        station             [0.52, 0, -0.62]
+//   foamTable    workTable        station             [0.76, 0, -0.62]
 //   taper        caseTaper        station             [0, 0, -1.15]
 //   labeller     labelApplicator  station             [-0.12, 0, -0.49]
-//   pallet       blockPallet      station             [0, 0, -2.15]
-//   dispatchBay  bayMarking       station             [0, 0, -2.15]
+//   pallet       blockPallet      station             [0, 0, -2.27]
+//   dispatchBay  bayMarking       station             [0, 0, -2.27]
 import * as THREE from 'three';
 
 /** What the station does (played by lib/station/StationCycle.js): ports, process ops, status, signals. */
@@ -296,15 +296,15 @@ export function build({ registry, ctx }) {
   // slab: Epoxy floor slab for a station cell with yellow boundary lines and an... (shell assemblyCell)
   equipment.slab = registry.buildComponent('floorSlab', {
     length: 4.7,
-    depth: 4.6,
-    walkway: 0.8804347826086957,
+    depth: 5.1,
+    walkway: 0.8921568627450981,
   }, ctx);
-  equipment.slab.root.position.set(0, 0, -0.7);
+  equipment.slab.root.position.set(0, 0, -0.95);
   root.add(equipment.slab.root);
 
   // fence: Safety guard fence: yellow posts and rails with wire-mesh panels, running... (shell assemblyCell)
   equipment.fence = registry.buildComponent('guardFence', { length: 4.1000000000000005 }, ctx);
-  equipment.fence.root.position.set(0, 0, -2.75);
+  equipment.fence.root.position.set(0, 0, -3.25);
   root.add(equipment.fence.root);
 
   // line: Twin-strand pallet conveyor on aluminium profiles, with optional work stop... (shell assemblyCell)
@@ -331,7 +331,7 @@ export function build({ registry, ctx }) {
     title: 'Packaging & Dispatch',
     color: '#8a6a2c',
   }, ctx);
-  equipment.sign.root.position.set(0, 0, -2.55);
+  equipment.sign.root.position.set(0, 0, -3.05);
   root.add(equipment.sign.root);
 
   // panel: Pedestal operator panel (HMI) with a live status screen, start/stop buttons... (shell assemblyCell)
@@ -348,13 +348,13 @@ export function build({ registry, ctx }) {
   // gantry: Overhead Cartesian gantry (X bridge, Z carriage, Y ram, rotary wrist) with a...
   equipment.gantry = registry.buildComponent('cartesianGantry', {
     spanX: 1.4,
-    spanZ: 2.55,
+    spanZ: 2.75,
     beamY: 2.7,
     maxGap: 0.64,
     fingerLength: 0.2,
     minToolY: 0.62,
   }, ctx);
-  equipment.gantry.root.position.set(0, 0, -1.175);
+  equipment.gantry.root.position.set(0.08, 0, -1.175);
   root.add(equipment.gantry.root);
 
   // cartonLine: Roller conveyor section with side frames, legs, optional end stop and floor...
@@ -375,11 +375,11 @@ export function build({ registry, ctx }) {
 
   // foamTable: Plain work table with a steel top, four legs and side rails
   equipment.foamTable = registry.buildComponent('workTable', {
-    length: 0.62,
+    length: 0.5,
     width: 0.34,
     height: 0.75,
   }, ctx);
-  equipment.foamTable.root.position.set(0.52, 0, -0.62);
+  equipment.foamTable.root.position.set(0.76, 0, -0.62);
   root.add(equipment.foamTable.root);
 
   // taper: Case taper bridge: a tape head on a travelling arm lowers onto the carton top...
@@ -404,12 +404,12 @@ export function build({ registry, ctx }) {
     width: 1.15,
     height: 0.144,
   }, ctx);
-  equipment.pallet.root.position.set(0, 0, -2.15);
+  equipment.pallet.root.position.set(0, 0, -2.27);
   root.add(equipment.pallet.root);
 
   // dispatchBay: Translucent coloured floor marking for a bay (dispatch, reject, buffer area)
   equipment.dispatchBay = registry.buildComponent('bayMarking', {}, ctx);
-  equipment.dispatchBay.root.position.set(0, 0, -2.15);
+  equipment.dispatchBay.root.position.set(0, 0, -2.27);
   root.add(equipment.dispatchBay.root);
 
   return { root, equipment };

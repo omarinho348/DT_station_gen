@@ -9,11 +9,15 @@
 // stands on the bare floor) that fills a third of those views, our worker is parked in its bay all
 // the time, and our station-3 belt is the catalog belt conveyor. Geometry and motion match there as
 // elsewhere; see benchmarks/results/lubricant-line-visual.md.
+//
+// 2026-11-24 (Phase 7 step 7.3): station 2's case rack stands 6 cm further back, clear of the can
+// transfer's pusher stand (a clash the reviewer found, the reference has it too). Its wire decks
+// cover much of the can-transfer and station-2 views: can transfer now 8.0–8.1 %, station 2 9.0 %.
 const WIDE = 0.04;
 const LINE = 0.055;
 const S1 = 0.06;
-const T1 = 0.075;
-const S2 = 0.095;
+const T1 = 0.09;
+const S2 = 0.10;
 
 export const VIEW_LIMITS = {
   'line-wide-0': WIDE,

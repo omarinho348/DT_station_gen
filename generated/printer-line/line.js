@@ -151,7 +151,7 @@ export const timing = {
   ],
 };
 
-/** The stations in flow order: each `{ station, build }`. */
+/** The stations in the factory's order (the order the line builds and updates them): each `{ station, build }`. */
 export const stations = [st1, st2, st3, st4, st5, st6];
 
 /**

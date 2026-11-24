@@ -179,8 +179,10 @@ function emitLine({ expanded, timing, source, libPath, stationFiles }) {
     '/** Dry timing from compiler/timing.js (seconds). */',
     `export const timing = ${toJs(timingData)};`,
     '',
-    '/** The stations in flow order: each `{ station, build }`. */',
-    `export const stations = [${order.map(moduleName).join(', ')}];`,
+    // The factory's order, not flow order: the line builds and updates its stations in this order, so
+    // the compiled line plays exactly as the one built from the IR (a reviewer check, step 7.4).
+    '/** The stations in the factory\'s order (the order the line builds and updates them): each `{ station, build }`. */',
+    `export const stations = [${expanded.line.stations.map((s) => moduleName(s.id)).join(', ')}];`,
     '',
     '/**',
     ' * Builds the line: every station from its file, laid out and chained through its ports.',

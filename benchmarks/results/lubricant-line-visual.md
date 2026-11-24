@@ -1,4 +1,4 @@
-# Lubricant line: compiled vs reference (visual comparison)
+9.02 % | 8.22 |2.98 % | 2.12 |9.04 % | 8.38 |4.60 % | 3.52 |8.95 % | 8.20 |8.01 % | 6.55 |8.08 % | 6.62 |3.02 % | 2.14 |# Lubricant line: compiled vs reference (visual comparison)
 
 Written for Phase 5 step 9d. Numbers: [lubricant-line-visual.json](lubricant-line-visual.json) (from `node scripts/visual-compare.mjs --line lubricant-line`). Images: `tests/golden/lines/lubricant-line/<view>.png` (ours) and `<view>.reference.png`. Diff images (differing pixels in red): `visual/lubricant-line/<view>.diff.png`. Views and cameras: `scripts/visual-views.js`.
 
@@ -9,22 +9,22 @@ Three things are set up so the two can be compared at all:
 2. **One wrapper.** The reference loads its stretch wrapper from `Wrapping.STEP` through occt-import-js, which this project doesn't carry (owner's decision: procedural wrapper). In the reference render, `vite.config.js` points that import at `app/dev/referenceWrapStub.js`, which builds **our** wrapper from `lubricant-line.factory.json`, with the bay sizes the timing recording used. The wrapper itself is therefore not compared.
 3. **The same stepping as the timing recording** for the reference: 0.02 s steps, with world matrices brought up to date after every update, as rendering does. Ours steps 0.05 s; its times are exact either way.
 
-## Results (2026-11-23)
+## Results (re-measured 2026-11-24, after difference 9)
 
 | View | t (s) | Camera | Differing pixels | Mean abs. diff |
 |---|---:|---|---:|---:|
-| line-wide-0 | 0 | whole line | 2.97 % | 2.11 |
+| line-wide-0 | 0 | whole line | 3.00 % | 2.13 |
 | s1-8 | 8 | station 1, filling | 4.74 % | 4.01 |
 | s1-41 | 41.5 | station 1, capping | 4.86 % | 4.08 |
-| t1-55 | 55.5 | can transfer, pusher A | 6.37 % | 5.58 |
-| t1-62 | 62.5 | can transfer, feeding station 2 | 6.24 % | 5.45 |
-| s2-75 | 75 | station 2 | 8.28 % | 7.75 |
-| line-100 | 100 | line | 4.50 % | 3.48 |
-| s2-100 | 100 | station 2, the pick | 8.41 % | 7.96 |
+| t1-55 | 55.5 | can transfer, pusher A | 8.08 % | 6.62 |
+| t1-62 | 62.5 | can transfer, feeding station 2 | 8.01 % | 6.55 |
+| s2-75 | 75 | station 2 | 8.95 % | 8.20 |
+| line-100 | 100 | line | 4.60 % | 3.52 |
+| s2-100 | 100 | station 2, the pick | 9.04 % | 8.38 |
 | s3-426 | 426.6 | station 3, the 11th case | 38.56 % | 27.31 |
-| line-wide-500 | 500 | whole line | 2.94 % | 2.10 |
+| line-wide-500 | 500 | whole line | 2.97 % | 2.11 |
 | s1-500 | 500 | station 1 | 4.81 % | 4.14 |
-| s2-500 | 500 | station 2 | 8.39 % | 7.91 |
+| s2-500 | 500 | station 2 | 9.02 % | 8.22 |
 | s3-944 | 944.2 | station 3, hauling the full pallet | 32.10 % | 23.11 |
 | s3-959 | 959 | station 3, wrapping | 36.19 % | 25.71 |
 
@@ -51,6 +51,7 @@ The red in the diffs is the list below.
 6. **Robot home pose** (tool down, 9c part 1) and **paths between end points**; the pallet **turns with our wrapper deck** (in the reference render the stand-in deck turns under a still pallet).
 7. **Outfeed belt gear motor** at the end of station 1 not drawn (step 2).
 8. **Carton stock in the rack:** ours are closed cartons (our `carton` at stage `closed`); the reference drew plain boxes with a tape line.
+9. **Station 2's case rack 6 cm further back** (z −0.81, reference −0.75), clear of the can transfer's pusher stand that went through its step beams. The reviewer's geometry check found it (Phase 7 step 7.3). Its wire decks move in the can-transfer and station-2 views: +1.6 to +1.8 points there, +0.5 to +0.7 in the station-2 views.
 
 ## Limits of the test
 

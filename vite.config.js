@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
+import { reviewApi } from './server/reviewApi.js';
 
 // Dev only: the reference lubricant factory (app/dev/referenceLubricant.js) loads its stretch
 // wrapper from a STEP file through occt-import-js, which this project does not carry. Its import of
@@ -17,7 +18,7 @@ const referenceStubs = {
 };
 
 export default defineConfig({
-  plugins: [referenceStubs],
+  plugins: [referenceStubs, reviewApi()], // reviewApi: /api/review, the deterministic reviewer (dev server only)
   server: {
     port: 5173,
     strictPort: true,

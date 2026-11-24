@@ -185,7 +185,8 @@ describe('the printer line plays', () => {
     expect(tested.mesh.every((v) => Number.isFinite(v))).toBe(true);
     expect(Math.max(...tested.mesh) - Math.min(...tested.mesh)).toBeLessThanOrEqual(80 + 1); // peak-to-valley = flatness (µm)
     expect(tested).toMatchObject({ probed: 9, result: 'IN SPEC', flatness: '0.08 mm', belts: 'X 92 Hz · Y 88 Hz', print: 1, shutters: [0, 0] });
-    close(tested.plug, 0.366, 1e-4); // docked at the enclosure's rear face (sampled as undocking starts)
+    close(tested.plug, 0.456, 1e-4); // docked (sampled as undocking starts): the reference's contact point, from a dock
+    // standing behind the enclosure's rear panel since the step-7.3 clash fixes (0.366 from 9 cm closer in the reference)
     expect(st4.equipment.dock.state.plug).toBe(0); // undocked at the end
     // Pick lights end off.
     const lights = Object.entries(st1.equipment).filter(([id]) => id.startsWith('light'));
@@ -223,7 +224,7 @@ describe('the printer line plays', () => {
       const at = st6.root.worldToLocal(worldOf(carton));
       const [dx, dz, layer] = spots[i];
       close(at.x, dx, 1e-3);
-      close(at.z, -2.15 + dz, 1e-3);
+      close(at.z, -2.27 + dz, 1e-3); // the pallet at −2.27, clear of the carton line's legs (−2.15 in the reference)
       close(at.y, 0.144 + layer * 0.69 + 0.002, 1e-3);
       expect(carton.getObjectByName('Shipping label').visible).toBe(true);
       expect(carton.getObjectByName('Tape').visible).toBe(true);

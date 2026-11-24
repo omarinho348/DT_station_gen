@@ -1,6 +1,7 @@
 // The deterministic reviewer (agents/reviewer/deterministic.js, Phase 7 step 1): the example lines
 // pass; broken copies of the bottling line give every problem, each with its check, its path in
-// factory.json and a useful message.
+// factory.json and a useful message. The geometry check (step 7.2) has its own file,
+// reviewer-geometry.test.js; here the GLB models are not loaded, as in a fresh process.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { registry } from '../../lib/components/index.js';
@@ -10,23 +11,32 @@ import { review, formatFindings, opPathFromMessage, stationOps } from '../../age
 
 const load = (name) => JSON.parse(readFileSync(`spec/examples/${name}.factory.json`, 'utf8'));
 const bottling = load('bottling-line');
-const broken = (change) => { const f = structuredClone(bottling); change(f); return review(registry, f); };
+const fast = { geometry: false, play: false }; // the checks that need no built line (those have their own files)
+const broken = (change) => { const f = structuredClone(bottling); change(f); return review(registry, f, fast); };
 const errors = (r) => r.findings.filter((f) => f.severity === 'error');
 
 describe('deterministic reviewer', () => {
-  it('passes the three example lines (the bottling line\'s two placeholders as warnings)', () => {
+  it('passes the three example lines on the checks before geometry (the bottling line\'s two placeholders as warnings)', () => {
     for (const name of ['printer-line', 'lubricant-line']) {
-      const r = review(registry, load(name));
+      const r = review(registry, load(name), fast);
       expect(r.findings, name).toEqual([]);
       expect(r.ok).toBe(true);
     }
-    const r = review(registry, bottling);
+    const r = review(registry, bottling, fast);
     expect(r.ok).toBe(true);
     expect(r.findings.map((f) => [f.check, f.severity, f.path])).toEqual([
       ['placeholder', 'warning', 'stations[3].equipment[1]'],
       ['placeholder', 'warning', 'stations[4].equipment[1]'],
     ]);
     expect(r.timing.takt).toBeGreaterThan(0);
+  });
+
+  it('geometry and play with a GLB model not loaded: a note each, not an error (the CLI preloads them)', () => {
+    const r = review(registry, load('lubricant-line'));
+    expect(r.ok).toBe(true);
+    expect(r.findings.map((f) => [f.check, f.severity, f.path])).toEqual([['geometry', 'info', '(line)'], ['play', 'info', '(line)']]);
+    expect(r.findings[1].message).toMatch(/^run not played: "abbIrb6760" needs its model loaded first/);
+    expect(r.findings[0].message).toMatch(/^geometry not checked: "abbIrb6760" needs its model loaded first \(abbIrb6760\.glb\)$/);
   });
 
   it('schema: every issue with its path, at once', () => {

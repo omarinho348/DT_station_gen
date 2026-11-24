@@ -22,7 +22,7 @@
           "code": "ST1",
           "title": "Component Kitting",
           "color": "#2c5d8f",
-          "minZ": -2.35
+          "minZ": -2.7
         }
       },
       "equipment": [
@@ -84,7 +84,7 @@
             ]
           },
           "position": [
-            -0.6,
+            -0.66,
             0,
             -1.16
           ]
@@ -116,7 +116,7 @@
           "position": [
             -0.72,
             0,
-            -0.6
+            -0.64
           ]
         },
         {
@@ -359,7 +359,7 @@
           "position": [
             -0.49,
             0.729,
-            -0.35
+            -0.39
           ]
         }
       ],
@@ -1310,7 +1310,7 @@
           "code": "ST2",
           "title": "Frame Assembly",
           "color": "#e0782a",
-          "minZ": -1.5
+          "minZ": -1.8
         }
       },
       "equipment": [
@@ -1330,7 +1330,7 @@
           "type": "workTable",
           "params": {
             "length": 1.2,
-            "width": 0.5,
+            "width": 0.42,
             "height": 0.8
           },
           "position": [
@@ -1760,7 +1760,7 @@
           "type": "testCabinet",
           "params": {},
           "position": [
-            -1.2,
+            -1.37,
             0,
             -0.75
           ]
@@ -2167,12 +2167,12 @@
           "type": "dockingUnit",
           "params": {
             "axisHeight": 0.92,
-            "stroke": 0.37
+            "stroke": 0.46
           },
           "position": [
             -0.086,
             0,
-            -0.96
+            -1.14
           ]
         },
         {
@@ -2198,7 +2198,7 @@
             "depth": 0.5
           },
           "position": [
-            -0.3,
+            -0.48,
             0,
             -1.15
           ]
@@ -2354,7 +2354,7 @@
           "op": "move",
           "machine": "dock",
           "to": {
-            "plug": 0.366
+            "plug": 0.456
           },
           "seconds": 0.55,
           "label": "Docking power & data connector",
@@ -2961,7 +2961,8 @@
           "code": "ST5",
           "title": "Quality Inspection",
           "color": "#c8231d",
-          "minZ": -2.35
+          "minZ": -2.5,
+          "panelX": -1.8
         }
       },
       "equipment": [
@@ -3438,7 +3439,7 @@
           "code": "ST6",
           "title": "Packaging & Dispatch",
           "color": "#8a6a2c",
-          "minZ": -3
+          "minZ": -3.5
         }
       },
       "equipment": [
@@ -3447,14 +3448,14 @@
           "type": "cartesianGantry",
           "params": {
             "spanX": 1.4,
-            "spanZ": 2.55,
+            "spanZ": 2.75,
             "beamY": 2.7,
             "maxGap": 0.64,
             "fingerLength": 0.2,
             "minToolY": 0.62
           },
           "position": [
-            0,
+            0.08,
             0,
             -1.175
           ]
@@ -3491,12 +3492,12 @@
           "id": "foamTable",
           "type": "workTable",
           "params": {
-            "length": 0.62,
+            "length": 0.5,
             "width": 0.34,
             "height": 0.75
           },
           "position": [
-            0.52,
+            0.76,
             0,
             -0.62
           ]
@@ -3539,7 +3540,7 @@
           "position": [
             0,
             0,
-            -2.15
+            -2.27
           ]
         },
         {
@@ -3549,7 +3550,7 @@
           "position": [
             0,
             0,
-            -2.15
+            -2.27
           ]
         }
       ],

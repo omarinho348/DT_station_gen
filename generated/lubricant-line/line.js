@@ -101,7 +101,7 @@ export const timing = {
   transfers: [{ from: 'packing.output', to: 'palletizing.input', distance: 3.21, duration: 5.85 }],
 };
 
-/** The stations in flow order: each `{ station, build }`. */
+/** The stations in the factory's order (the order the line builds and updates them): each `{ station, build }`. */
 export const stations = [filling, canTransfer, packing, palletizing];
 
 /**
