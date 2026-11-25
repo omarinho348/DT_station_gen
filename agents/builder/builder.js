@@ -47,6 +47,9 @@ export function phaseOf(finding, stationIndex) {
   if (finding.check === 'geometry') return 'layout';
   if (finding.path?.startsWith(`${base}.equipment`) && /\.params/.test(finding.path)) return 'machines';
   if (finding.path?.startsWith(`${base}.equipment`) || finding.path?.startsWith(`${base}.shell`) || finding.path?.startsWith(`${base}.ports`)) return 'layout';
+  // A station port naming a machine or port that isn't there is the layout's, wherever it is reported
+  // (the station's build reports it at the station's path; it went back to the process phase before).
+  if (/\bport "[^"]+": (unknown )?machine "[^"]+"/.test(finding.message ?? '')) return 'layout';
   return 'process';
 }
 
@@ -234,17 +237,42 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
       layout.conveyor = repairTo;
     }
     if (!ids.has(layout.conveyor) && !shellIds.includes(layout.conveyor)) problems.push(`conveyor: "${layout.conveyor}" is neither a listed machine nor the shell's (${shellIds.join(', ') || 'no shell'})`);
-    for (const p of layout.ports ?? []) if (!ids.has(p.machine) && !shellIds.includes(p.machine)) problems.push(`ports.${p.name}: unknown machine "${p.machine}"`);
-    // What this station takes in must be what the previous one hands over (benchmark tuning set: a
-    // station on pallet carriers followed by one taking loose units).
+    // What this station takes in must be what the previous one hands over. The model was told so, with
+    // the fix spelled out, and still kept choosing pallet carriers after a station handing over loose
+    // units (benchmark step 13.3: 2 of the 5 held-out stops). There is one right answer, so it is
+    // chosen in code: the station's conveyor becomes one that takes those goods.
     const prev = job.stations.at(-1);
-    if (prev && ids.size + shellIds.length) {
+    if (prev && (ids.has(layout.conveyor) || shellIds.includes(layout.conveyor))) {
       const given = goodsOf(job, prev);
-      const shellEq = layout.shell ? (() => { try { return registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)).equipment; } catch { return []; } })() : [];
-      const conv = [...layout.equipment, ...shellEq].find((e) => e.id === layout.conveyor);
+      const conv = [...layout.equipment, ...shellEquipmentOf(job, layout)].find((e) => e.id === layout.conveyor);
       const taken = conv ? goodsAt(job, { type: conv.type, params: conv.params ?? {} }, 'in') : null;
-      if (given && taken && given !== taken) problems.push(`conveyor: this station takes ${taken} at its input ("${layout.conveyor}", ${conv.type}), but "${prev.id}" hands over ${given}: use a conveyor${layout.shell ? ' or shell' : ''} that takes ${given}`);
+      if (given && taken && given !== taken) {
+        const type = conveyorFor(job, given);
+        if (!type) {
+          problems.push(`conveyor: this station takes ${taken} at its input ("${layout.conveyor}", ${conv.type}), but "${prev.id}" hands over ${given}: use a conveyor${layout.shell ? ' or shell' : ''} that takes ${given}`);
+        } else if (shellIds.includes(layout.conveyor)) {
+          // The shell's own conveyor: the shell's furniture is built around it, so the shell is left out
+          // and the station gets its own conveyor under the same id (the machines' hints still hold).
+          const shellType = layout.shell.type;
+          const dropped = (layout.ports ?? []).filter((p) => shellIds.includes(p.machine) && p.machine !== layout.conveyor);
+          delete layout.shell;
+          layout.ports = (layout.ports ?? []).filter((p) => !dropped.includes(p));
+          layout.equipment = [{ id: conv.id, type, why: `the station conveyor (added: the ${shellType} shell's takes ${taken})`, place: 'line', at: 'whole' }, ...layout.equipment];
+          ids.add(conv.id);
+          shellIds = [];
+          shellConveyor = null;
+          repairs.push(`conveyor: "${prev.id}" hands over ${given}, but the ${shellType} shell's conveyor "${conv.id}" (${conv.type}) takes ${taken}: the shell is left out and the station gets its own ${type} "${conv.id}"${dropped.length ? ` (ports on shell machines dropped: ${dropped.map((p) => p.name).join(', ')})` : ''}`);
+        } else {
+          repairs.push(`conveyor: "${prev.id}" hands over ${given}, but "${conv.id}" (${conv.type}) takes ${taken}: it is a ${type} now`);
+          conv.type = type;
+        }
+      }
     }
+    // Extra station ports (a reject port) must be a real port of a station machine. This was found only
+    // when the line played, and that finding went back to the process phase, which can't change the
+    // layout: refused 5 times (benchmark step 13.3: 2 of the 5 held-out stops). Now checked here, and
+    // repaired in code where the answer is clear.
+    fixPorts(job, layout, ids, shellIds, problems, repairs);
     // Every op the process will use needs a machine here that can do it (benchmark tuning set, step
     // 12.2: pick-and-place without a robot that has x / y / z / yaw failed only in the process phase).
     const stationTypes = [...layout.equipment.map((e) => e.type), ...(layout.shell ? registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)).equipment.map((e) => e.type) : [])];
@@ -264,6 +292,78 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
       if (i >= 0) problems.splice(i, 1);
     }
     return { value: layout, cost: r.cost, problems, repairs };
+  }
+
+  /** The shell's machines of a layout ([] without a shell, or when its params are refused). */
+  function shellEquipmentOf(job, layout) {
+    if (!layout.shell) return [];
+    try { return registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)).equipment; } catch { return []; }
+  }
+
+  /**
+   * A conveyor type that takes these goods in and hands them out: the line's transport if it does,
+   * else the first catalog conveyor (then transport) that does. null when none does.
+   */
+  function conveyorFor(job, goods) {
+    const conveys = (type) => {
+      try {
+        const ports = Object.values(registry.componentSpec(type, {}, ctx(job.line)).ports ?? {});
+        return ports.some((p) => p.direction === 'in' && p.carries === goods) && ports.some((p) => p.direction === 'out' && p.carries === goods);
+      } catch {
+        return false;
+      }
+    };
+    if (conveys(job.line.transport.type)) return job.line.transport.type;
+    const of = (category) => registry.components().filter((d) => d.category === category).map((d) => d.type).sort().find(conveys);
+    return of('conveyor') ?? of('transport') ?? null;
+  }
+
+  /**
+   * Checks the layout's extra station ports (mutates the layout): each must be a port of a station
+   * machine, in its direction. Where the answer is clear it is repaired in code, in this order:
+   *   1. the port named after a machine of the station (machine and port mixed up): that machine's port
+   *   2. the named machine has exactly one port that way: that one
+   *   3. exactly one other conveyor of the station has a port that way (the lane units leave on): that one
+   *   4. an out port and no lane at all: a lane is added (beside the line, turned away from it)
+   * Otherwise it is a refusal listing the ports there are.
+   */
+  function fixPorts(job, layout, ids, shellIds, problems, repairs) {
+    const machines = [...layout.equipment, ...shellEquipmentOf(job, layout)];
+    const portsOf = (m) => { try { return registry.componentSpec(m.type, m.params ?? {}, ctx(job.line)).ports ?? {}; } catch { return {}; } };
+    const that = (m, direction) => Object.entries(portsOf(m)).filter(([, q]) => q.direction === direction).map(([n]) => n);
+    const conveying = (m) => ['conveyor', 'transport'].includes(registry.getComponent(m.type)?.category);
+    const byId = (id) => machines.find((m) => m.id === id);
+    for (const p of layout.ports ?? []) {
+      const m = byId(p.machine);
+      if (m && portsOf(m)[p.port]) continue;
+      const was = `"${p.machine}.${p.port}" is no port of the station`;
+      const fix = (machine, port, why) => {
+        repairs.push(`ports.${p.name}: ${was}; "${machine}.${port}" is used (${why})`);
+        p.machine = machine;
+        p.port = port;
+      };
+      const named = byId(p.port);
+      if (named && that(named, p.direction).length === 1) { fix(named.id, that(named, p.direction)[0], `"${p.port}" is a machine: its ${p.direction} port`); continue; }
+      if (m && that(m, p.direction).length === 1) { fix(m.id, that(m, p.direction)[0], `its only ${p.direction} port`); continue; }
+      const lanes = machines.filter((x) => x.id !== layout.conveyor && conveying(x)).flatMap((x) => that(x, p.direction).map((n) => `${x.id}.${n}`));
+      if (lanes.length === 1) { const [mid, port] = lanes[0].split('.'); fix(mid, port, `the station's only lane ${p.direction === 'out' ? 'out' : 'in'}`); continue; }
+      if (!lanes.length && p.direction === 'out') {
+        const conv = byId(layout.conveyor);
+        const goods = (conv && goodsAt(job, { type: conv.type, params: conv.params ?? {} }, 'out')) ?? 'unit';
+        const type = conveyorFor(job, goods);
+        const out = type ? that({ type }, 'out')[0] : null;
+        if (out) {
+          let id = `${p.name}Lane`;
+          for (let k = 2; ids.has(id) || shellIds.includes(id); k += 1) id = `${p.name}Lane${k}`;
+          layout.equipment.push({ id, type, why: `takes the units leaving at the ${p.name} port (added: the station had no lane for it)`, place: 'besideLine', at: 'work', turned: true });
+          ids.add(id);
+          machines.push({ id, type });
+          fix(id, out, `the station had no lane for it: a ${type} "${id}" is added beside the line, turned away from it`);
+          continue;
+        }
+      }
+      problems.push(`ports.${p.name}: ${was}${lanes.length ? ` (ports that way: ${lanes.join(', ')})` : ''}: name a port of one of the station's machines`);
+    }
   }
 
   /** Can a catalog type (at its default params) do what an op needs? A composite can be anything. */

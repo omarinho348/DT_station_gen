@@ -3774,7 +3774,7 @@ Step 13.1 approved by the owner (2026-11-25: "yes go on to 13.2").
 
 **Next: step 13.3,** a live benchmark rerun to measure the effect (about $0.10–0.30; needs the owner's OK and a key in `.env`). Re-record the live replay first.
 
-### Step 13.3: the live benchmark rerun (done, waiting for the owner)
+### Step 13.3: the live benchmark rerun (done; pushed to branch phase-13-routines)
 
 Step 13.2 approved by the owner (2026-11-25: "go ahead with 13.3 and spend that amount its okay", about $0.10–0.30). Note: `.env` holds the key pasted in the chat earlier, not a new one; the owner was told to replace it.
 
@@ -3800,3 +3800,30 @@ Step 13.2 approved by the owner (2026-11-25: "go ahead with 13.3 and spend that 
 1. assembly routines for the robots
 2. deterministic fixes for the two layout stops (reject port, goods continuity)
 3. more named machines for the held-out industries
+
+### Step 13.4: the two common layout stops, repaired in code (done, waiting for the owner)
+
+Asked 2026-11-25: "Fix the two common layout failures in code". These were 4 of the 5 held-out stops in step 13.3.
+
+**1. A station port naming something that is no port** (bread-loaves: reject port `weighVision.rejectLane`; panel-cutting: `rejectSidePusher.stop`; neither station had a reject lane).
+- **Why it never got fixed:** it was found only when the line played, reported at the station's path, so `phaseOf` sent it to the **process** phase, which can't change ports. The model was refused 5 times for something it could not fix there.
+- **Now:** extra station ports are checked at the layout phase (`fixPorts` in `agents/builder/builder.js`), repaired where the answer is clear, with a note:
+  1. machine and port mixed up: the named machine's port
+  2. the machine has one port that way: that one
+  3. one other lane in the station: that one
+  4. an out port and no lane at all: a lane is added (the conveyor type for the goods, beside the line at the work place, turned away)
+- otherwise a layout refusal listing the ports there are
+- `phaseOf` also sends any "port …: machine …" finding to the layout
+
+**2. A station taking other goods than the previous one hands over** (pharma-blister, tshirt-folding: the assembly cell or a pallet conveyor after a station handing over loose units).
+- **Why it never got fixed:** the model was told, fix included, and kept choosing pallets.
+- **Now:** there is one right answer, so it is chosen in code (`conveyorFor`: the line's transport if it carries those goods, else the first catalog conveyor that does):
+  - the station's own conveyor changes type
+  - if it is the shell's conveyor, the shell is left out and the station gets its own conveyor under the same id (the machines' hints still hold); ports on shell machines are dropped
+- noted either way
+
+**Changed:** `agents/builder/builder.js` (`fixPorts`, `conveyorFor`, `shellEquipmentOf`, the goods repair, `phaseOf`); `tests/agents/builder-layout-repairs.test.js` (new, 6: the benchmark's own mistakes replayed, each station built first time and played; an ambiguous port refused at the layout).
+
+**Checked against the recordings ($0, mock mode):** replaying the held-out answers, the stations that stopped (bread-loaves checkWeigher, tshirt-folding foldTo250x300, pharma-blister) now pass the layout with the model's first answer and need a new, unrecorded machines answer: measuring the effect needs a live run (about $0.05–0.10). Results folder restored afterwards (mock runs rewrite it).
+
+**Results:** `npm test` (`--testTimeout=180000`): 86 files, **2223 passed, 0 failed**, 3 skipped. Spent: $0.
