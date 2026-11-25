@@ -1,0 +1,33 @@
+{
+  "key": "274aa5b3736cb14dc3f8349bbdb8192a5759a7ce6a197da0e481f4f6409ea743",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:00:50.847Z",
+  "usage": {
+    "inputTokens": 6366,
+    "cachedInputTokens": 0,
+    "outputTokens": 136
+  },
+  "output": {
+    "params": {
+      "baggerCell": {
+        "name": "Bagger & settle into bag",
+        "note": "Guides loaf into presented plastic bag mouth and settles to height",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 2,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "loafStop": {
+        "span": 0.58
+      },
+      "safetyFence": {
+        "length": 4.1,
+        "height": 2,
+        "panelWidth": 1.6
+      }
+    }
+  }
+}

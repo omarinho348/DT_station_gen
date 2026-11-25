@@ -1,0 +1,33 @@
+{
+  "key": "0784c870b496cdae3f8c01fac35f67f6a16fe84a0855c3fa2f0c9cd00a71ef4b",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:07:18.185Z",
+  "usage": {
+    "inputTokens": 8448,
+    "cachedInputTokens": 7936,
+    "outputTokens": 98
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "boardPhotoEye.detect",
+        "seconds": 0.3
+      },
+      {
+        "use": "solderPasteDispenser.work",
+        "seconds": 20,
+        "task": "Dispense solder paste onto pads"
+      },
+      {
+        "use": "solderPasteVision.inspect",
+        "seconds": 4.5,
+        "rejectLane": "line"
+      }
+    ],
+    "output": null,
+    "inputStage": "processed"
+  }
+}

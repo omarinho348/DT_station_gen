@@ -1,0 +1,64 @@
+{
+  "key": "62b4daf5c713d1568f73ce34c22ad0eafebe4b36e6ebadeb97aaa0f328ddae9c",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:09:47.900Z",
+  "usage": {
+    "inputTokens": 13518,
+    "cachedInputTokens": 13056,
+    "outputTokens": 510
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "stopConveyors",
+        "conveyors": [
+          "line"
+        ],
+        "speed": null,
+        "ramp": null,
+        "label": "Index pallet carrier to ST1",
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "pickRobot.moveUnit",
+        "clearance": 0.12,
+        "task": "Pick window regulator",
+        "to": "regulatorCradle.lane1"
+      },
+      {
+        "use": "pickRobot.moveUnit",
+        "clearance": 0.12,
+        "task": "Place regulator on carrier",
+        "to": "regulatorCradle.lane3"
+      },
+      {
+        "op": "toolOn",
+        "machine": "screwdriverMount",
+        "motion": "driver",
+        "value": "1",
+        "then": "0",
+        "seconds": 12,
+        "label": "Drive 4 screws (assisted)",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "screwdriverMount",
+        "motion": "driverSpin",
+        "value": "1",
+        "then": "0",
+        "seconds": 2,
+        "label": "Confirm drive completion",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

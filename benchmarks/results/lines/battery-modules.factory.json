@@ -29,111 +29,110 @@
       },
       "equipment": [
         {
-          "id": "vibratoryFeeder",
+          "id": "vfCells",
           "type": "vibratoryFeeder",
-          "params": {
-            "bowlDiameter": 0.26,
-            "hoseLength": 1.2
-          },
+          "params": {},
           "position": [
-            -1.72,
+            -1.6025,
             0,
-            -0.08
+            -0.54
           ],
           "rotationY": 0
         },
         {
-          "id": "workTable",
+          "id": "wtModuleFrame",
           "type": "workTable",
-          "params": {
-            "length": 1.2,
-            "width": 0.7,
-            "height": 0.9,
-            "top": "stainless"
-          },
+          "params": {},
           "position": [
-            0,
+            -0.1,
             0,
             -0.76
           ],
           "rotationY": 0
         },
         {
-          "id": "robot",
-          "type": "abbIrb6760",
-          "params": {
-            "padLength": 0.5,
-            "padWidth": 0.34
-          },
+          "id": "camCarrierOrientation",
+          "type": "visionCamera",
+          "params": {},
           "position": [
             0,
             0,
-            -4.31
+            0.65
           ],
           "rotationY": 0
         },
         {
-          "id": "gripper",
-          "type": "fingerGripper",
-          "params": {
-            "fingerLength": 0.12,
-            "maxGap": 0.2
-          },
+          "id": "robotPlaceCells",
+          "type": "abbIrb6760",
+          "params": {},
           "position": [
             0,
-            4.2,
-            -4.31
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "gripperFinger",
+          "type": "fingerGripper",
+          "params": {},
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "seatConfirmSensor",
+          "type": "photoEye",
+          "params": {},
+          "position": [
+            0.675,
+            0,
+            -0.65
           ],
           "rotationY": 0
         }
       ],
       "conveyor": "line",
-      "inputStage": "raw",
       "process": [
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
+          "clearance": 0.12,
+          "name": "Load frame to work pos",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "item": "product",
+            "ref": "top"
           },
           "to": {
-            "item": "product",
-            "ref": "seat1"
+            "machine": "wtModuleFrame",
+            "port": "top",
+            "offset": [
+              0,
+              0.072,
+              0
+            ]
           },
-          "name": "Load cell 1",
-          "gap": 0.04,
-          "openGap": 0.18,
-          "gripMotion": "grip",
-          "anchor": "tool",
-          "indicator": "holding",
-          "timing": {
-            "approach": 0.6,
-            "descend": 0.35,
-            "grip": 0.2,
-            "lift": 0.35,
-            "transfer": 0.8,
-            "place": 0.5,
-            "release": 0.2
-          },
-          "clearance": 0.12,
-          "label": "Load cell 1"
+          "gap": 1,
+          "openGap": 0
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat2"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 2",
-          "gap": 0.04,
+          "name": "Cell seat 1",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -147,23 +146,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 2"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat3"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 3",
-          "gap": 0.04,
+          "name": "Cell seat 2",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -177,23 +184,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 3"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat4"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 4",
-          "gap": 0.04,
+          "name": "Cell seat 3",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -207,23 +222,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 4"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat5"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 5",
-          "gap": 0.04,
+          "name": "Cell seat 4",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -237,23 +260,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 5"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat6"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 6",
-          "gap": 0.04,
+          "name": "Cell seat 5",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -267,23 +298,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 6"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat7"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 7",
-          "gap": 0.04,
+          "name": "Cell seat 6",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -297,23 +336,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 7"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat8"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 8",
-          "gap": 0.04,
+          "name": "Cell seat 7",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -327,23 +374,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 8"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat9"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 9",
-          "gap": 0.04,
+          "name": "Cell seat 8",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -357,23 +412,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 9"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat10"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 10",
-          "gap": 0.04,
+          "name": "Cell seat 9",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -387,23 +450,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 10"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat11"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 11",
-          "gap": 0.04,
+          "name": "Cell seat 10",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -417,23 +488,31 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 11"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "pickPlace",
-          "machine": "robot",
+          "machine": "robotPlaceCells",
           "item": "product",
           "from": {
-            "machine": "robot",
-            "port": "gripper"
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
           },
           "to": {
-            "item": "product",
-            "ref": "seat12"
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
           },
-          "name": "Load cell 12",
-          "gap": 0.04,
+          "name": "Cell seat 11",
+          "gap": 0.02,
           "openGap": 0.18,
           "gripMotion": "grip",
           "anchor": "tool",
@@ -447,13 +526,59 @@
             "place": 0.5,
             "release": 0.2
           },
-          "clearance": 0.12,
-          "label": "Load cell 12"
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robotPlaceCells",
+          "item": "product",
+          "from": {
+            "machine": "robotPlaceCells",
+            "port": "vfCellsOutlet"
+          },
+          "to": {
+            "machine": "robotPlaceCells",
+            "port": "wtModuleFrameTop"
+          },
+          "name": "Cell seat 12",
+          "gap": 0.02,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12
+        },
+        {
+          "op": "toolOn",
+          "machine": "seatConfirmSensor",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
         },
         {
           "op": "wait",
-          "seconds": 60,
-          "label": "Confirm seat sensors"
+          "seconds": 2,
+          "label": "All seat confirmations complete"
         }
       ],
       "feed": {

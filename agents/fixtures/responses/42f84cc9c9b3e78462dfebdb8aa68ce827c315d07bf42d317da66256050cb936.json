@@ -1,0 +1,41 @@
+{
+  "key": "42f84cc9c9b3e78462dfebdb8aa68ce827c315d07bf42d317da66256050cb936",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:07:41.024Z",
+  "usage": {
+    "inputTokens": 7066,
+    "cachedInputTokens": 4864,
+    "outputTokens": 233
+  },
+  "output": {
+    "params": {
+      "vfCells": {
+        "bowlDiameter": null,
+        "hoseLength": null
+      },
+      "wtModuleFrame": {
+        "length": null,
+        "width": null,
+        "height": null,
+        "top": null
+      },
+      "camCarrierOrientation": {
+        "workingDistance": null,
+        "ringRadius": null
+      },
+      "robotPlaceCells": {
+        "padLength": null,
+        "padWidth": null
+      },
+      "gripperFinger": {
+        "fingerLength": null,
+        "maxGap": null
+      },
+      "seatConfirmSensor": {
+        "span": null
+      }
+    }
+  }
+}

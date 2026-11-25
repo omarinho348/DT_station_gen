@@ -1,0 +1,46 @@
+{
+  "key": "777dfa75d26e21455c46583132e0dd5671345760eb82ca67c8c6bd9c8d960c7b",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:03:36.845Z",
+  "usage": {
+    "inputTokens": 7330,
+    "cachedInputTokens": 0,
+    "outputTokens": 309
+  },
+  "output": {
+    "params": {
+      "infeedBelt": {
+        "length": 4,
+        "beltWidth": null,
+        "guides": null,
+        "guideGap": null,
+        "drive": null,
+        "carries": null
+      },
+      "inputStop": {
+        "span": null
+      },
+      "shirtInPlaceEye": {
+        "span": null
+      },
+      "stationHmi": {
+        "height": null
+      },
+      "stackLight": {
+        "height": null,
+        "buzzer": null
+      },
+      "foldingMachine": {
+        "name": "Folding-machine input",
+        "note": null,
+        "length": null,
+        "depth": null,
+        "height": null,
+        "passThrough": null,
+        "carries": null
+      }
+    }
+  }
+}

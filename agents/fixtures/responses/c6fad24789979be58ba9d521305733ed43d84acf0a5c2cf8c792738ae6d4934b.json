@@ -1,0 +1,73 @@
+{
+  "key": "c6fad24789979be58ba9d521305733ed43d84acf0a5c2cf8c792738ae6d4934b",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:03:25.789Z",
+  "usage": {
+    "inputTokens": 6159,
+    "cachedInputTokens": 4864,
+    "outputTokens": 760
+  },
+  "output": {
+    "id": "shirtLoad",
+    "code": "ST1",
+    "title": "Manual shirt load",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "infeedBelt",
+        "type": "beltConveyor",
+        "why": "Conveys the loaded flat T-shirt onward into the line",
+        "place": "line",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "inputStop",
+        "type": "beltEndStop",
+        "why": "Stops each shirt at the folding-machine input footprint",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "shirtInPlaceEye",
+        "type": "photoEye",
+        "why": "Confirms the shirt is correctly present at the input stop",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "stationHmi",
+        "type": "hmi",
+        "why": "Provides operator start/ready confirmation for the load cycle",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "stackLight",
+        "type": "stackLight",
+        "why": "Signals ready/start status for the manual load step",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "infeedBelt",
+    "ports": null,
+    "ops": []
+  }
+}

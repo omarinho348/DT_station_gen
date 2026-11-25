@@ -3698,3 +3698,105 @@ All 12 phases of Claude.md are now built. The benchmark shows the system works a
   - Tests: `tests/agents/builder-single-unit.test.js` (new); the station-cycle and reviewer expectations updated for the work place.
   - `npm test`: 84 files, **2192 tests passed**.
   - The catalog is unchanged, so the recorded answers still replay.
+
+## Phase 13: Machine routines (owner's request after Phase 12)
+
+The benchmark's main finding (`benchmarks/results/findings.md`): the Builder fails in the **process phase**, on op semantics (which machine an op drives, motion names and values, a decision's branches). Asked 2026-11-25 to apply the suggested fix: **per-machine process templates** ("routines"). Plan: 13.1 the mechanism and the self-contained machines; 13.2 robots and grippers (pick and place between named places), and fitting machines to the product (below); 13.3 a live benchmark rerun (needs the owner's OK: it spends budget).
+
+### Step 13.1: routines for self-contained machines (approved)
+
+**What it is:** a component may declare `recipes` ("routines" in the prompt; products already use the word routine): its standard process, written and tested once.
+- Each routine: a summary, the few args an agent may set (ranges, defaults), optional station args (another machine of the station it needs, e.g. a reject lane or a supply tank, with the category / motions it must have), what the product must have, and `ops(ctx)` → plain factory.json ops.
+- The Builder's process phase offers each station machine's routines as `{ "use": "<machine id>.<routine>", ...args }` beside the ops, and **expands them into plain ops before the checks**. factory.json, the compiler, the reviewer, the Editor and SimPy see only ops (nothing downstream changed).
+- A wrong call (unknown machine or routine, an arg out of range, a station arg naming the wrong kind of machine) is a process refusal naming the problem; the model's own answer is shown back.
+- The routine list goes in the Builder's stable prompt part (after the catalog). **`catalog.json` is unchanged**, so the Spec, Editor and Reviewer prompts and their recorded answers still replay.
+
+**Routines added (10):** `filler.fillUnit` (seconds, liquid, supply tank), `capper.capUnit` (turns), `visionScanner.scan`, `visionScanner.inspect` (scan, then reject down a reject lane on the quality verdict), `labelApplicator.applyLabel`, `genericMachine.work` (seconds, task), `testCabinet.test` (testing lamp, then pass / fail by verdict), `dockingUnit.dock`, `photoEye.detect`, `pickToLight.signal`. Sequences follow the hand-written lines (printer ST5 scan passes, bottling inspect reject).
+
+**Changed**
+- `lib/registry.js`: `recipes` in the component contract (validated where defined)
+- `lib/recipes.js` (new): listing for the prompt, which routines a station and product can use, expansion (decision branches included) with named problems
+- the 10 component files above: their routines
+- `agents/builder/schemas.js`: routine branches in the process union (station args limited to fitting machines); layout `ops` now "beyond the routines"
+- `agents/builder/builder.js`: routines in the prompt, offered and expanded in the process phase, expansion problems refused; the raw answer kept for feedback
+- `agents/prompts/builder.md`: routines first, ops only for what no routine covers
+- `app/dev/lines/routines.json` (new): a check line built by the Builder (scripted answers) only from routines: fill → cap → label → inspect → test → pack; `#/twin?demo=line&line=routines`
+- `tests/agents/builder-recipes.test.js` (new, 20): every routine builds a station through the Builder that passes the reviewer and plays a run of 4; expansion errors; strict schema; prompt; refusal and retry; routines inside decisions; the contract
+
+**Checked by screenshot** (`screenshots/routines/`; Chromium from the Playwright cache via `CHROME_PATH`, Chrome is not installed here):
+- right: filling (nozzle in the neck, juice jet, tank behind), inspection (arch with laser over the bottle, reject lane beside), test cabinet (lamps), placeholder (progress bar)
+- **not right, and not caused by the routines** (the same happens with hand-written ops): machines are not fitted to the product
+  - capper: its default seat height suits the jerry can; the chuck stops ~7 cm above a 0.26 m bottle's neck
+  - labeller and docking unit: placed beside the line clear of their whole stroke, so the pad / plug stops ~0.3–0.5 m short of the unit; the labeller also sits higher than this bottle's label
+  - fix proposed for 13.2: fit heights to the product's refs (neck, cap seat, label spot) in code, as `singleUnit` does, and let reach-in machines stand at the conveyor (their stroke over it)
+
+**Results**
+- `npm test` (with `--testTimeout=180000`: the reviewer's geometry tests take 35–50 s on this machine): 85 files, **2208 passed, 1 failed, 3 skipped**
+- **the failure:** `tests/agents/builder-live.test.js`, the recorded live run. The Builder's prompt and schemas changed, so its recorded answers no longer match (mock-mode error, as its header says). Re-recording is a live call, about $0.005 (`npm run builder:live`), and needs the owner's key in `.env`.
+- spent: $0 (no live calls)
+- also: `npm install` added `fflate` (in §5's stack, added to package.json by the pull)
+
+### Step 13.2: machines fitted to the unit, reach-in tools, robot routines (approved)
+
+Step 13.1 approved by the owner (2026-11-25: "yes go on to 13.2").
+
+**1. Machines fitted to the unit, in code.** The model can't measure the product, so it no longer has to:
+- `lib/station/unit.js` (new): the line's product built once and measured (size; refs such as neck, cap seat, label spot, grasp, top; at its last stage).
+- Component contract: `fit({ unit, params, ctx }) → params`. The Builder applies it after the machines phase (and in the layout preview), as it does `singleUnit`, with a note.
+- filler: nozzle 3 cm into the neck, raised clear of the top (its `tipHeight` minimum 0.26 → 0.15 m, so it reaches into a 0.26 m bottle); capper: seat at the cap seat; labeller: pad at the label spot's height; docking unit: connector at mid-height.
+
+**2. Reach-in tools.** Component contract: `reach(params) → { port, motion, toward, param }` (labeller: pad / tamp / −Z / stroke; docking unit: connector / plug / +Z / stroke).
+- `lib/station/reach.js` (new): where the tool stands and points once placed, how far it must go to the unit's face, the turn that makes it face the line.
+- placer: such a machine beside the line is **turned to face the line**, its retracted tool at the conveyor's edge (before: its whole stroke was kept off the conveyor, so it could never reach, and a walkway-side docking unit pointed away from the line).
+- Builder: a stroke too short for the unit is lengthened, with a note, and the station placed again.
+- routines move the tool **exactly to the unit's face**.
+
+**3. Robot routines.** `moveUnit(to, clearance?, task?)` for scara, cartesianGantry (fingers: grip at the grasp point, gap from the unit's width) and palletizerRobot, abbIrb6760 (vacuum: by the top). `to` is a place of the station (`"machine.port"`, offered from the station's own ports; a plain belt's `work` is its middle, as the runtime has it). Gripper settings and hold heights come from the measured unit; the model never sets them.
+
+**Found by the screenshots and fixed (generic, not routine-specific):**
+- **Robots placed 'rear' could never reach the line:** a robot's footprint is its reach envelope, and the placer kept that off the conveyor (a palletizer robot stood 3.9 m away). Robots now stand by their real parts, from the conveyor's edge outward until those clear.
+- **A photo-eye placed over the line stood on the floor under the belt:** a `surface`-mounted component now stands on the conveyor's top.
+- the "only fits behind the fence" note compared footprints too strictly; it now uses the machine's middle.
+
+**Changed**
+- `lib/registry.js` (`fit`, `reach`, place-kind station args), `lib/station/unit.js`, `lib/station/reach.js` (new), `lib/station/place.js`, `lib/station/stationSpec.js` (`midWork` exported), `lib/recipes.js` (places, placement and reach passed to routines)
+- `lib/components/robots/pickRoutines.js` (new; shared by the four robots), the robots, filler, capper, labelApplicator, dockingUnit
+- `agents/builder/builder.js`: unit measured once, fits applied, strokes lengthened after placement, routines given where they stand
+- `tests/agents/builder-recipes.test.js`: 28 tests; now also three robot stations (scara to a table and back, gantry into a nest and back, palletizer robot by vacuum), fitted heights, tools facing the line and stopping exactly at the unit, the photo-eye on the belt
+- `app/dev/lines/routines.json`: rebuilt, with a robot station (7 stations, all played)
+
+**Checked by screenshot** (`screenshots/routines/`): capper chuck on the neck; labeller pad on the bottle at label height; docking plug on the bottle, unit facing the line; scara lifting the bottle off a table back to the belt; photo-eye on the belt's side frames. Remaining look: the photo-eye and labeller both stand at the work place, close together (no clash).
+
+**Results**
+- `npm test` (`--testTimeout=180000`): 85 files, **2216 passed, 1 failed, 3 skipped**
+- the failure is still only `tests/agents/builder-live.test.js` (the recorded live run; re-record with `npm run builder:live`, about $0.005, needs the key)
+- spent: $0
+
+**Next: step 13.3,** a live benchmark rerun to measure the effect (about $0.10–0.30; needs the owner's OK and a key in `.env`). Re-record the live replay first.
+
+### Step 13.3: the live benchmark rerun (done, waiting for the owner)
+
+Step 13.2 approved by the owner (2026-11-25: "go ahead with 13.3 and spend that amount its okay", about $0.10–0.30). Note: `.env` holds the key pasted in the chat earlier, not a new one; the owner was told to replace it.
+
+**Result first** (full write-up: `benchmarks/results/findings.md`, "Phase 13"):
+- **held-out set: 11 of 31 stations built** (was 4), 0 lines complete; 9 of the 11 are placeholders (the catalog lacks the machines)
+- **tuning set: 2 of 25** (was 2, then on the mini model), 0 lines complete: mostly assembly stations, which no routine covers yet
+- the model used routines in 14 of 19 process answers; the stops moved from the process phase to the layout (reject ports, goods continuity) and to assembly
+
+**Runs** (gpt-5.4-nano, 4 retries; all answers recorded as fixtures, so they replay for $0):
+- `npm run builder:live`: the recorded replay re-recorded ($0.0056). The model picked `bottleFiller.fillUnit` with the supply tank by itself; first time through all three gates. `tests/agents/builder-live.test.js` updated and passing.
+- held-out set ($0.0896), tuning set ($0.0714), lotion-pumps rerun after a fix ($0.0021)
+- **spent in this step: $0.169; budget left $3.6613** (the guard's total cap is $3.83, the owner's remaining credit)
+
+**Fixed along the way**
+- `agents/llm.js` `record()`: an answer replayed from an existing fixture in a live run (unchanged Spec answers) made recording crash after the run; it is now skipped (test in `tests/agents/llm.test.js`). The held-out run files were rewritten by the $0 rerun that recorded them; their cost and time are set back to the live run's (`costNote` in each).
+- `lib/recipes.js`: routine text args over their length are shortened at a word instead of refused. Strict mode can't carry maxLength, and the model was refused 5 times for a 40-character task label (lotion-pumps). Tested.
+
+**Results**
+- `npm test` (`--testTimeout=180000`): 85 files, **2217 passed, 0 failed**, 3 skipped
+- `benchmarks/results/benchmark.md`, `runs/*.json`, `lines/*.factory.json` rewritten; `findings.md` has the Phase 13 section
+
+**Next (owner's call):** the findings list three candidates:
+1. assembly routines for the robots
+2. deterministic fixes for the two layout stops (reject port, goods continuity)
+3. more named machines for the held-out industries

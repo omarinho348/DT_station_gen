@@ -1,0 +1,70 @@
+{
+  "key": "a2ebf5995a29db3eb23b3d9af9e3e444af60df710db6a674bfa039a67b17842f",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:01:43.019Z",
+  "usage": {
+    "inputTokens": 6514,
+    "cachedInputTokens": 5888,
+    "outputTokens": 468
+  },
+  "output": {
+    "id": "checkWeigher",
+    "code": "ST6",
+    "title": "Weigh check and accept/reject",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST6",
+        "title": "Weigh check and accept/reject",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "inPlacePhotoEye",
+        "type": "photoEye",
+        "why": "Confirms the labeled bag/pallet carrier is correctly positioned on the check-weigh platform.",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "weighMachine",
+        "type": "genericMachine",
+        "why": "Performs the weight check and provides a quality verdict used for routing.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "weighVision",
+        "type": "visionScanner",
+        "why": "Scans/inspects at the work place and routes PASS vs REJECT via the reject lane.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "weighPalletConveyor",
+    "ports": [
+      {
+        "name": "reject",
+        "machine": "weighVision",
+        "port": "rejectLane",
+        "direction": "out"
+      }
+    ],
+    "ops": [
+      "decide",
+      "transfer"
+    ]
+  }
+}

@@ -74,3 +74,29 @@ Each fix removed the failure it targeted, and several failures **moved earlier**
   - **A per-machine op vocabulary in the prompt:** for each machine of the station, the ops it can drive with their exact args and motion values, generated from the registry, instead of the generic op detail.
   - **Deterministic process defaults:** for a station whose machines all have templates, write the process in code and let the model only adjust timing.
 - The coverage gaps (soldering, textile joining, primary shaping, potting) explain the placeholders in the held-out set (blister sealing, bag sealing), and are the library work that would raise the named share.
+
+## Phase 13: machine routines, measured (step 13.3)
+
+What changed since the runs above: machines ship their standard process as routines the Builder picks and parameterizes; machine heights and reach-in strokes are fitted to the product in code; reach-in tools and robots are placed so they reach the line; a photo-eye stands on the conveyor (`PROGRESS.md`, steps 13.1–13.2). Same briefs, gpt-5.4-nano for every agent, 4 retries per station, every gate auto-approved.
+
+| | Held-out set | Tuning set |
+|---|---|---|
+| Stations built, before (Phase 12) | 4 of 31 (nano) | 2 of 25 (mini Builder) |
+| **Stations built, now** | **11 of 31** | **2 of 25** (nano) |
+| Lines complete | 0 of 5 | 0 of 5 |
+| Built stations: named / composite / placeholder | 2 / 0 / 9 | 2 / 0 / 0 |
+| Cost of the run | $0.090 | $0.074 |
+
+- **The model uses the routines:** 14 of 19 process answers in the held-out run used one, 12 of them nothing else (placeholder `work` 13×, photo-eye `detect` 5×, `inspect`, `applyLabel`, `fillUnit`).
+- **Held-out: almost three times the stations.** The process phase, where the Phase 12 runs stopped, is no longer where most of them stop: of the 5 held-out stops, 4 are in the layout (a reject port on a machine without that port ×2; a station taking pallets after one handing over units ×2) and 1 is an op the model wrote itself (`accumulate`).
+- **But most of those stations are placeholders** (9 of 11): the held-out briefs need machines the catalog lacks (slicers, blister sealers, panel saws, folders), and the model fills them with `genericMachine.work`. The line runs with the right timing; it does not look like the real machine.
+- **Tuning set: no gain.** Three of its five briefs are assembly lines (PCB, battery modules, car door): their stations fit parts onto the unit (pick a part from a feeder, place it, drive a screw). No routine covers that yet; the model wrote the ops itself and failed as before. The other two: a capper's cap feeder clashing with the cell's fence (layout), and a 40-character label limit the model couldn't see (fixed in code; the rerun then stopped on a robot out of reach, after using "move the unit" for fitting a part).
+
+**What this means:** routines remove the failure they were built for. Lines still don't complete, for two reasons the routines don't touch:
+1. **layout semantics** (ports, what goods a station takes) — now the most common stop
+2. **assembly** — parts onto the unit
+
+**Next candidates:**
+- assembly routines (part from a feeder or tray onto the unit, screw drive) for the robots, using the product's parts
+- deterministic fixes for the two layout stops: a reject port where a station has a reject lane; the station conveyor chosen by the goods handed over
+- more named machines for the held-out industries, to replace the placeholders

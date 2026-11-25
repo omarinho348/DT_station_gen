@@ -1,0 +1,36 @@
+{
+  "key": "f4891349d5131df39a9497635f682ab94363b8a94a206fae7d193306f37ddf86",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:02:16.401Z",
+  "usage": {
+    "inputTokens": 6579,
+    "cachedInputTokens": 4864,
+    "outputTokens": 171
+  },
+  "output": {
+    "params": {
+      "dosingHead": {
+        "name": "Dosing head",
+        "note": "Drops/doses tablets into blister cavities at the work position",
+        "length": null,
+        "depth": null,
+        "height": null,
+        "passThrough": null,
+        "carries": "unit"
+      },
+      "cavityIndexStop": {
+        "span": null
+      },
+      "unitConveyor": {
+        "length": null,
+        "beltWidth": 0.34,
+        "guides": null,
+        "guideGap": null,
+        "drive": null,
+        "carries": "unit"
+      }
+    }
+  }
+}

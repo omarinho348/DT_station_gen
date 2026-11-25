@@ -1,0 +1,50 @@
+{
+  "key": "74a6e45ae8331ef6eefa4f0afc61d9bd0af3babc9ceee5e022bccadeb1f2e089",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:02:05.182Z",
+  "usage": {
+    "inputTokens": 6158,
+    "cachedInputTokens": 0,
+    "outputTokens": 426
+  },
+  "output": {
+    "id": "doseTablets",
+    "code": "ST2",
+    "title": "Dose tablets into cavities",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Dose tablets into cavities",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "dosingHead",
+        "type": "genericMachine",
+        "why": "Drops/doses tablets into each blister cavity under the dosing head",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "cavityIndexStop",
+        "type": "beltEndStop",
+        "why": "Provides a repeatable stop/positioning reference for cavity indexing under the head",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "st2Conveyor",
+    "ports": null,
+    "ops": []
+  }
+}

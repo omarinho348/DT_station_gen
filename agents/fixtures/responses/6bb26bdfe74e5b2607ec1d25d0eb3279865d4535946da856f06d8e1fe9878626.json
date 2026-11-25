@@ -1,0 +1,33 @@
+{
+  "key": "6bb26bdfe74e5b2607ec1d25d0eb3279865d4535946da856f06d8e1fe9878626",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:01:49.778Z",
+  "usage": {
+    "inputTokens": 9659,
+    "cachedInputTokens": 0,
+    "outputTokens": 329
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "inPlacePhotoEye.detect",
+        "seconds": 0.3
+      },
+      {
+        "use": "weighMachine.work",
+        "seconds": 2,
+        "task": "Weigh bag / check weight"
+      },
+      {
+        "use": "weighVision.inspect",
+        "seconds": 4.5,
+        "rejectLane": "line"
+      }
+    ],
+    "output": null,
+    "inputStage": "labelled"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "key": "1022a09ae151795119c4b9e038e0e2150b42b6bffb52c5dc07b419dc038422c3",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:06:43.880Z",
+  "usage": {
+    "inputTokens": 6034,
+    "cachedInputTokens": 4864,
+    "outputTokens": 164
+  },
+  "output": {
+    "params": {
+      "pumpHeadFeeder": {
+        "bowlDiameter": 0.26,
+        "hoseLength": 1.2
+      },
+      "pumpHeadRobot": {
+        "link1": 0.55,
+        "link2": 0.5,
+        "armHeight": 1.45,
+        "stroke": 0.4,
+        "maxGap": 0.26,
+        "fingerLength": 0.1,
+        "screwdriver": false
+      }
+    }
+  }
+}

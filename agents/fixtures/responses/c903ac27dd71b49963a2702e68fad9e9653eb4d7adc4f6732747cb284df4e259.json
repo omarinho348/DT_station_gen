@@ -1,0 +1,43 @@
+{
+  "key": "c903ac27dd71b49963a2702e68fad9e9653eb4d7adc4f6732747cb284df4e259",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:02:35.859Z",
+  "usage": {
+    "inputTokens": 6926,
+    "cachedInputTokens": 0,
+    "outputTokens": 237
+  },
+  "output": {
+    "params": {
+      "cuttingSaw": {
+        "name": "CUTTING SAW",
+        "note": "Chipboard cut-to-size",
+        "length": 1.8,
+        "depth": 1.1,
+        "height": 2.1,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "cuttingTable": {
+        "length": 1.2,
+        "width": 0.7,
+        "height": 0.9,
+        "top": "stainless"
+      },
+      "safetyEnclosure": {
+        "length": 1.64,
+        "width": 1.12,
+        "height": 2.05,
+        "shutterRise": 0.82,
+        "extraction": true
+      },
+      "dustGuardFence": {
+        "length": 4.1,
+        "height": 2,
+        "panelWidth": 1.6
+      }
+    }
+  }
+}

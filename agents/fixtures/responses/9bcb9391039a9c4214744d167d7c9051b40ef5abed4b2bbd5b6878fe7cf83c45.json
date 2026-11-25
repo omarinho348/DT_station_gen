@@ -1,0 +1,60 @@
+{
+  "key": "9bcb9391039a9c4214744d167d7c9051b40ef5abed4b2bbd5b6878fe7cf83c45",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T13:59:47.223Z",
+  "usage": {
+    "inputTokens": 6121,
+    "cachedInputTokens": 0,
+    "outputTokens": 798
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST2",
+    "title": "Fill empty glass bottles",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Filling station",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "fillConveyor",
+        "type": "beltConveyor",
+        "why": "Conveys bottles through the filling station",
+        "place": "line",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "juiceSupply",
+        "type": "supplyTank",
+        "why": "Provides apple juice to the filler heads",
+        "place": "besideLine",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "bottleFiller",
+        "type": "filler",
+        "why": "Lower nozzle into bottle neck and dispense about 6 s",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "fillConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

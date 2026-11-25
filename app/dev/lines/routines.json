@@ -1,0 +1,630 @@
+{
+  "factory": {
+    "version": 1,
+    "line": {
+      "id": "routineLine",
+      "title": "Routines only",
+      "runSize": 6,
+      "conventions": {
+        "beltHeight": 0.86
+      }
+    },
+    "product": {
+      "kind": "parametric",
+      "params": {
+        "shape": "bottle",
+        "length": 0.09,
+        "width": 0.09,
+        "height": 0.26,
+        "finish": "glass",
+        "liquid": "#d9a21b",
+        "labelText": "APPLE JUICE",
+        "rejectEvery": 3
+      }
+    },
+    "stations": [
+      {
+        "id": "fill",
+        "title": "Filling",
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {},
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "filler",
+            "type": "filler",
+            "params": {
+              "heads": 1,
+              "tipHeight": 0.23
+            },
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "tank",
+            "type": "supplyTank",
+            "params": {},
+            "position": [
+              -0.52,
+              0,
+              -1.07
+            ],
+            "rotationY": 0
+          }
+        ],
+        "conveyor": "belt",
+        "inputStage": "raw",
+        "process": [
+          {
+            "op": "fill",
+            "machine": "filler",
+            "units": "Unit",
+            "liquid": "juice",
+            "timing": {
+              "dispense": 3
+            },
+            "supply": {
+              "machine": "tank"
+            }
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      },
+      {
+        "id": "cap",
+        "title": "Capping",
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {},
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "capper",
+            "type": "capper",
+            "params": {
+              "heads": 1,
+              "seatHeight": 0.248
+            },
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          }
+        ],
+        "conveyor": "belt",
+        "inputStage": "filled",
+        "process": [
+          {
+            "op": "cap",
+            "machine": "capper",
+            "units": "Unit",
+            "turns": 3
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      },
+      {
+        "id": "label",
+        "title": "Labelling",
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {},
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "eye",
+            "type": "photoEye",
+            "params": {},
+            "position": [
+              0,
+              0.86,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "labeller",
+            "type": "labelApplicator",
+            "params": {
+              "applyHeight": 0.951,
+              "stroke": 0.36
+            },
+            "position": [
+              0,
+              0,
+              0.91
+            ],
+            "rotationY": 0
+          }
+        ],
+        "conveyor": "belt",
+        "inputStage": "capped",
+        "process": [
+          {
+            "op": "toolOn",
+            "machine": "eye",
+            "motion": "beam",
+            "value": "blocked",
+            "then": "clear",
+            "seconds": 0.3,
+            "label": "Unit detected"
+          },
+          {
+            "op": "move",
+            "machine": "labeller",
+            "to": {
+              "tamp": 0.355
+            },
+            "seconds": 0.44,
+            "routine": {
+              "routine": "label"
+            },
+            "label": "Applying the label",
+            "state": "LABELLING"
+          },
+          {
+            "op": "move",
+            "machine": "labeller",
+            "to": {
+              "tamp": 0
+            },
+            "seconds": 0.36,
+            "label": "Labeller retracting",
+            "state": "LABELLING"
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      },
+      {
+        "id": "inspect",
+        "title": "Inspection",
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {},
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "scanner",
+            "type": "visionScanner",
+            "params": {},
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "rejectLane",
+            "type": "rollerConveyor",
+            "params": {},
+            "position": [
+              0,
+              0,
+              -1.155
+            ],
+            "rotationY": 1.5707963267948966
+          }
+        ],
+        "conveyor": "belt",
+        "ports": {
+          "reject": {
+            "machine": "rejectLane",
+            "port": "output",
+            "direction": "out"
+          }
+        },
+        "inputStage": "labelled",
+        "process": [
+          {
+            "op": "move",
+            "machine": "scanner",
+            "to": {
+              "x": 0.66
+            },
+            "switches": {
+              "scan": "on"
+            },
+            "seconds": 2.25,
+            "label": "Vision scan · forward pass",
+            "state": "INSPECTING"
+          },
+          {
+            "op": "move",
+            "machine": "scanner",
+            "to": {
+              "x": -0.72
+            },
+            "seconds": 1.35,
+            "label": "Vision scan · return pass",
+            "state": "INSPECTING"
+          },
+          {
+            "op": "move",
+            "machine": "scanner",
+            "to": {
+              "x": -1.2000000000000002
+            },
+            "switches": {
+              "scan": "off"
+            },
+            "seconds": 0.9,
+            "label": "Analysing the images",
+            "state": "INSPECTING"
+          },
+          {
+            "op": "decide",
+            "on": "quality",
+            "planAs": "pass",
+            "cases": {
+              "pass": [],
+              "reject": [
+                {
+                  "op": "transfer",
+                  "conveyor": "rejectLane",
+                  "to": {
+                    "machine": "rejectLane",
+                    "port": "output"
+                  },
+                  "label": "Rejected · to the reject lane",
+                  "state": "REJECT"
+                }
+              ]
+            }
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      },
+      {
+        "id": "test",
+        "title": "Function test",
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {},
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "tester",
+            "type": "testCabinet",
+            "params": {},
+            "position": [
+              0,
+              0,
+              -0.465
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "dock",
+            "type": "dockingUnit",
+            "params": {
+              "axisHeight": 0.994,
+              "stroke": 0.36
+            },
+            "position": [
+              0,
+              0,
+              0.87
+            ],
+            "rotationY": 3.141592653589793
+          }
+        ],
+        "conveyor": "belt",
+        "inputStage": "labelled",
+        "process": [
+          {
+            "op": "move",
+            "machine": "dock",
+            "to": {
+              "plug": 0.355
+            },
+            "seconds": 0.5,
+            "label": "Connector docking",
+            "state": "TESTING"
+          },
+          {
+            "op": "wait",
+            "seconds": 1,
+            "label": "Docked · testing",
+            "state": "TESTING"
+          },
+          {
+            "op": "move",
+            "machine": "dock",
+            "to": {
+              "plug": 0
+            },
+            "seconds": 0.4,
+            "label": "Connector retracting",
+            "state": "TESTING"
+          },
+          {
+            "op": "toolOn",
+            "machine": "tester",
+            "motion": "status",
+            "value": "testing",
+            "seconds": 2,
+            "label": "Testing",
+            "state": "TESTING"
+          },
+          {
+            "op": "decide",
+            "on": "quality",
+            "planAs": "pass",
+            "cases": {
+              "pass": [
+                {
+                  "op": "toolOn",
+                  "machine": "tester",
+                  "motion": "status",
+                  "value": "pass",
+                  "then": "idle",
+                  "seconds": 0.6,
+                  "label": "Test passed",
+                  "state": "TESTING"
+                }
+              ],
+              "reject": [
+                {
+                  "op": "toolOn",
+                  "machine": "tester",
+                  "motion": "status",
+                  "value": "fail",
+                  "then": "idle",
+                  "seconds": 0.6,
+                  "label": "Test failed",
+                  "state": "TESTING"
+                }
+              ]
+            }
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      },
+      {
+        "id": "rework",
+        "title": "Robot check",
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {
+              "length": 1.6
+            },
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "robot",
+            "type": "scara",
+            "params": {},
+            "position": [
+              0,
+              0,
+              -0.345
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "table",
+            "type": "workTable",
+            "params": {},
+            "position": [
+              0.8,
+              0,
+              -0.595
+            ],
+            "rotationY": 0
+          }
+        ],
+        "conveyor": "belt",
+        "inputStage": "labelled",
+        "process": [
+          {
+            "op": "pickPlace",
+            "machine": "robot",
+            "item": "product",
+            "clearance": 0.12,
+            "name": "Bottle to the check table",
+            "from": {
+              "item": "product",
+              "ref": "grasp"
+            },
+            "to": {
+              "machine": "table",
+              "port": "top",
+              "offset": [
+                0,
+                0.2,
+                0
+              ]
+            },
+            "gap": 0.09,
+            "openGap": 0.14
+          },
+          {
+            "op": "pickPlace",
+            "machine": "robot",
+            "item": "product",
+            "clearance": 0.12,
+            "name": "Bottle back to the line",
+            "from": {
+              "item": "product",
+              "ref": "grasp"
+            },
+            "to": {
+              "machine": "belt",
+              "port": "input",
+              "offset": [
+                0.8,
+                0.2,
+                0
+              ]
+            },
+            "gap": 0.09,
+            "openGap": 0.14
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      },
+      {
+        "id": "pack",
+        "title": "Packing (placeholder)",
+        "equipment": [
+          {
+            "id": "belt",
+            "type": "beltConveyor",
+            "params": {},
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "packer",
+            "type": "genericMachine",
+            "params": {},
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          }
+        ],
+        "conveyor": "belt",
+        "inputStage": "labelled",
+        "process": [
+          {
+            "op": "operate",
+            "machine": "packer",
+            "seconds": 4,
+            "label": "Packing"
+          }
+        ],
+        "feed": {
+          "fromLift": false
+        }
+      }
+    ],
+    "graph": {
+      "edges": [
+        {
+          "from": "fill.output",
+          "to": "cap.input",
+          "transport": {
+            "kind": "conveyor",
+            "type": "beltConveyor",
+            "params": {}
+          }
+        },
+        {
+          "from": "cap.output",
+          "to": "label.input",
+          "transport": {
+            "kind": "conveyor",
+            "type": "beltConveyor",
+            "params": {}
+          }
+        },
+        {
+          "from": "label.output",
+          "to": "inspect.input",
+          "transport": {
+            "kind": "conveyor",
+            "type": "beltConveyor",
+            "params": {}
+          }
+        },
+        {
+          "from": "inspect.output",
+          "to": "test.input",
+          "transport": {
+            "kind": "conveyor",
+            "type": "beltConveyor",
+            "params": {}
+          }
+        },
+        {
+          "from": "test.output",
+          "to": "rework.input",
+          "transport": {
+            "kind": "conveyor",
+            "type": "beltConveyor",
+            "params": {}
+          }
+        },
+        {
+          "from": "rework.output",
+          "to": "pack.input",
+          "transport": {
+            "kind": "conveyor",
+            "type": "beltConveyor",
+            "params": {}
+          }
+        }
+      ]
+    }
+  },
+  "camera": null
+}

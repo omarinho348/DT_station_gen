@@ -1,0 +1,24 @@
+{
+  "key": "917cebdda988014e4d9b6e812c54affe13dd5dbf6ae96fb2bb2978612fa6de7c",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:02:54.463Z",
+  "usage": {
+    "inputTokens": 8026,
+    "cachedInputTokens": 0,
+    "outputTokens": 145
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "drillMachining.work",
+        "seconds": 40,
+        "task": "Drill hinge & dowel holes"
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

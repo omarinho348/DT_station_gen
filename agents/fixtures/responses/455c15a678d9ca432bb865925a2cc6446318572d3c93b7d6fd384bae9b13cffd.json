@@ -1,0 +1,83 @@
+{
+  "key": "455c15a678d9ca432bb865925a2cc6446318572d3c93b7d6fd384bae9b13cffd",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:03:33.821Z",
+  "usage": {
+    "inputTokens": 6411,
+    "cachedInputTokens": 4864,
+    "outputTokens": 804
+  },
+  "output": {
+    "id": "loadFlatShirt",
+    "code": "ST1",
+    "title": "Manual shirt load",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "infeedBelt",
+        "type": "beltConveyor",
+        "why": "Conveys the loaded flat T-shirt onward into the line",
+        "place": "line",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "inputStop",
+        "type": "beltEndStop",
+        "why": "Stops each shirt at the folding-machine input footprint",
+        "place": "downstream",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "shirtInPlaceEye",
+        "type": "photoEye",
+        "why": "Confirms the shirt is correctly present at the input stop",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "stationHmi",
+        "type": "hmi",
+        "why": "Provides operator start/ready confirmation for the load cycle",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "stackLight",
+        "type": "stackLight",
+        "why": "Signals ready/start status for the manual load step",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "foldingMachine",
+        "type": "genericMachine",
+        "why": "Folding machine input work position where loaded shirts are accepted",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "infeedBelt",
+    "ports": null,
+    "ops": []
+  }
+}

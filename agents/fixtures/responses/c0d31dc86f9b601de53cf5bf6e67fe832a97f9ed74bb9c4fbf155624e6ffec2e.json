@@ -1,0 +1,33 @@
+{
+  "key": "c0d31dc86f9b601de53cf5bf6e67fe832a97f9ed74bb9c4fbf155624e6ffec2e",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:07:13.904Z",
+  "usage": {
+    "inputTokens": 8328,
+    "cachedInputTokens": 0,
+    "outputTokens": 263
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "boardPhotoEye.detect",
+        "seconds": 0.3
+      },
+      {
+        "use": "solderPasteDispenser.work",
+        "seconds": 20,
+        "task": "Dispense solder paste pattern onto PCB pads"
+      },
+      {
+        "use": "solderPasteVision.inspect",
+        "seconds": 4.5,
+        "rejectLane": "line"
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

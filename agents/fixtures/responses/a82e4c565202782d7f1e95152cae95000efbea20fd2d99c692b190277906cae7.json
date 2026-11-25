@@ -1,0 +1,36 @@
+{
+  "key": "a82e4c565202782d7f1e95152cae95000efbea20fd2d99c692b190277906cae7",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:02:11.372Z",
+  "usage": {
+    "inputTokens": 6557,
+    "cachedInputTokens": 0,
+    "outputTokens": 162
+  },
+  "output": {
+    "params": {
+      "dosingHead": {
+        "name": "Tablet dosing head",
+        "note": "Drop dose into each blister cavity",
+        "length": null,
+        "depth": null,
+        "height": null,
+        "passThrough": null,
+        "carries": "unit"
+      },
+      "cavityIndexStop": {
+        "span": 0.58
+      },
+      "unitConveyor": {
+        "length": 4,
+        "beltWidth": 0.34,
+        "guides": true,
+        "guideGap": 0.22,
+        "drive": true,
+        "carries": "unit"
+      }
+    }
+  }
+}

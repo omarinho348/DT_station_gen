@@ -1,0 +1,39 @@
+{
+  "key": "b459e73cbd645523fe3d7834e763044256c91b9ecaf058f0b9d574593c52167f",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:07:11.282Z",
+  "usage": {
+    "inputTokens": 6800,
+    "cachedInputTokens": 4864,
+    "outputTokens": 326
+  },
+  "output": {
+    "params": {
+      "boardPhotoEye": {
+        "span": 0.4
+      },
+      "solderPasteDispenser": {
+        "name": "Solder paste dispenser",
+        "note": "Dispense solder paste onto PCB pads",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "solderPasteVision": {
+        "length": 2.7,
+        "width": 1.44,
+        "railHeight": 2.05,
+        "archWidth": 1,
+        "archBottom": 1.1
+      },
+      "dispenseNozzleTool": {
+        "jetLength": 0.12,
+        "liquid": "glue"
+      }
+    }
+  }
+}

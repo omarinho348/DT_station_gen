@@ -1,0 +1,53 @@
+{
+  "key": "d04126f819cd3007f6558927f6304a1bc3da523f1da299a779b7cbfeb2610db3",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:09:43.088Z",
+  "usage": {
+    "inputTokens": 13579,
+    "cachedInputTokens": 13056,
+    "outputTokens": 1136
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "stopConveyors",
+        "conveyors": [
+          "line"
+        ],
+        "speed": null,
+        "ramp": null,
+        "label": "Index pallet carrier to ST1",
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "pickRobot.moveUnit",
+        "clearance": 0.12,
+        "task": "Pick window regulator from presented location (operator-assisted/assisted pick)",
+        "to": "regulatorCradle.lane1"
+      },
+      {
+        "use": "pickRobot.moveUnit",
+        "clearance": 0.12,
+        "task": "Move window regulator over the carrier and lower to align mounting holes",
+        "to": "regulatorCradle.lane3"
+      },
+      {
+        "op": "toolOn",
+        "machine": "screwdriverMount",
+        "motion": "driver",
+        "value": "1",
+        "then": "0",
+        "seconds": 12,
+        "label": "Drive screws (4x) with screwdriver mount",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

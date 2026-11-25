@@ -1,0 +1,60 @@
+{
+  "key": "c3b298b3212c7c329f81037208b0d48cef6ec17c2e3b8efd6fd6f1ab985b61a5",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:02:14.559Z",
+  "usage": {
+    "inputTokens": 6355,
+    "cachedInputTokens": 5888,
+    "outputTokens": 344
+  },
+  "output": {
+    "id": "doseTablets",
+    "code": "ST2",
+    "title": "Dose tablets into cavities",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Dose tablets into cavities",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "dosingHead",
+        "type": "genericMachine",
+        "why": "Drops/doses tablets into each blister cavity under the dosing head",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "cavityIndexStop",
+        "type": "beltEndStop",
+        "why": "Repeatable stop/position reference for blister cavity indexing under the head",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "unitConveyor",
+        "type": "beltConveyor",
+        "why": "Conveys thermoformed blister cavity units through the dosing work position",
+        "place": "line",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "unitConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

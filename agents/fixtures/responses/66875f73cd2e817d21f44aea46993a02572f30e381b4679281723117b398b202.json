@@ -1,0 +1,57 @@
+{
+  "key": "66875f73cd2e817d21f44aea46993a02572f30e381b4679281723117b398b202",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:02:26.336Z",
+  "usage": {
+    "inputTokens": 6180,
+    "cachedInputTokens": 5888,
+    "outputTokens": 853
+  },
+  "output": {
+    "id": "inspectCavities",
+    "code": "ST3",
+    "title": "Camera-inspect filled cavities",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST3",
+        "title": "Camera-inspect filled cavities",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "visionScan",
+        "type": "visionScanner",
+        "why": "Scan blister strips and assess cavity fill for pass/reject routing",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "rejectLane",
+        "type": "beltConveyor",
+        "why": "Receive REJECT strips diverted by the vision inspection",
+        "place": "besideLine",
+        "at": "output",
+        "on": null,
+        "side": "equipment",
+        "turned": true
+      }
+    ],
+    "conveyor": "stripBelt",
+    "ports": [
+      {
+        "name": "reject",
+        "machine": "rejectLane",
+        "port": "output",
+        "direction": "out"
+      }
+    ],
+    "ops": []
+  }
+}

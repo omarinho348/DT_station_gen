@@ -1,0 +1,429 @@
+{
+  "version": 1,
+  "line": {
+    "id": "panelCutting",
+    "title": "Chipboard panel cutting & preparation",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "box",
+      "length": 0.8,
+      "width": 0.2,
+      "height": 0.018,
+      "finish": "cardboard",
+      "color": "#D5B28A",
+      "processedColor": "#D5B28A"
+    }
+  },
+  "stations": [
+    {
+      "id": "cutToSize",
+      "code": "ST1",
+      "title": "Saw: cut to finished size",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Saw: cut to finished size"
+        }
+      },
+      "equipment": [
+        {
+          "id": "cuttingSaw",
+          "type": "genericMachine",
+          "params": {
+            "name": "CUTTING SAW",
+            "note": "Chipboard cut-to-size",
+            "length": 1.8,
+            "depth": 1.1,
+            "height": 2.1,
+            "passThrough": true,
+            "carries": "unit"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "cuttingTable",
+          "type": "workTable",
+          "params": {
+            "length": 1.2,
+            "width": 0.7,
+            "height": 0.9,
+            "top": "stainless"
+          },
+          "position": [
+            -0.925,
+            0,
+            -1.61
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "safetyEnclosure",
+          "type": "shutterEnclosure",
+          "params": {
+            "length": 1.64,
+            "width": 1.12,
+            "height": 2.05,
+            "shutterRise": 0.82,
+            "extraction": true
+          },
+          "position": [
+            0.675,
+            0,
+            -1.85
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "dustGuardFence",
+          "type": "guardFence",
+          "params": {
+            "length": 4.1,
+            "height": 2,
+            "panelWidth": 1.6
+          },
+          "position": [
+            0,
+            0,
+            -0.78
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "operate",
+          "machine": "cuttingSaw",
+          "seconds": 40,
+          "label": "Cut to finished size"
+        },
+        {
+          "op": "operate",
+          "machine": "cuttingSaw",
+          "seconds": 0.5,
+          "label": "Idle / stabilize after cut"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "applyEdgeBand",
+      "code": "ST2",
+      "title": "Edge band gluing & press",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST2",
+          "title": "Edge band gluing & press",
+          "color": "#D5B28A"
+        }
+      },
+      "equipment": [
+        {
+          "id": "edgeBandGluingUnit",
+          "type": "genericMachine",
+          "params": {
+            "name": "Edge band gluing & press",
+            "note": "Glue → apply band → press/trim",
+            "length": 1.6,
+            "depth": 1.2,
+            "height": 2,
+            "passThrough": true,
+            "carries": "unit"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "processed",
+      "process": [
+        {
+          "op": "operate",
+          "machine": "edgeBandGluingUnit",
+          "seconds": 40,
+          "label": "Gluing edge banding (adhesive + press)"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "drillHingeAndDowelHoles",
+      "code": "ST3",
+      "title": "Drill hinge & dowel holes",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST3",
+          "title": "Drill hinge & dowel holes"
+        }
+      },
+      "equipment": [
+        {
+          "id": "drillNestFixture",
+          "type": "partCradle",
+          "params": {
+            "lanes": [
+              -0.17,
+              -0.08,
+              0,
+              0.06,
+              0.15
+            ]
+          },
+          "position": [
+            0,
+            0,
+            -0.86
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "drillZoneEnclosure",
+          "type": "shutterEnclosure",
+          "params": {},
+          "position": [
+            0,
+            0,
+            -1.85
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "drillMachining",
+          "type": "genericMachine",
+          "params": {
+            "name": "DRILLING",
+            "note": "Hinge cup & dowel hole drilling",
+            "passThrough": true,
+            "carries": "unit"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "process": [
+        {
+          "op": "operate",
+          "machine": "drillMachining",
+          "seconds": 40,
+          "label": "Drill hinge & dowel holes"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "inspectDimensions",
+      "code": "ST4",
+      "title": "Periodic dimension inspection",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST4",
+          "title": "Periodic inspection",
+          "color": "#D5B28A"
+        }
+      },
+      "equipment": [
+        {
+          "id": "hmiPanel",
+          "type": "hmi",
+          "params": {
+            "height": 1.2
+          },
+          "position": [
+            -0.58,
+            0,
+            0.76
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "photoInPlace",
+          "type": "photoEye",
+          "params": {
+            "span": 0.4
+          },
+          "position": [
+            2.225,
+            0,
+            -0.01
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "dimensionBench",
+          "type": "genericMachine",
+          "params": {
+            "name": "DIMENSION CHECK",
+            "note": "Operator-led inspection (sampling)",
+            "length": 1.6,
+            "depth": 1.2,
+            "height": 1.9,
+            "passThrough": true,
+            "carries": "unit"
+          },
+          "position": [
+            2.4,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "rejectSidePusher",
+          "type": "sidePusher",
+          "params": {
+            "plateLength": 0.68
+          },
+          "position": [
+            2.02,
+            0,
+            -0.95
+          ],
+          "rotationY": 1.5707963267948966
+        },
+        {
+          "id": "towerLight",
+          "type": "stackLight",
+          "params": {
+            "height": 2.1,
+            "buzzer": true
+          },
+          "position": [
+            -0.06,
+            0,
+            0.66
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "statusDash",
+          "type": "statusMonitor",
+          "params": {
+            "height": 1.45,
+            "screenWidth": 0.7,
+            "screenHeight": 0.42
+          },
+          "position": [
+            0.52,
+            0,
+            0.75
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "ports": {
+        "reject": {
+          "machine": "rejectSidePusher",
+          "port": "stop",
+          "direction": "out"
+        }
+      },
+      "process": [
+        {
+          "op": "toolOn",
+          "machine": "photoInPlace",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
+        },
+        {
+          "op": "operate",
+          "machine": "dimensionBench",
+          "seconds": 40,
+          "label": "Working"
+        },
+        {
+          "op": "decide",
+          "on": "quality",
+          "cases": {
+            "pass": [],
+            "reject": [
+              {
+                "op": "push",
+                "machine": "rejectSidePusher",
+                "items": [
+                  "unit"
+                ],
+                "motion": "face",
+                "anchor": "face",
+                "to": 0.22,
+                "seconds": 0.7,
+                "retract": {
+                  "seconds": 0.45,
+                  "label": "Pusher retracting"
+                },
+                "label": "Divert out-of-tolerance panel"
+              }
+            ]
+          },
+          "planAs": "ST4",
+          "label": "Route by dimension inspection result"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    }
+  ],
+  "graph": {
+    "edges": [
+      {
+        "from": "cutToSize.output",
+        "to": "applyEdgeBand.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      },
+      {
+        "from": "applyEdgeBand.output",
+        "to": "drillHingeAndDowelHoles.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      },
+      {
+        "from": "drillHingeAndDowelHoles.output",
+        "to": "inspectDimensions.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      }
+    ]
+  }
+}

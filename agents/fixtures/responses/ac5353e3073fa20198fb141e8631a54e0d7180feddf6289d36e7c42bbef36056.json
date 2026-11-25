@@ -1,0 +1,24 @@
+{
+  "key": "ac5353e3073fa20198fb141e8631a54e0d7180feddf6289d36e7c42bbef36056",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:02:01.756Z",
+  "usage": {
+    "inputTokens": 7079,
+    "cachedInputTokens": 0,
+    "outputTokens": 134
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "formingZone.work",
+        "seconds": 1,
+        "task": "Heat-form PVC to create blister cavities (10-up)"
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

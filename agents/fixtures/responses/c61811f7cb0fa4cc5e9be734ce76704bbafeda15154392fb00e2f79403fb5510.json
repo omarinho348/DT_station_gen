@@ -1,0 +1,50 @@
+{
+  "key": "c61811f7cb0fa4cc5e9be734ce76704bbafeda15154392fb00e2f79403fb5510",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:06:36.815Z",
+  "usage": {
+    "inputTokens": 6993,
+    "cachedInputTokens": 5888,
+    "outputTokens": 315
+  },
+  "output": {
+    "id": "pumpHeadPlacement",
+    "code": "ST2",
+    "title": "Place pump head",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Place pump head",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "pumpHeadFeeder",
+        "type": "vibratoryFeeder",
+        "why": "Supply pump heads as parts",
+        "place": "besideLine",
+        "at": "input",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "pumpHeadRobot",
+        "type": "scara",
+        "why": "Pick a pump head and install it on the bottle neck",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": []
+  }
+}

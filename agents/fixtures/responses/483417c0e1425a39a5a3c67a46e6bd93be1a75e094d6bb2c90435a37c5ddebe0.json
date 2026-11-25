@@ -1,0 +1,70 @@
+{
+  "key": "483417c0e1425a39a5a3c67a46e6bd93be1a75e094d6bb2c90435a37c5ddebe0",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:07:00.755Z",
+  "usage": {
+    "inputTokens": 6164,
+    "cachedInputTokens": 4864,
+    "outputTokens": 744
+  },
+  "output": {
+    "id": "pasteSolderPaste",
+    "code": "ST1",
+    "title": "Solder paste dispense on PCB pads",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Solder paste dispense",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "boardPhotoEye",
+        "type": "photoEye",
+        "why": "Verify carrier arrival and correct board presence",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "solderPasteDispenser",
+        "type": "genericMachine",
+        "why": "Dispense solder paste pattern onto PCB pads",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "solderPasteVision",
+        "type": "visionScanner",
+        "why": "Confirm board/paste placement condition and enable quality verdict handling",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "dispenseNozzleTool",
+        "type": "dispenseNozzle",
+        "why": "Stencil/nozzle tool used by the dispenser head",
+        "place": "upstream",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

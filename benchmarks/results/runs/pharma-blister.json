@@ -3,12 +3,12 @@
   "stage": "builder",
   "ok": false,
   "cost": {
-    "spec": 0.00324046,
-    "builder": 0.01530121,
+    "spec": 0,
+    "builder": 0,
     "editor": 0,
     "reviewer": 0
   },
-  "seconds": 62.655,
+  "seconds": 40,
   "brief": {
     "status": "draft",
     "retries": 0,
@@ -34,16 +34,17 @@
       "id": "formBlisterCavities",
       "title": "Form PVC blister cavities",
       "ok": true,
-      "refusals": 3,
-      "phases": [
-        "layout",
-        "machines",
-        "process"
-      ],
+      "refusals": 0,
+      "phases": [],
       "kind": "placeholder",
       "types": [
+        "beltConveyor",
+        "floorSlab",
+        "guardFence",
         "shutterEnclosure",
-        "genericMachine"
+        "genericMachine",
+        "hmi",
+        "stackLight"
       ],
       "problems": []
     },
@@ -51,12 +52,17 @@
       "id": "doseTablets",
       "title": "Dose tablets into cavities",
       "ok": true,
-      "refusals": 0,
-      "phases": [],
+      "refusals": 3,
+      "phases": [
+        "layout",
+        "layout",
+        "machines"
+      ],
       "kind": "placeholder",
       "types": [
         "genericMachine",
-        "photoEye"
+        "beltEndStop",
+        "beltConveyor"
       ],
       "problems": []
     },
@@ -74,20 +80,22 @@
       ],
       "kind": "named",
       "types": [
-        "visionScanner"
+        "visionScanner",
+        "beltConveyor"
       ],
       "problems": [
-        "conveyor: this station takes unit at its input (\"palletLine\", beltConveyor), but \"doseTablets\" hands over pallet: use a conveyor that takes pallet"
+        "conveyor: this station takes pallet at its input (\"line\", palletConveyor), but \"doseTablets\" hands over unit: use a conveyor or shell that takes unit"
       ]
     }
   ],
-  "reason": "station \"inspectCavities\" still failing after the retries: conveyor: this station takes unit at its input (\"palletLine\", beltConveyor), but \"doseTablets\" hands over pallet: use a conveyor that takes pallet",
-  "totalCost": 0.01854167,
+  "reason": "station \"inspectCavities\" still failing after the retries: conveyor: this station takes pallet at its input (\"line\", palletConveyor), but \"doseTablets\" hands over unit: use a conveyor or shell that takes unit",
+  "totalCost": 0.0149,
   "mode": "live",
   "models": {
     "builder": "gpt-5.4-nano",
     "others": "gpt-5.4-nano"
   },
   "retries": 4,
-  "time": "2026-11-25T02:23:54.672Z"
+  "time": "2026-11-25T14:05:02.048Z",
+  "costNote": "cost and time of the live run (step 13.3); the run file was rewritten by a $0 rerun from the cache that recorded the answers"
 }

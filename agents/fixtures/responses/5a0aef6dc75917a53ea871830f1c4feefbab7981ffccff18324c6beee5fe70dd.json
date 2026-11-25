@@ -1,0 +1,25 @@
+{
+  "key": "5a0aef6dc75917a53ea871830f1c4feefbab7981ffccff18324c6beee5fe70dd",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:05:52.549Z",
+  "usage": {
+    "inputTokens": 7639,
+    "cachedInputTokens": 0,
+    "outputTokens": 129
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "waterFiller.fillUnit",
+        "seconds": 3,
+        "liquid": "still mineral water",
+        "supply": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

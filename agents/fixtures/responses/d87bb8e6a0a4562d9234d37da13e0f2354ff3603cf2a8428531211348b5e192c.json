@@ -1,0 +1,43 @@
+{
+  "key": "d87bb8e6a0a4562d9234d37da13e0f2354ff3603cf2a8428531211348b5e192c",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:03:05.211Z",
+  "usage": {
+    "inputTokens": 7359,
+    "cachedInputTokens": 6912,
+    "outputTokens": 215
+  },
+  "output": {
+    "params": {
+      "hmiPanel": {
+        "height": 1.35
+      },
+      "photoInPlace": {
+        "span": 0.4
+      },
+      "dimensionBench": {
+        "name": "Dim check bench",
+        "note": "OK / reject",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 2.1,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "rejectSidePusher": {
+        "plateLength": 0.68
+      },
+      "towerLight": {
+        "height": 2.1,
+        "buzzer": true
+      },
+      "statusDash": {
+        "height": 1.45,
+        "screenWidth": 0.7,
+        "screenHeight": 0.42
+      }
+    }
+  }
+}

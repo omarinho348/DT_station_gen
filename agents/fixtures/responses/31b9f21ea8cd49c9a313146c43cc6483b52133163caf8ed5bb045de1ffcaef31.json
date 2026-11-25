@@ -1,0 +1,25 @@
+{
+  "key": "31b9f21ea8cd49c9a313146c43cc6483b52133163caf8ed5bb045de1ffcaef31",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:06:46.636Z",
+  "usage": {
+    "inputTokens": 7514,
+    "cachedInputTokens": 0,
+    "outputTokens": 310
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "pumpHeadRobot.moveUnit",
+        "clearance": 0.12,
+        "task": "Place pump head onto the bottle opening/neck position",
+        "to": "pumpHeadFeeder.outlet"
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

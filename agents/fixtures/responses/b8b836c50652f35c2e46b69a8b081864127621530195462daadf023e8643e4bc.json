@@ -1,0 +1,46 @@
+{
+  "key": "b8b836c50652f35c2e46b69a8b081864127621530195462daadf023e8643e4bc",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:02:52.040Z",
+  "usage": {
+    "inputTokens": 6956,
+    "cachedInputTokens": 0,
+    "outputTokens": 197
+  },
+  "output": {
+    "params": {
+      "drillNestFixture": {
+        "length": null,
+        "width": null,
+        "height": null,
+        "lanes": [
+          -0.17,
+          -0.08,
+          0,
+          0.06,
+          0.15
+        ],
+        "laneWidth": null,
+        "saddleSpacing": null
+      },
+      "drillZoneEnclosure": {
+        "length": null,
+        "width": null,
+        "height": null,
+        "shutterRise": null,
+        "extraction": null
+      },
+      "drillMachining": {
+        "name": "DRILLING",
+        "note": "Hinge cup & dowel hole drilling",
+        "length": null,
+        "depth": null,
+        "height": null,
+        "passThrough": true,
+        "carries": "unit"
+      }
+    }
+  }
+}

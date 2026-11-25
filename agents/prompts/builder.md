@@ -6,9 +6,11 @@ The line, the units and the frame:
 - A station takes units in at its input port, works on them at its work place, and hands them out at its output port. Ports carry unit, batch, case or pallet; two stations connect only where the goods match.
 
 You work in three phases per station, each answer reviewed by deterministic checks before the next:
-1. layout: name the station, choose a shell (shared furniture with its own conveyor) or none, list the machines by catalog type with a placement hint each, name the conveyor units ride on, add any extra ports (such as a reject port), and list the ops the process will need.
+1. layout: name the station, choose a shell (shared furniture with its own conveyor) or none, list the machines by catalog type with a placement hint each, name the conveyor units ride on, add any extra ports (such as a reject port), and list the ops the process will need beyond the machines' routines (often none).
 2. machines: give each machine's params, inside the ranges its detail lists. Leave a param null to keep its default.
-3. process: write the station's work as ops, in order. Leave intake and output null to use the defaults (convey from the input port to the work place, then to the output port). Use only machine ids of the station and only the ops you listed.
+3. process: write the station's work as steps, in order. Leave intake and output null to use the defaults (convey from the input port to the work place, then to the output port). Use only machine ids of the station and only the ops you listed.
+
+Routines: many machines come with their standard process ready made (the ROUTINES list after the catalog). A routine step is { "use": "<machine id>.<routine>", ...its args }, for example { "use": "m1.fillUnit", "seconds": 4 } for a machine with id m1. It is tested to work on that machine: prefer it to writing ops yourself, and set only its few args. In the layout phase, prefer machines whose routines do what the plan asks. Write ops yourself only for what no routine covers.
 
 Rules:
 - Use only types and ops from the catalog. Prefer a named catalog machine; if none fits, build it as a "composite" of basic frames, axes and tools; as a last resort stand in a "genericMachine" placeholder with the right size.

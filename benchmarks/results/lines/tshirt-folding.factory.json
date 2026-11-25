@@ -22,28 +22,119 @@
       "id": "loadFlatShirt",
       "code": "ST1",
       "title": "Manual shirt load",
+      "equipment": [
+        {
+          "id": "infeedBelt",
+          "type": "beltConveyor",
+          "params": {
+            "length": 4
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "inputStop",
+          "type": "beltEndStop",
+          "params": {},
+          "position": [
+            2.025,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "shirtInPlaceEye",
+          "type": "photoEye",
+          "params": {},
+          "position": [
+            -0.875,
+            0,
+            -0.485
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "stationHmi",
+          "type": "hmi",
+          "params": {},
+          "position": [
+            0.0125,
+            0,
+            0.84
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "stackLight",
+          "type": "stackLight",
+          "params": {},
+          "position": [
+            0.0125,
+            0,
+            -1.505
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "foldingMachine",
+          "type": "genericMachine",
+          "params": {
+            "name": "Folding-machine input"
+          },
+          "position": [
+            0.1,
+            0,
+            -0.845
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "infeedBelt",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "toolOn",
+          "machine": "shirtInPlaceEye",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
+        },
+        {
+          "op": "operate",
+          "machine": "foldingMachine",
+          "seconds": 4,
+          "label": "Fold cycle"
+        }
+      ],
+      "feed": {
+        "fromLift": false
+      }
+    },
+    {
+      "id": "foldTo250x300",
+      "code": "ST2",
+      "title": "Fold to 250×300 mm",
       "shell": {
         "type": "assemblyCell",
         "params": {
-          "code": "ST1",
-          "title": "Manual shirt load"
+          "code": "ST2",
+          "title": "Fold to 250×300 mm"
         }
       },
       "equipment": [
         {
-          "id": "foldInputStopMachine",
+          "id": "foldingMachine",
           "type": "genericMachine",
-          "params": {
-            "name": "Fold Input Stop",
-            "note": "Operator placement",
-            "length": 1.2,
-            "depth": 1,
-            "height": 2,
-            "passThrough": true,
-            "carries": "unit"
-          },
+          "params": {},
           "position": [
-            -2.2,
+            0,
             0,
             0
           ],
@@ -51,41 +142,23 @@
         }
       ],
       "conveyor": "line",
-      "inputStage": "raw",
-      "process": [
-        {
-          "op": "grip",
-          "machine": "foldInputStopMachine",
-          "item": "product",
-          "motion": "grip",
-          "to": 1,
-          "indicator": "holding",
-          "seconds": 0.3,
-          "label": "Load T-shirt onto folding infeed stop"
-        },
-        {
-          "op": "operate",
-          "machine": "foldInputStopMachine",
-          "seconds": 4,
-          "label": "Fold cycle"
-        },
-        {
-          "op": "release",
-          "machine": "foldInputStopMachine",
-          "item": "product",
-          "motion": "grip",
-          "to": 0,
-          "indicator": "holding",
-          "seconds": 0.3,
-          "label": "Release folded T-shirt to conveyor"
-        }
-      ],
+      "process": [],
       "feed": {
         "fromLift": true
       }
     }
   ],
   "graph": {
-    "edges": []
+    "edges": [
+      {
+        "from": "loadFlatShirt.output",
+        "to": "foldTo250x300.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "beltConveyor",
+          "params": {}
+        }
+      }
+    ]
   }
 }

@@ -26,7 +26,11 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { layoutSchema, machinesSchema, processSchema } from './schemas.js';
 import { catalogIndex, catalogDetail } from '../../lib/catalog.js';
+import { recipeLines, stationRecipes, candidatesFor, expandRecipes } from '../../lib/recipes.js';
+import { paramFields } from '../../lib/registry.js';
 import { placeStation, PlacementError } from '../../lib/station/place.js';
+import { measureUnit } from '../../lib/station/unit.js';
+import { reachPose, reachNeeded, workPlaceOf } from '../../lib/station/reach.js';
 import { review, formatFindings } from '../reviewer/deterministic.js';
 import { compileFactory } from '../../compiler/emit.js';
 import { writeCompiled } from '../../compiler/write.js';
@@ -55,8 +59,10 @@ export function phaseOf(finding, stationIndex) {
  * @param {boolean} [o.play]      also play the run once a station passes (reach of worked-out targets)
  */
 export function createBuilder({ registry, llm, root = null, maxRetries = 2, play = true }) {
-  // The stable start of every prompt (instructions + catalog): the same bytes for the whole session.
-  const system = `${readFileSync(INSTRUCTIONS, 'utf8').trim()}\n\nCATALOG\n${JSON.stringify(catalogIndex(registry))}`;
+  // The stable start of every prompt (instructions + catalog + the machines' routines): the same bytes
+  // for the whole session. The routines are the Builder's alone, so the other agents' prompts (and
+  // their recorded answers) stay as they were.
+  const system = `${readFileSync(INSTRUCTIONS, 'utf8').trim()}\n\nCATALOG\n${JSON.stringify(catalogIndex(registry))}\n\nROUTINES (type.routine(args) — what it does)\n${JSON.stringify(recipeLines(registry))}`;
   const ctx = (line) => ({ beltHeight: line.conventions?.beltHeight ?? CONVENTIONS.beltHeight });
 
   const ask = async (schemaDef, task) => llm.call({
@@ -300,7 +306,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
     const r = await ask(def, taskText('machines', { ...lineContext(job), plan: job.plan, layout, detail: detail.components, previousAnswer: feedback ? state.params : null, feedback }));
     const params = def.decode(r.output).params;
     const problems = [];
-    const repairs = singleUnitParams(layout, params);
+    const repairs = [...singleUnitParams(layout, params), ...fitParams(job, layout, params)];
     for (const [j, e] of layout.equipment.entries()) {
       try { registry.componentSpec(e.type, params[e.id] ?? {}, ctx(job.line)); } catch (error) { problems.push(`equipment[${j}].params (${e.id}): ${error.message}`); }
     }
@@ -324,16 +330,82 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
     return notes;
   }
 
+  /** The line's unit, measured once per product (lib/station/unit.js): what machines are fitted to. */
+  const units = new Map();
+  const unitOf = (job) => {
+    const key = JSON.stringify([job.product, ctx(job.line)]);
+    if (!units.has(key)) units.set(key, measureUnit(registry, job.product, ctx(job.line)));
+    return units.get(key);
+  };
+
+  /**
+   * Params a machine fits to the unit it works on (`fit` in the component contract: a nozzle height at
+   * the neck, a seat height at the cap seat), in code: the model can't measure the product. Mutates
+   * params; returns notes. Values the fit gives that the params' ranges refuse are left as they were.
+   */
+  function fitParams(job, layout, params) {
+    const unit = unitOf(job);
+    const notes = [];
+    if (!unit) return notes;
+    for (const e of layout.equipment) {
+      const def = registry.getComponent(e.type);
+      if (!def?.fit) continue;
+      const before = params[e.id] ?? {};
+      let current;
+      try { current = registry.componentSpec(e.type, before, ctx(job.line)).params; } catch { continue; }
+      const patch = def.fit({ unit, params: current, ctx: ctx(job.line) }) ?? {};
+      const changed = Object.entries(patch).filter(([k, v]) => Math.abs((current[k] ?? 0) - v) > 1e-4);
+      if (!changed.length) continue;
+      const next = { ...before, ...Object.fromEntries(changed) };
+      try { registry.componentSpec(e.type, next, ctx(job.line)); } catch { continue; }
+      params[e.id] = next;
+      notes.push(`${e.id}: ${changed.map(([k, v]) => `${k} ${current[k]} → ${v}`).join(', ')} (fitted to the unit)`);
+    }
+    return notes;
+  }
+
   function place(job, state) {
-    const { layout, params } = state;
+    const { layout } = state;
+    const params = { ...(state.params ?? {}) };
     const shell = layout.shell ? registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)) : null;
-    const r = placeStation(registry, {
+    const run = () => placeStation(registry, {
       conveyor: layout.conveyor,
       fixed: shell?.equipment ?? [],
       equipment: layout.equipment.map((e) => ({ ...e, params: params[e.id] ?? {} })),
       ctx: ctx(job.line),
     });
-    return { placed: r.equipment, notes: [...(state.notes ?? []).filter((n) => n.repair), ...r.notes], machines: [...(shell?.equipment ?? []).map((e) => e.id), ...layout.equipment.map((e) => e.id)] };
+    let r = run();
+    // A reach-in tool (a tamp pad, a plug) that can't reach the unit from where it stands gets the
+    // stroke it needs, and the station is placed again (its retracted tool stays at the conveyor's edge).
+    const reachNotes = reachFit(job, layout, params, r.equipment, shell);
+    if (reachNotes.length) r = run();
+    return {
+      params,
+      placed: r.equipment,
+      notes: [...(state.notes ?? []).filter((n) => n.repair && !n.reach), ...reachNotes.map((message) => ({ repair: true, reach: true, message })), ...r.notes],
+      machines: [...(shell?.equipment ?? []).map((e) => e.id), ...layout.equipment.map((e) => e.id)],
+    };
+  }
+
+  /** Lengthens reach-in strokes the unit is beyond (mutates params); returns notes. */
+  function reachFit(job, layout, params, placed, shell) {
+    const unit = unitOf(job);
+    const notes = [];
+    const conveyor = [...(shell?.equipment ?? []), ...placed].find((e) => e.id === layout.conveyor);
+    if (!unit || !conveyor) return notes;
+    const workAt = workPlaceOf(registry, conveyor, ctx(job.line));
+    for (const e of placed) {
+      const pose = (() => { try { return reachPose(registry, e, ctx(job.line)); } catch { return null; } })();
+      if (!pose?.param) continue;
+      const needed = reachNeeded(pose, unit, workAt);
+      if (needed === null || needed <= pose.max) continue;
+      const field = paramFields(registry.getComponent(e.type).params).find((f) => f.key === pose.param);
+      const want = Math.round((needed + 0.005) * 1000) / 1000;
+      const value = field?.max !== undefined ? Math.min(field.max, want) : want;
+      params[e.id] = { ...(params[e.id] ?? {}), [pose.param]: value };
+      notes.push(`${e.id}: ${pose.param} ${pose.max} → ${value} (to reach the unit${value < want ? `; it needs ${want}, more than the most it has` : ''})`);
+    }
+    return notes;
   }
 
   async function processPhase(job, state, feedback) {
@@ -347,16 +419,42 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
         info[e.id] = { ops: registry.getComponent(e.type).ops ?? [], motions: Object.keys(spec.motions ?? {}), valueMotions: Object.entries(spec.motions ?? {}).filter(([, m]) => m.values).map(([k]) => k) };
       } catch { /* the checks report it */ }
     }
-    const def = processSchema(registry, { ops: layout.ops, machines, info, items: ['product'] });
-    const types = [...new Set([...placed.map((e) => e.type), ...(layout.shell ? registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)).equipment.map((e) => e.type) : [])])];
+    // The machines' routines (their standard processes) the product allows, each station arg limited
+    // to the machines that fit it; a routine whose required station arg nothing here can fill is left out.
+    const all = [...shellEquipment, ...placed];
+    const productDef = registry.getProduct(productType(job));
+    const recipes = stationRecipes(registry, all, { productDef }).map((r) => ({
+      ...r,
+      candidates: Object.fromEntries(Object.entries(r.def.stationArgs ?? {}).map(([k, rule]) => [k, candidatesFor(registry, rule, all, ctx(job.line), { exclude: r.machine })])),
+    })).filter((r) => Object.entries(r.def.stationArgs ?? {}).every(([k, rule]) => rule.optional || r.candidates[k].length));
+    const def = processSchema(registry, { ops: layout.ops, machines, info, items: ['product'], recipes });
+    const types = [...new Set(all.map((e) => e.type))];
     const detail = catalogDetail(registry, { types, ops: layout.ops });
     const station = { id: layout.id, conveyor: layout.conveyor, machines: placed.map((e) => ({ id: e.id, type: e.type, position: e.position })), ports: layout.ports ?? [] };
-    const r = await ask(def, taskText('process', { ...lineContext(job), plan: job.plan, station, detail, previousAnswer: feedback ? state.process : null, feedback }));
-    return { value: def.decode(r.output), cost: r.cost, problems: [] };
+    const routines = recipes.length ? recipes.map((r) => ({
+      use: r.use,
+      does: r.def.summary,
+      args: Object.fromEntries(paramFields(r.def.args).map((f) => [f.key, [f.kind, f.min !== undefined ? `${f.min}–${f.max}` : null, f.default !== undefined ? `default ${f.default}` : null, f.label !== f.key ? f.label : null].filter(Boolean).join(', ')])),
+      ...(Object.keys(r.candidates).length ? { machinesFor: r.candidates } : {}),
+    })) : null;
+    const r = await ask(def, taskText('process', { ...lineContext(job), plan: job.plan, station, routines, detail, previousAnswer: feedback ? (state.processAnswer ?? state.process) : null, feedback }));
+    const answer = def.decode(r.output);
+    // Routine calls become the plain ops they stand for: factory.json only ever holds ops.
+    const expandCtx = { ctx: ctx(job.line), productDef, unit: unitOf(job) };
+    const stationInfo = { conveyor: layout.conveyor, machines: all.map((e) => ({ id: e.id, type: e.type, params: e.params ?? {}, position: e.position, rotationY: e.rotationY ?? 0 })) };
+    const problems = [];
+    const value = { ...answer };
+    for (const part of ['intake', 'process', 'output']) {
+      if (!answer[part]) continue;
+      const x = expandRecipes(registry, answer[part], stationInfo, { ...expandCtx, path: part });
+      value[part] = x.ops;
+      problems.push(...x.problems);
+    }
+    return { value, answer, cost: r.cost, problems };
   }
 
   /** A fresh build of one station: where it starts, what was refused, what it cost. Plain JSON. */
-  const newBuild = () => ({ from: 'layout', feedback: null, attempts: [], cost: 0, layout: null, params: null, placed: null, notes: [], machines: null, process: null });
+  const newBuild = () => ({ from: 'layout', feedback: null, attempts: [], cost: 0, layout: null, params: null, placed: null, notes: [], machines: null, process: null, processAnswer: null });
 
   /**
    * Runs a build on from where it stands (`build.from`) until the phase `stopAfter` has passed its
@@ -399,6 +497,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
           // The preview: default params, placed from the hints. A hint that can't be placed is refused.
           build.params = {};
           singleUnitParams(build.layout, build.params);
+          fitParams(job, build.layout, build.params);
           try {
             Object.assign(build, place(job, build));
           } catch (error) {
@@ -424,6 +523,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
           continue;
         }
         build.process = null;
+        build.processAnswer = null;
         // Clashes are known now: refused before the process call is paid for.
         const result = review(registry, factoryWith(job, assemble(job, build)), { play: false });
         const clashes = blockingOf(result.findings, 'geometry');
@@ -434,6 +534,8 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
       const r = await processPhase(job, build, build.feedback);
       build.cost += r.cost;
       build.process = r.value;
+      build.processAnswer = r.answer;
+      if (r.problems.length) { refuse('process', r.problems); continue; }
 
       // The deterministic reviewer on the line so far (fast checks and geometry; play once it passes).
       const factory = factoryWith(job, assemble(job, build));
@@ -465,7 +567,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
     build.attempts = [];
     build.feedback = `The owner rejected your ${phase} answer with this comment: "${String(comment).trim()}". Change what the comment asks and keep the rest.`;
     if (phase === 'layout') { build.params = null; build.placed = null; }
-    if (phase !== 'process') build.process = null;
+    if (phase !== 'process') { build.process = null; build.processAnswer = null; }
     return build;
   }
 

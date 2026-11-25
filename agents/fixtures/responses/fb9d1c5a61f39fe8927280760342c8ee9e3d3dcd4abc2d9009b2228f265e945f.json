@@ -1,0 +1,28 @@
+{
+  "key": "fb9d1c5a61f39fe8927280760342c8ee9e3d3dcd4abc2d9009b2228f265e945f",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:01:01.212Z",
+  "usage": {
+    "inputTokens": 6020,
+    "cachedInputTokens": 0,
+    "outputTokens": 144
+  },
+  "output": {
+    "params": {
+      "bagClipCloser": {
+        "name": "CLIP CLOSER",
+        "note": "Clips bag mouth at fixed station work position",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "clipPresenceEye": {
+        "span": 0.4
+      }
+    }
+  }
+}

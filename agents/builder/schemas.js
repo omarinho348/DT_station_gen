@@ -102,7 +102,7 @@ export function layoutSchema(registry, { product = null } = {}) {
           required: ['name', 'machine', 'port', 'direction'],
         },
       },
-      ops: { type: 'array', items: { type: 'string', enum: ops }, description: 'The ops the process will use (the process phase can use only these)' },
+      ops: { type: 'array', items: { type: 'string', enum: ops }, description: 'The ops the process will use beyond its machines\' routines (routines need no listing; the process phase can use only these ops); often none' },
     },
     required: ['id', 'title', 'equipment', 'conveyor', 'ops'],
   };
@@ -169,17 +169,47 @@ function machinesFor(def, machines, info) {
 }
 
 /**
+ * A routine call as a union branch: { use: "machine.routine", ...its args, ...its station args }.
+ * Station args are limited to the station machines that fit (`candidates`); an optional one with no
+ * candidate is left out.
+ */
+function recipeBranch({ use, def, candidates = {} }) {
+  const args = jsonOf(def.args);
+  const station = {};
+  const required = [...(args.required ?? [])];
+  for (const [key, rule] of Object.entries(def.stationArgs ?? {})) {
+    const list = candidates[key] ?? [];
+    if (!list.length) continue;
+    station[key] = { type: 'string', enum: list, description: rule.about ?? 'a machine of the station' };
+    if (!rule.optional) required.push(key);
+  }
+  return {
+    type: 'object',
+    description: `Routine: ${def.summary}`,
+    properties: { use: { const: use }, ...(args.properties ?? {}), ...station },
+    required: ['use', ...required],
+  };
+}
+
+/**
  * Phase 3: the process. intake / output may be null (the defaults: convey from the input port to the
- * work place and on to the output port); process is the station's own ops. Each op is one of
- * `ops`, typed by its args; ops a decision runs are the same union.
+ * work place and on to the output port); process is the station's own steps. Each step is a routine
+ * of one of the station's machines ({ use: "machine.routine", args }: the machine's standard process,
+ * lib/recipes.js) or one of `ops`, typed by its args; steps a decision runs are the same union.
  * @param {object} o
  * @param {string[]} o.ops       the ops the layout phase chose
  * @param {string[]} o.machines  every equipment id of the station (shell's included)
  * @param {object} [o.info]      { id: { ops, motions } } per machine (its component's ops and motions)
  * @param {string[]} [o.items]   the items the station's ops can name (the unit is "product")
+ * @param {object[]} [o.recipes] the station's routines: [{ use, def, candidates: { stationArg: [ids] } }]
  */
-export function processSchema(registry, { ops, machines, info = null, items = null }) {
-  const branches = [...new Set(ops)].map((op) => {
+export function processSchema(registry, { ops, machines, info = null, items = null, recipes = [] }) {
+  const routineBranches = recipes.map(recipeBranch);
+  // Nothing to choose from at all would be an empty union: a wait keeps the schema valid (the checks
+  // then say what is missing).
+  const opNames = [...new Set(ops)];
+  if (!opNames.length && !routineBranches.length) opNames.push('wait');
+  const branches = opNames.map((op) => {
     const def = registry.getOp(op);
     if (!def) throw new Error(`unknown op "${op}"`);
     const args = shapeOpArgs(jsonOf(def.args), { machines: machinesFor(def, machines, info), conveyors: machines, items });
@@ -194,13 +224,13 @@ export function processSchema(registry, { ops, machines, info = null, items = nu
   const source = {
     type: 'object',
     properties: {
-      intake: list('Ops that bring a unit from the input port to the work place; null for the default'),
-      process: list('The station\'s own ops on the unit at the work place'),
-      output: list('Ops that take the finished unit to the output port; null for the default'),
+      intake: list('Steps that bring a unit from the input port to the work place; null for the default'),
+      process: list('The station\'s own steps on the unit at the work place: machine routines first, ops for what no routine covers'),
+      output: list('Steps that take the finished unit to the output port; null for the default'),
       inputStage: { type: 'string', description: 'The product stage units arrive in (one of the product\'s stages), or null' },
     },
     required: ['process'],
-    $defs: { op: { anyOf: branches } },
+    $defs: { op: { anyOf: [...routineBranches, ...branches] } },
   };
   return { name: 'stationProcess', ...toStrict(source) };
 }

@@ -22,9 +22,16 @@
       "id": "coolingBuffer",
       "code": "ST1",
       "title": "Cool loaves by dwell",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Cool loaves by dwell"
+        }
+      },
       "equipment": [
         {
-          "id": "coolTable",
+          "id": "dwellTable",
           "type": "accumulationTable",
           "params": {
             "radius": 0.6,
@@ -34,7 +41,7 @@
           "position": [
             0,
             0,
-            0
+            -1.85
           ],
           "rotationY": 0
         },
@@ -49,7 +56,7 @@
           "position": [
             0,
             0,
-            -1.01
+            -0.78
           ],
           "rotationY": 0
         },
@@ -62,64 +69,126 @@
             "color": "#2c5d8f",
             "width": 2,
             "height": 3.1,
-            "scale": 0.9
+            "scale": 1
           },
           "position": [
             0,
             0,
-            0.994
+            0.66
           ],
           "rotationY": 0
         }
       ],
-      "conveyor": "coolTable",
+      "conveyor": "line",
       "inputStage": "raw",
       "process": [
         {
-          "op": "accumulate",
-          "items": [
-            {
-              "item": "product",
-              "conveyor": "coolTable",
-              "to": {
-                "machine": "coolTable",
-                "port": "output"
-              }
-            }
-          ],
-          "blend": 0.06,
-          "stopping": {
-            "label": "Loaves dwell stop"
-          },
-          "label": "Register loaf on cooling dwell table"
-        },
-        {
           "op": "wait",
           "seconds": 2.5,
-          "label": "Cooling dwell",
-          "status": {
-            "stationCode": "ST1"
-          }
+          "label": "Cooling dwell on accumulation table"
         }
       ],
       "feed": {
-        "fromLift": false
+        "fromLift": true
       }
     },
     {
       "id": "slicingStation",
       "code": "ST2",
       "title": "Slice loaves to sandwiches",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST2",
+          "title": "Slice loaves to sandwiches"
+        }
+      },
       "equipment": [
         {
-          "id": "slicingConveyor",
-          "type": "beltConveyor",
+          "id": "hygienicGuardFence",
+          "type": "guardFence",
           "params": {
-            "length": 4,
-            "beltWidth": 0.34,
-            "guides": true,
-            "guideGap": 0.22,
-            "drive": true,
+            "length": 4.1,
+            "height": 2,
+            "panelWidth": 1.6
+          },
+          "position": [
+            0,
+            0,
+            -1.13
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "slicerUnit",
+          "type": "genericMachine",
+          "params": {
+            "name": "MACHINE",
+            "length": 1.6,
+            "depth": 1.2,
+            "height": 1.9,
+            "passThrough": true,
+            "carries": "unit"
+          },
+          "position": [
+            -2.4,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "slicerInfeedWorkTable",
+          "type": "workTable",
+          "params": {
+            "length": 1.2,
+            "width": 0.7,
+            "height": 0.9,
+            "top": "stainless"
+          },
+          "position": [
+            0,
+            0,
+            -0.76
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "process": [
+        {
+          "op": "operate",
+          "machine": "slicerUnit",
+          "seconds": 2.8,
+          "label": "Slice loaves (cycle)"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "baggingStation",
+      "code": "ST3",
+      "title": "Bag sliced loaf",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST3",
+          "title": "Bag sliced loaf"
+        }
+      },
+      "equipment": [
+        {
+          "id": "baggerCell",
+          "type": "genericMachine",
+          "params": {
+            "name": "Bag & settle",
+            "note": "Guide loaf into bag",
+            "length": 1.6,
+            "depth": 1.2,
+            "height": 2,
+            "passThrough": true,
             "carries": "unit"
           },
           "position": [
@@ -130,9 +199,66 @@
           "rotationY": 0
         },
         {
-          "id": "slicerClampsAndHead",
+          "id": "loafStop",
+          "type": "beltEndStop",
+          "params": {
+            "span": 0.58
+          },
+          "position": [
+            -0.025,
+            0,
+            -0.92
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "safetyFence",
+          "type": "guardFence",
+          "params": {
+            "length": 4.1,
+            "height": 2,
+            "panelWidth": 1.6
+          },
+          "position": [
+            0,
+            0,
+            -0.78
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "processed",
+      "process": [
+        {
+          "op": "operate",
+          "machine": "baggerCell",
+          "seconds": 2.5,
+          "label": "Bag sliced loaf into plastic bag"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "clipClosingStation",
+      "code": "ST4",
+      "title": "Clip close bag",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST4",
+          "title": "Clip close bag"
+        }
+      },
+      "equipment": [
+        {
+          "id": "bagClipCloser",
           "type": "genericMachine",
           "params": {
+            "name": "Bag clipper",
+            "note": "Clip onto bag mouth",
             "length": 1.6,
             "depth": 1.2,
             "height": 1.9,
@@ -147,53 +273,245 @@
           "rotationY": 0
         },
         {
-          "id": "safetyGuardFence",
-          "type": "guardFence",
+          "id": "clipPresenceEye",
+          "type": "photoEye",
           "params": {
-            "length": 4.1,
-            "height": 2,
-            "panelWidth": 1.6
+            "span": 0.4
           },
           "position": [
-            0.0125,
             0,
-            -0.615
+            0,
+            -0.65
           ],
           "rotationY": 0
         }
       ],
-      "conveyor": "slicingConveyor",
-      "inputStage": "raw",
+      "conveyor": "line",
       "process": [
         {
-          "op": "grip",
-          "machine": "slicerClampsAndHead",
-          "item": "product",
-          "motion": "grip",
-          "to": 1,
-          "indicator": "holding",
-          "seconds": 0.3,
-          "label": "Clamp loaf"
-        },
-        {
           "op": "operate",
-          "machine": "slicerClampsAndHead",
-          "seconds": 2.8,
-          "label": "Slice loaves"
+          "machine": "bagClipCloser",
+          "seconds": 1.5,
+          "label": "Close bag using clip"
         },
         {
-          "op": "release",
-          "machine": "slicerClampsAndHead",
-          "item": "product",
-          "motion": "grip",
-          "to": 0,
-          "indicator": "holding",
+          "op": "toolOn",
+          "machine": "clipPresenceEye",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
           "seconds": 0.3,
-          "label": "Release slices to conveyor"
+          "label": "Unit detected"
         }
       ],
       "feed": {
-        "fromLift": false
+        "fromLift": true
+      }
+    },
+    {
+      "id": "dateLabelStation",
+      "code": "ST5",
+      "title": "Apply date label",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST5",
+          "title": "Apply date label"
+        }
+      },
+      "equipment": [
+        {
+          "id": "dateLabelApplicator",
+          "type": "labelApplicator",
+          "params": {
+            "applyHeight": 0.91,
+            "stroke": 0.3,
+            "padWidth": 0.06
+          },
+          "position": [
+            0,
+            0,
+            0.45
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "process": [
+        {
+          "op": "move",
+          "machine": "dateLabelApplicator",
+          "to": {
+            "tamp": 0
+          },
+          "seconds": 0.66,
+          "routine": {
+            "routine": "label"
+          },
+          "label": "Applying the label",
+          "state": "LABELLING"
+        },
+        {
+          "op": "move",
+          "machine": "dateLabelApplicator",
+          "to": {
+            "tamp": 0
+          },
+          "seconds": 0.54,
+          "label": "Labeller retracting",
+          "state": "LABELLING"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "checkWeigher",
+      "code": "ST6",
+      "title": "Weigh check and accept/reject",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST6",
+          "title": "Weigh check and accept/reject"
+        }
+      },
+      "equipment": [
+        {
+          "id": "inPlacePhotoEye",
+          "type": "photoEye",
+          "params": {
+            "span": 0.4
+          },
+          "position": [
+            0,
+            0,
+            -0.65
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "weighMachine",
+          "type": "genericMachine",
+          "params": {
+            "name": "Check Weigher",
+            "note": "Weigh check and PASS/REJECT routing",
+            "length": 1.6,
+            "depth": 1.2,
+            "height": 1.9,
+            "passThrough": true,
+            "carries": "unit"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "weighVision",
+          "type": "visionScanner",
+          "params": {
+            "length": 2.7,
+            "width": 1.44,
+            "railHeight": 2.05,
+            "archWidth": 1,
+            "archBottom": 1.3
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "ports": {
+        "reject": {
+          "machine": "weighVision",
+          "port": "rejectLane",
+          "direction": "out"
+        }
+      },
+      "inputStage": "labelled",
+      "process": [
+        {
+          "op": "toolOn",
+          "machine": "inPlacePhotoEye",
+          "motion": "beam",
+          "value": "blocked",
+          "then": "clear",
+          "seconds": 0.3,
+          "label": "Unit detected"
+        },
+        {
+          "op": "operate",
+          "machine": "weighMachine",
+          "seconds": 2,
+          "label": "Weigh bag / check weight"
+        },
+        {
+          "op": "move",
+          "machine": "weighVision",
+          "to": {
+            "x": 0.66
+          },
+          "switches": {
+            "scan": "on"
+          },
+          "seconds": 2.25,
+          "label": "Vision scan · forward pass",
+          "state": "INSPECTING"
+        },
+        {
+          "op": "move",
+          "machine": "weighVision",
+          "to": {
+            "x": -0.72
+          },
+          "seconds": 1.35,
+          "label": "Vision scan · return pass",
+          "state": "INSPECTING"
+        },
+        {
+          "op": "move",
+          "machine": "weighVision",
+          "to": {
+            "x": -1.2000000000000002
+          },
+          "switches": {
+            "scan": "off"
+          },
+          "seconds": 0.9,
+          "label": "Analysing the images",
+          "state": "INSPECTING"
+        },
+        {
+          "op": "decide",
+          "on": "quality",
+          "planAs": "pass",
+          "cases": {
+            "pass": [],
+            "reject": [
+              {
+                "op": "transfer",
+                "conveyor": "line",
+                "to": {
+                  "machine": "line",
+                  "port": "output"
+                },
+                "label": "Rejected · to the reject lane",
+                "state": "REJECT"
+              }
+            ]
+          }
+        }
+      ],
+      "feed": {
+        "fromLift": true
       }
     }
   ],
@@ -204,7 +522,43 @@
         "to": "slicingStation.input",
         "transport": {
           "kind": "conveyor",
-          "type": "beltConveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      },
+      {
+        "from": "slicingStation.output",
+        "to": "baggingStation.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      },
+      {
+        "from": "baggingStation.output",
+        "to": "clipClosingStation.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      },
+      {
+        "from": "clipClosingStation.output",
+        "to": "dateLabelStation.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      },
+      {
+        "from": "dateLabelStation.output",
+        "to": "checkWeigher.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
           "params": {}
         }
       }

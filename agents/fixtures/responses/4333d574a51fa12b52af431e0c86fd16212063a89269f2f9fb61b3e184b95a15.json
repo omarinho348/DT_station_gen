@@ -1,0 +1,28 @@
+{
+  "key": "4333d574a51fa12b52af431e0c86fd16212063a89269f2f9fb61b3e184b95a15",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:01:02.829Z",
+  "usage": {
+    "inputTokens": 6135,
+    "cachedInputTokens": 5888,
+    "outputTokens": 127
+  },
+  "output": {
+    "params": {
+      "bagClipCloser": {
+        "name": "CLIP CLOSER",
+        "note": "Clips bag mouth",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "clipPresenceEye": {
+        "span": 0.4
+      }
+    }
+  }
+}
