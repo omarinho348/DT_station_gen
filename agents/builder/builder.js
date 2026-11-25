@@ -300,10 +300,28 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
     const r = await ask(def, taskText('machines', { ...lineContext(job), plan: job.plan, layout, detail: detail.components, previousAnswer: feedback ? state.params : null, feedback }));
     const params = def.decode(r.output).params;
     const problems = [];
+    const repairs = singleUnitParams(layout, params);
     for (const [j, e] of layout.equipment.entries()) {
       try { registry.componentSpec(e.type, params[e.id] ?? {}, ctx(job.line)); } catch (error) { problems.push(`equipment[${j}].params (${e.id}): ${error.message}`); }
     }
-    return { value: params, cost: r.cost, problems };
+    return { value: params, cost: r.cost, problems, repairs };
+  }
+
+  /**
+   * The Builder's stations serve one unit at a time: a machine that declares params for that
+   * (`singleUnit`, e.g. one head instead of four) gets them, in code. Mutates params; returns notes.
+   */
+  function singleUnitParams(layout, params) {
+    const notes = [];
+    for (const e of layout.equipment) {
+      const single = registry.getComponent(e.type)?.singleUnit;
+      if (!single) continue;
+      const before = params[e.id] ?? {};
+      const changed = Object.entries(single).filter(([k, v]) => before[k] !== v);
+      params[e.id] = { ...before, ...single };
+      if (changed.length) notes.push(`${e.id}: ${changed.map(([k, v]) => `${k} ${before[k] ?? 'default'} → ${v}`).join(', ')} (this station serves one unit at a time)`);
+    }
+    return notes;
   }
 
   function place(job, state) {
@@ -380,6 +398,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
         if (stop === 0) {
           // The preview: default params, placed from the hints. A hint that can't be placed is refused.
           build.params = {};
+          singleUnitParams(build.layout, build.params);
           try {
             Object.assign(build, place(job, build));
           } catch (error) {
@@ -395,6 +414,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
         const r = await machinesPhase(job, build, build.feedback);
         build.cost += r.cost;
         build.params = r.value;
+        build.notes = [...(build.notes ?? []).filter((n) => !n.single), ...(r.repairs ?? []).map((message) => ({ repair: true, single: true, message }))];
         if (r.problems.length) { refuse('machines', r.problems); continue; }
         try {
           Object.assign(build, place(job, build));

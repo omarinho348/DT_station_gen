@@ -1,0 +1,62 @@
+{
+  "id": "oliveOilBottling",
+  "title": "Olive oil 500 ml: fill, cap, wrap label",
+  "product": {
+    "name": "500 ml dark olive oil bottle",
+    "description": "Dark glass 500 ml olive-oil bottle, about 70 mm across and 280 mm tall, with a black screw cap. Filled with olive oil, then capped, then a wrap-around label is applied to the front.",
+    "model": {
+      "kind": "parametric",
+      "params": {
+        "shape": "bottle",
+        "length": 0.07,
+        "width": 0.07,
+        "height": 0.28,
+        "finish": "glass",
+        "color": "#2b1f1a",
+        "liquid": "#d9b24c",
+        "fillLevel": 1,
+        "capColor": "#111111",
+        "labelText": "Olive oil 20x20mm",
+        "rejectEvery": 0
+      }
+    }
+  },
+  "targetPerHour": 300,
+  "runSize": 8,
+  "steps": [
+    {
+      "name": "Fill",
+      "does": "Fill each bottle with olive oil to the required fill level acceptance range (target corresponds to 220 ml)."
+    },
+    {
+      "name": "Cap",
+      "does": "Screw on the black cap to each filled bottle."
+    },
+    {
+      "name": "Label",
+      "does": "Apply a wrap-around label to the front of each capped bottle (label size 20×20 mm)."
+    },
+    {
+      "name": "BottleValidCheck",
+      "does": "Check bottle validity: ensure fill level is within the acceptance range (210–235 ml) and cap is present. Mark invalid units for removal from the belt."
+    },
+    {
+      "name": "DiscardRejects",
+      "does": "Remove rejected bottles from the belt so only valid bottles continue."
+    }
+  ],
+  "quality": "BottleValidCheck marks units invalid if fill volume is outside 210–235 ml and/or the cap is not present; DiscardRejects ejects marked units from the single-file belt.",
+  "constraints": [
+    "Single-file bottle flow on a belt at a fixed pitch (no accumulation requested).",
+    "Rejections must be discarded from the belt (no rework loop requested).",
+    "Label is wrap-around, nominal size 20×20 mm on the front of each bottle."
+  ],
+  "assumptions": [
+    "No shift length provided: assumed 8 hours/day for scheduling (takt derived from 300 bottles/hour).",
+    "No pitch provided: assumed a recommended bottle pitch of 0.25 m center-to-center to set belt speed and station timing.",
+    "“220 mm volume target yes” interpreted as 220 ml target fill volume; acceptance is exactly 210–235 ml as stated.",
+    "BottleValidCheck includes only fill-level acceptance and cap-present validation (no additional cap torque/height validation and no label-position/readability validation requested).",
+    "Label is applied to all bottles upstream; invalid-label handling is not included in validity since only fill level and cap present were specified."
+  ],
+  "questions": []
+}

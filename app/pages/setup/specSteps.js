@@ -49,6 +49,12 @@ export function createSpecStore() {
       emit();
       return !st.error;
     },
+    /** Forgets the current factory (conversation and drafts); approved documents in sdd/ stay. */
+    async startOver() {
+      if (!confirm('Start a new factory? The current conversation and draft documents are forgotten (documents you approved stay in sdd/).')) return;
+      const ok = await this.act('Starting a new factory…', '/reset');
+      if (ok) { st.method = 'chat'; st.open = {}; emit(); }
+    },
     async build() {
       Object.assign(st, { busy: 'Handing the plan to the Builder…', error: null });
       emit();
@@ -68,6 +74,14 @@ export function createSpecStore() {
     },
   };
 }
+
+/** "Working on …" with Start a new factory, when a factory is in progress. */
+const currentBar = (st) => {
+  const s = st.session;
+  if (!s?.conversation?.length) return '';
+  const what = s.line ? `<b>${esc(s.line.title)}</b>` : 'a new factory';
+  return `<div class="spec-current">${icon('Factory', { size: 16 })}<span>Working on ${what}</span><button type="button" class="btn btn--ghost spec-current__new" data-start-over${st.busy ? ' disabled' : ''}>${icon('RotateCcw', { size: 14 })} Start a new factory</button></div>`;
+};
 
 const busyLine = (st) => (st.busy ? `<p class="spec-busy" role="status"><span class="spec-spin"></span>${esc(st.busy)}</p>` : '');
 const errorLine = (st) => (st.error ? `<p class="spec-error" role="alert">${icon('TriangleAlert', { size: 14 })} ${esc(st.error)}</p>` : '');
@@ -142,10 +156,11 @@ export function mountBrief(el, store) {
         ${questions.length ? `<p class="spec-ask">${icon('MessageCircleQuestion', { size: 16 })} The Spec agent asks (answer in the chat, or approve the brief with its assumptions):</p><ol class="spec-questions">${questions.map((q) => `<li><b>${esc(q.question)}</b> <span class="muted">${esc(q.why)}</span></li>`).join('')}</ol>` : (brief.status === 'draft' ? '<p class="muted">No open questions: the brief is ready for review.</p>' : '')}
         <a class="btn btn--primary" href="${href('setup', 'docs')}">${icon('FileCheck', { size: 16 })} Review the documents</a>
       </div>`;
-    el.innerHTML = `${methods}${work}${busyLine(st)}${errorLine(st)}${status}`;
+    el.innerHTML = `${currentBar(st)}${methods}${work}${busyLine(st)}${errorLine(st)}${status}`;
   };
   const off = store.subscribe(render);
   const onClick = (e) => {
+    if (e.target.closest('[data-start-over]') && !store.st.busy) { store.startOver(); return; }
     const m = e.target.closest('[data-method]');
     if (m) { store.set({ method: m.dataset.method }); return; }
     const t = e.target.closest('[data-template]');
@@ -201,7 +216,7 @@ export function mountDocs(el, store) {
   const render = (st) => {
     const s = st.session;
     if (!s) { el.innerHTML = `${busyLine(st)}${errorLine(st)}`; return; }
-    el.innerHTML = `<div class="doc-list">${DOCS.map(([id, file, text]) => {
+    el.innerHTML = `${currentBar(st)}<div class="doc-list">${DOCS.map(([id, file, text]) => {
       const d = s.docs[id];
       const [ic, label, cls] = STATUS[d.status];
       const waitingFor = id === 'brief' ? 'Describe the factory first (step 2)' : id === 'plan' ? 'Approve the brief first' : '';
@@ -238,6 +253,7 @@ export function mountDocs(el, store) {
   const onClick = (e) => {
     const b = e.target.closest('button');
     if (!b) return;
+    if (b.hasAttribute('data-start-over')) { if (!store.st.busy) store.startOver(); return; }
     if (b.dataset.toggle) { const id = b.dataset.toggle; store.st.open[id] = !(b.textContent.trim() === 'Hide'); store.set({}); }
     else if (b.dataset.approve) {
       const id = b.dataset.approve;

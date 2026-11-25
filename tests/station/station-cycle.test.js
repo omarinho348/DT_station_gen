@@ -154,11 +154,17 @@ describe('dry plan', () => {
     expect(plan.output.steps[0].label).toBe('Releasing carrier'); // output still the default
   });
 
-  it('a conveyor without a work stop conveys straight through', () => {
+  it('a conveyor without a work place of its own: the unit is conveyed to its middle, worked on there, then out', () => {
     const equipment = { line: { type: 'rollerConveyor', params: {}, position: [0, 0, 0] } };
     const plan = planStation(registry, { id: 'pass', title: 'Pass', conveyor: 'line', process: [{ op: 'wait', seconds: 1 }] }, { equipment });
-    expect(plan.intake.steps).toEqual([]);
+    // Midway between input and output (where machines over the conveyor are placed), not at the input.
+    expect(plan.intake.steps.map((s) => s.label)).toEqual(['Carrier transport to work position']);
     expect(plan.output.steps.map((s) => s.label)).toEqual(['Transport to output port']);
+    const ports = registry.componentSpec('rollerConveyor', {}, {}).ports;
+    const half = (ports.output.position[0] - ports.input.position[0]) / 2;
+    // Two half-length moves take the same distance as the old single input → output move.
+    expect(plan.intake.steps[0].duration).toBeGreaterThan(0);
+    expect(half).toBeGreaterThan(0);
   });
 });
 

@@ -3686,3 +3686,15 @@ Asked 2026-11-25 how to go on; the owner chose **gpt-5.4-mini for the Builder** 
 All 12 phases of Claude.md are now built. The benchmark shows the system works as an **assisted** builder (approved documents reliably; the Builder needs the owner's corrections for most stations) rather than an autonomous one.
 
 **Next, the owner's call:** the step most likely to make lines complete unaided is **per-machine process templates** (each named component ships its standard process as data, so the model picks and parameterizes instead of composing ops). It is library work beyond Claude.md's phases.
+
+### After Phase 12: owner testing (2026-11-25)
+
+- The owner asked how to test the whole workflow; `npm run dev` failed with "port 5173 in use": a dev server I had started for screenshots (PID 32204) was still running. Stopped it.
+- Testing showed the Spec session (conversation and drafts) survives restarts by design (`.agent-cache/spec/session.json`), but the page had no way to start over. Added **Start a new factory** to the Brief and Documents steps ("Working on <line>" bar; confirms first; `POST /api/spec/reset`; approved documents in `sdd/` stay). The Builder panel already had "Discard this build" / "Start over". Checked by screenshot on the owner's session; tests pass.
+- **Filling stations missed the bottle** (owner report): a single bottle under a 4-nozzle filler, all jets on the belt. Two causes, both fixed:
+  1. **The bottle never reached the machine.** A plain belt has no work port, so a station's default intake left the unit at the input, while the placer put machines over the belt's middle. Now a conveyor with input and output but no work place gets one **midway** (where the placer puts machines over it); the default intake conveys there and the output on from there (`lib/station/stationSpec.js`). This applies at run time, so already compiled lines get it on reload.
+  2. **A batch machine on one unit:** the filler and capper are 4-head batch machines (lubricant line). A component can now declare `singleUnit` params (both: `heads: 1`, the head centred where the unit stops). The Builder applies them in code with a note, since its stations serve one unit at a time. The lubricant line's batch stations keep their 4 heads.
+  - Checked by screenshot: the nozzle dives into the neck and the bottle fills.
+  - Tests: `tests/agents/builder-single-unit.test.js` (new); the station-cycle and reviewer expectations updated for the work place.
+  - `npm test`: 84 files, **2192 tests passed**.
+  - The catalog is unchanged, so the recorded answers still replay.

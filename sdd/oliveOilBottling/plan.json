@@ -1,0 +1,121 @@
+{
+  "transport": "beltConveyor",
+  "stations": [
+    {
+      "id": "filling",
+      "code": "ST1",
+      "title": "Fill olive oil bottles",
+      "does": "Fill each bottle with olive oil to the required fill level acceptance range (target corresponds to 220 ml).",
+      "steps": [
+        "Receive the next bottle in single-file at the fill station in fixed pitch.",
+        "Detect bottle presence with the station photo-eye.",
+        "Lower the filler head/nozzle into the bottle mouth/neck.",
+        "Open the fill valve and dispense oil until the controller reaches the target fill amount mapped to the acceptance window.",
+        "Close the fill valve.",
+        "Raise the filler head/nozzle clear of the bottle.",
+        "Advance the bottle to the next station."
+      ],
+      "seconds": 8,
+      "covers": [
+        "Fill"
+      ],
+      "machines": [
+        "filler",
+        "photoEye"
+      ]
+    },
+    {
+      "id": "capping",
+      "code": "ST2",
+      "title": "Screw cap onto bottle",
+      "does": "Screw on the black cap to each filled bottle.",
+      "steps": [
+        "Receive the next filled bottle in single-file.",
+        "Confirm bottle presence; stop/skip if missing.",
+        "Pick and position the black cap over the bottle threaded opening.",
+        "Lower the capper head to engage the cap.",
+        "Drive the screw/threads with controlled rotation until the cap is fully tightened to the machine’s torque/end-stop setting.",
+        "Retract the capper head.",
+        "Advance the bottle to the next station."
+      ],
+      "seconds": 9,
+      "covers": [
+        "Cap"
+      ],
+      "machines": [
+        "capper",
+        "photoEye"
+      ]
+    },
+    {
+      "id": "labeling",
+      "code": "ST3",
+      "title": "Apply wrap label",
+      "does": "Apply a wrap-around label to the front of each capped bottle (label size 20×20 mm).",
+      "steps": [
+        "Receive the next capped bottle in single-file.",
+        "Detect bottle position and synchronize label timing to belt pitch.",
+        "Dispense/position a 20×20 mm wrap-around label so the label front ends up on the front reference area of the bottle.",
+        "Apply the label around the bottle circumference with the label applicator (press/tamp to adhere).",
+        "Release pressure and retract applicator tooling.",
+        "Advance the bottle to the next station."
+      ],
+      "seconds": 10,
+      "covers": [
+        "Label"
+      ],
+      "machines": [
+        "labelApplicator",
+        "photoEye"
+      ]
+    },
+    {
+      "id": "validating",
+      "code": "ST4",
+      "title": "Validate fill + cap",
+      "does": "Check bottle validity: ensure fill level is within the acceptance range (210–235 ml) and cap is present. Mark invalid units for removal from the belt.",
+      "steps": [
+        "Position the bottle under the inspection view at the fixed pitch dwell window.",
+        "Measure fill level (from top-of-liquid in image/estimation mapped to ml) and determine pass/fail against 210–235 ml.",
+        "Check cap presence using an image/vision feature or sensor at the top of the bottle.",
+        "Combine verdicts: pass only if fill level is within 210–235 ml AND cap-present is true.",
+        "If invalid, set a reject trigger/marker for downstream discharge.",
+        "Advance the bottle to the discard station."
+      ],
+      "seconds": 6,
+      "covers": [
+        "BottleValidCheck"
+      ],
+      "machines": [
+        "visionScanner",
+        "photoEye"
+      ]
+    },
+    {
+      "id": "discarding",
+      "code": "ST5",
+      "title": "Discard rejected bottles",
+      "does": "Remove rejected bottles from the belt so only valid bottles continue.",
+      "steps": [
+        "Receive the bottle at the single-file belt exit area.",
+        "Read the reject trigger/marker for the current position.",
+        "If the bottle is marked invalid, actuate an eject action (side push or diverter) to move the bottle off the main belt onto the rejection path/chute.",
+        "If valid, keep the bottle on the main belt with no diversion.",
+        "Allow the belt to carry the valid bottles forward and reject bins/chute to collect ejected bottles."
+      ],
+      "seconds": 5,
+      "covers": [
+        "DiscardRejects"
+      ],
+      "machines": [
+        "sidePusher",
+        "gravityChute"
+      ]
+    }
+  ],
+  "notes": [
+    "Takt is 12 s/unit (3600/300). All station time budgets are set to fit within the takt; if capping or labeling with a wrap-around label requires more than budgeted time, the line rate will need to be reduced or those steps redesigned (e.g., multi-heads or parallel indexing).",
+    "The label applicator in the catalog is a tamp-pad style; if a true wrap-around application requires a different mechanism (wrap head), keep the station’s operation order but swap the machine type in the builder.",
+    "The discard step ejects invalid bottles from the single-file belt (no rework loop). Ensure the diverter/pusher response time is compatible with belt pitch (0.25 m assumed)."
+  ]
+}

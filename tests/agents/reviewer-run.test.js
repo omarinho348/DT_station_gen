@@ -49,7 +49,7 @@ describe('edges', () => {
     const e = of(review(registry, f, fast), 'edges');
     expect(e.map((x) => x.path)).toEqual(['graph.edges[1].from']);
     expect(e[0].message).toBe('station "cap" has no port "side"');
-    expect(e[0].hint).toBe('its ports: input, output');
+    expect(e[0].hint).toBe('its ports: input, work, output'); // work: midway along a plain belt
   });
 
   it('the example lines have no edge findings', () => {

@@ -1,0 +1,101 @@
+{
+  "transport": "beltConveyor",
+  "stations": [
+    {
+      "id": "fillingAndWeightCheck",
+      "code": "ST1",
+      "title": "Fill + weight check",
+      "does": "Fills each jar to 350 g with thick-sauce appropriate flow, then checks weight and diverts out-of-tolerance jars to reject.",
+      "steps": [
+        "Receive one empty jar upright on the conveyor and align it under the filler head.",
+        "Start metered fill of thick tomato sauce into the jar using a food-grade filling method (e.g., timed volumetric with dwell to settle) until the jar reaches the 350 g target.",
+        "Wait a short settle time to reduce variability from sauce settling (no foaming assumption).",
+        "Stop filling and capture the jar’s filled mass on an integrated in-line scale (fast weigh).",
+        "Compare measured mass to acceptance tolerance of ±2 g around 350 g.",
+        "If in-tolerance, index the jar forward to capping; if out-of-tolerance, divert it to the reject stream before it reaches the cap station."
+      ],
+      "seconds": 40,
+      "covers": [
+        "Fill"
+      ],
+      "machines": [
+        "filler",
+        "photoEye",
+        "genericMachine"
+      ]
+    },
+    {
+      "id": "twistCapping",
+      "code": "ST2",
+      "title": "Twist metal cap",
+      "does": "Applies the metal twist lid and twists it closed onto the jar.",
+      "steps": [
+        "Receive an in-tolerance filled jar from ST1 upright under the capper.",
+        "Pick a metal twist lid from a cap supply location and present it to the jar mouth.",
+        "Lower the lid onto the jar neck until seated.",
+        "Engage torque/twist and apply a controlled twist to close the cap.",
+        "Release the lid and allow the jar to dwell for torque finish (if required by the drive profile).",
+        "Index the capped jar forward to the labeling station."
+      ],
+      "seconds": 10,
+      "covers": [
+        "TwistCap"
+      ],
+      "machines": [
+        "capper",
+        "vibratoryFeeder"
+      ]
+    },
+    {
+      "id": "sideLabeling",
+      "code": "ST3",
+      "title": "Front side label",
+      "does": "Sticks one 10×10 mm label on the front of each jar (no printed-variable codes).",
+      "steps": [
+        "Receive a capped jar from ST2 and bring it under the label applicator.",
+        "Orient/register the jar front for consistent label placement (using the jar’s side/front datum from singulation/position sensors).",
+        "Actuate the tamp/pad label applicator to pick and place a 10×10 mm side label onto the jar front.",
+        "Press briefly to ensure adhesion and smooth contact (no rework handling).",
+        "Index the labeled jar forward to carton packing."
+      ],
+      "seconds": 12,
+      "covers": [
+        "ApplyLabel"
+      ],
+      "machines": [
+        "labelApplicator",
+        "visionScanner",
+        "photoEye"
+      ]
+    },
+    {
+      "id": "twoByTwoCartonPack",
+      "code": "ST4",
+      "title": "Pack 4 jars + close carton",
+      "does": "Packs jars upright in a fixed 2×2 arrangement into a slotted shipping carton and closes the carton immediately before discharge.",
+      "steps": [
+        "Receive labeled jars and ensure singulation/spacing for carton filling.",
+        "Provide a slotted shipping carton and open it to an upright ready state at the packing position.",
+        "Place jars upright into the carton in a fixed 2×2 arrangement (4 total) with consistent orientation for the ‘front’ label side.",
+        "After the 4th jar is placed, immediately close the carton using carton closing tooling (fold and tamp end flaps as required).",
+        "Verify carton is closed before discharge (simple presence/closure sensing).",
+        "Dispatch the completed carton to downstream discharge."
+      ],
+      "seconds": 20,
+      "covers": [
+        "PackCarton"
+      ],
+      "machines": [
+        "caseErector",
+        "caseCloser",
+        "photoEye"
+      ]
+    }
+  ],
+  "notes": [
+    "Takt is 3600 / 75 = 48 s per finished unit; all stations are budgeted ≤48 s (fill is the bottleneck at 40 s).",
+    "Weight acceptance is assumed ±2 g around 350 g; out-of-tolerance jars are diverted in ST1 before capping/labeling/packing to avoid downstream waste.",
+    "Carton packing clearances and carton internal dimensions for the 75 mm × 110 mm jar in a 2×2 layout are assumed sufficient; confirm carton model/size to prevent interference or poor closure.",
+    "PackCarton includes ‘close immediately before discharge’—the builder should ensure the carton closer is positioned at the end of ST4’s packing motion path."
+  ]
+}
