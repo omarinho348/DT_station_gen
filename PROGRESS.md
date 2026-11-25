@@ -3849,3 +3849,18 @@ Asked 2026-11-25: "Fix the two common layout failures in code". These were 4 of 
 **Tests:** 3 new in `tests/agents/builder-layout-repairs.test.js`. `npm test`: 86 files, **2226 passed, 0 failed**.
 
 **Note:** lines built before this fix keep their lift transfers. Rebuild them (Start over in the panel), or patch the edge's transport type.
+
+### Fix: station 2 "still failing after 2 retries" (a machine hitting the shell's rear fence) (2026-11-25)
+
+**Symptom (owner):** in the apple-juice run, the capping station always stopped at layout after 2 retries: `"fence" (guardFence) and "capper" (capper) overlap (Fence top rail × Feeder column, 65 mm to clear)`.
+
+**Cause:** the capper's cap-feeder column sticks out behind it, into the assembly cell's rear fence. The fence stands where the shell puts it (`minZ + 0.25`), and the model only gives place hints, so no answer it could give moves either one. Each refusal went back to layout and came back with the same clash.
+
+**Fix (in code, as the other layout repairs):**
+- Shells may declare `deepen(params, { side, by })` (`lib/registry.js`). `assemblyCell` moves its rear edge back (`minZ`), and the fence and sign move with it, or the front edge (`maxZ`).
+- The reviewer's machine-overlap finding carries `clash: { stations, ids, depth }` (`agents/reviewer/geometry.js`).
+- After placement the Builder (`deepenShell` / `placeAndFit` in `agents/builder/builder.js`) finds clashes between a station machine and shell furniture off the line's centre. It deepens the cell on that side by the depth plus 5 cm and places the station again. It stops when the shell can't grow, has no `deepen`, or a deeper cell doesn't help. The repair is shown as a placement note.
+
+**Tests:** new `tests/agents/builder-shell-deepen.test.js` reproduces the 65 mm clash: now no refusals, the cell is 12 cm deeper (`minZ` −1.62), and it is noted. `npm test`: 2228 passed, 2 failed:
+- `builder-live.test.js` (no recorded answer for the layout call) **already fails on the committed code**, so it was not caused by this fix.
+- `reviewer-geometry.test.js` "three example lines" timed out at 5 s under full parallel load (7.3 s). It passes when run alone, together with the builder tests (5 files, 34 passed).

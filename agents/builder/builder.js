@@ -503,6 +503,50 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
     };
   }
 
+  /**
+   * A machine of the station that hits the shell's furniture (a rear fence) can't be fixed by the model:
+   * it only gives hints, and the furniture stands where the shell puts it. So the shell is made deeper
+   * on that side, in code, by what the clash needs (the shell's `deepen`), and the station is placed
+   * again. Mutates build (layout.shell.params, placement); returns notes. Stops when the shell can't
+   * grow, has no `deepen`, or a deeper cell doesn't help.
+   */
+  function deepenShell(job, build) {
+    const layout = build.layout;
+    const def = layout.shell ? registry.getShell(layout.shell.type) : null;
+    if (!def?.deepen) return [];
+    const notes = [];
+    const tried = new Map(); // pair → depth before
+    for (let k = 0; k < 6; k += 1) {
+      const shell = registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line));
+      // Furniture off the line's centre: behind it (rear) or in front (front). The conveyor and what
+      // stands in line with it (lifts) don't move with the cell's depth.
+      const side = new Map(shell.equipment.filter((e) => Math.abs(e.position?.[2] ?? 0) > 0.3).map((e) => [e.id, e.position[2] < 0 ? 'rear' : 'front']));
+      const result = review(registry, factoryWith(job, assemble(job, build)), { play: false, geometry: true });
+      const hit = result.findings.find((f) => f.clash && f.clash.stations.every((s) => s === layout.id) && f.clash.ids.filter((id) => side.has(id)).length === 1);
+      if (!hit) break;
+      const furniture = hit.clash.ids.find((id) => side.has(id));
+      const machine = hit.clash.ids.find((id) => id !== furniture);
+      const pair = `${furniture}|${machine}`;
+      if (tried.has(pair) && hit.clash.depth >= tried.get(pair) - 1e-3) break; // deeper didn't help
+      tried.set(pair, hit.clash.depth);
+      const by = hit.clash.depth + 0.05;
+      const next = def.deepen(shell.params, { side: side.get(furniture), by });
+      if (!next) break;
+      const before = layout.shell.params ?? {};
+      layout.shell = { ...layout.shell, params: Object.fromEntries(Object.entries(next).filter(([key, v]) => before[key] !== undefined || v !== shell.params[key])) };
+      notes.push(`shell: "${machine}" hit the shell's "${furniture}" (${Math.round(hit.clash.depth * 1000)} mm); the cell is ${Math.round(by * 100)} cm deeper at the ${side.get(furniture)}`);
+      Object.assign(build, place(job, build));
+    }
+    return notes;
+  }
+
+  /** place(), then the shell deepened where a machine hits its furniture (notes kept with the build's). */
+  function placeAndFit(job, build) {
+    Object.assign(build, place(job, build));
+    const notes = deepenShell(job, build);
+    if (notes.length) build.notes = [...(build.notes ?? []).filter((n) => !n.shell), ...notes.map((message) => ({ repair: true, shell: true, message }))];
+  }
+
   /** Lengthens reach-in strokes the unit is beyond (mutates params); returns notes. */
   function reachFit(job, layout, params, placed, shell) {
     const unit = unitOf(job);
@@ -615,7 +659,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
           singleUnitParams(build.layout, build.params);
           fitParams(job, build.layout, build.params);
           try {
-            Object.assign(build, place(job, build));
+            placeAndFit(job, build);
           } catch (error) {
             if (!(error instanceof PlacementError)) throw error;
             refuse('layout', [`placement: ${error.message}`]);
@@ -632,7 +676,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
         build.notes = [...(build.notes ?? []).filter((n) => !n.single), ...(r.repairs ?? []).map((message) => ({ repair: true, single: true, message }))];
         if (r.problems.length) { refuse('machines', r.problems); continue; }
         try {
-          Object.assign(build, place(job, build));
+          placeAndFit(job, build);
         } catch (error) {
           if (!(error instanceof PlacementError)) throw error;
           refuse('layout', [`placement: ${error.message}`]);

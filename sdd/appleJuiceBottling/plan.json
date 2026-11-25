@@ -1,0 +1,92 @@
+{
+  "transport": "beltConveyor",
+  "stations": [
+    {
+      "id": "fill",
+      "code": "ST1",
+      "title": "Fill cloudy juice",
+      "does": "Fill the sanitized empty glass bottle with cloudy apple juice through a nozzle.",
+      "steps": [
+        "Fill"
+      ],
+      "seconds": 6,
+      "covers": [
+        "Fill"
+      ],
+      "machines": [
+        "filler",
+        "supplyTank"
+      ]
+    },
+    {
+      "id": "cap",
+      "code": "ST2",
+      "title": "Screw cap red",
+      "does": "Screw on the red cap to the filled bottle.",
+      "steps": [
+        "Cap"
+      ],
+      "seconds": 3,
+      "covers": [
+        "Cap"
+      ],
+      "machines": [
+        "capper",
+        "vibratoryFeeder"
+      ]
+    },
+    {
+      "id": "label",
+      "code": "ST3",
+      "title": "Apply paper label",
+      "does": "Apply the paper label to the capped bottle.",
+      "steps": [
+        "Label"
+      ],
+      "seconds": 2,
+      "covers": [
+        "Label"
+      ],
+      "machines": [
+        "labelApplicator"
+      ]
+    },
+    {
+      "id": "inspect",
+      "code": "ST4",
+      "title": "Camera inspect + decide divert",
+      "does": "Use a camera to check fill level, cap presence/condition, and label placement.",
+      "steps": [
+        "Inspect"
+      ],
+      "seconds": 4,
+      "covers": [
+        "Inspect"
+      ],
+      "machines": [
+        "visionScanner"
+      ]
+    },
+    {
+      "id": "divertRejects",
+      "code": "ST5",
+      "title": "Single-lane reject diverter",
+      "does": "Reject any bad bottles by diverting them off the line at the inspection station (single-lane divert).",
+      "steps": [
+        "DivertRejects"
+      ],
+      "seconds": 1,
+      "covers": [
+        "DivertRejects"
+      ],
+      "machines": [
+        "sidePusher"
+      ]
+    }
+  ],
+  "notes": [
+    "Takt is 15 s/unit (240 units/hour). The station budgets (Fill 6 + Cap 3 + Label 2 + Inspect 4 + DivertRejects 1 = 16 s) must be adjusted to fit 15 s/unit.",
+    "To satisfy the food-grade constraint, all direct food-contact parts at Fill should be CIP/sanitary designed; the line assumes owner-supplied sanitized bottles on entry (no wash station included).",
+    "Inspect and reject must happen as a single-lane divert at ST4/ST5; set the vision decision latency so the diverter action occurs within the same bottle’s dwell time window."
+  ]
+}
