@@ -1,0 +1,98 @@
+{
+  "key": "ba6ec35a76599f3d577ccb450ee8993d2e2afcae59390dc7f5da82a3107dab87",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-25T02:22:59.616Z",
+  "usage": {
+    "inputTokens": 6308,
+    "cachedInputTokens": 5888,
+    "outputTokens": 1107
+  },
+  "output": {
+    "id": "tabletBlisterPacking",
+    "title": "Tablet blister packing into 10-up strips",
+    "product": {
+      "name": "Tablet blister strips (10 cavities)",
+      "description": "Blister strip made from PVC cavities, filled with tablets, sealed with aluminium lid foil, then cut into individual strips. Each finished strip is 95 × 45 mm (flat blister size) and goes into folding carton with a leaflet; quality rejects strips with any empty cavity.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "tray",
+          "length": 0.095,
+          "width": 0.045,
+          "height": 0.01,
+          "finish": "plastic",
+          "color": null,
+          "processedColor": null,
+          "liquid": null,
+          "fillLevel": null,
+          "capColor": null,
+          "labelText": null,
+          "rejectEvery": 0
+        }
+      }
+    },
+    "targetPerHour": 3600,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "FormBlisterCavities",
+        "does": "Heat-form PVC film to create blister cavities for one 10-cavity strip."
+      },
+      {
+        "name": "DoseTablets",
+        "does": "Drop/dose tablets into each blister cavity."
+      },
+      {
+        "name": "InspectCavities",
+        "does": "Use a camera to check every cavity is filled; identify strips containing any empty cavity."
+      },
+      {
+        "name": "SealLidFoil",
+        "does": "Heat-seal aluminium lid foil over the blister cavities."
+      },
+      {
+        "name": "CutBlisterStrips",
+        "does": "Cut/trim the sealed web into individual strips (separate the strips apart)."
+      },
+      {
+        "name": "PackIntoCartons",
+        "does": "Place two finished strips into a folding carton and add the leaflet."
+      }
+    ],
+    "quality": "Strips with at least one empty blister cavity are rejected (discarded or diverted to a reject bin) and do not proceed to cartoning.",
+    "constraints": [
+      "GMP clean room required (controlled environment, wipe-down/cleaning practices, restrict airborne contamination).",
+      "Finished blister strips are formed from PVC film and sealed with aluminium lid foil.",
+      "Strip size is 95 × 45 mm; blister cavities must be 10 per strip (owner statement).",
+      "Rejected product: any strip with an empty cavity is removed before cartoning.",
+      "Target rate: 60 strips/min (3600 strips/hour)."
+    ],
+    "assumptions": [
+      "A “finished unit” for throughput is one individual blister strip (not the folding carton).",
+      "A folding carton contains exactly 2 blister strips plus 1 leaflet (as stated).",
+      "The line runs in steady-state; changeover time is ignored for the per-hour target.",
+      "Blister height (the third dimension for the model) is assumed ~10 mm because it was not provided.",
+      "Reject handling is purely diversion/discard (no rework).",
+      "Tablet type/form factor (shape, count per cavity, presence of chamfers, tablet thickness) is not modeled explicitly; it is treated as a discrete part dispensed into cavities."
+    ],
+    "questions": [
+      {
+        "topic": "product",
+        "question": "Do you have the blister “stack height” (typical finished blister thickness including lid foil) and exact cavity pitch/row pattern (how the 10 cavities are laid out)? This affects forming/sealing/vision fixturing.",
+        "why": "The twin needs correct cavity geometry to size stations and inspection coverage."
+      },
+      {
+        "topic": "throughput",
+        "question": "Is the 60 strips/min steady with no planned downtime, and is it measured at “finished strips exiting cartoning” (after carton insertion), or earlier (after cutting)?",
+        "why": "This determines whether the bottleneck is packaging or earlier thermoforming/sealing."
+      },
+      {
+        "topic": "steps",
+        "question": "What are the folding-carton handling details: are cartons pre-erected or erected on the line, and is carton closing (taping/gluing) manual or machine? Also, how is the leaflet inserted (drop-in and then close)?",
+        "why": "Cartoning station design and takt depend on erect/close method and leaflet insertion time."
+      }
+    ]
+  }
+}

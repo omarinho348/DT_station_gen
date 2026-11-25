@@ -1,0 +1,68 @@
+{
+  "key": "7df1c6b38246b764e86d3f49c7b80781c0a6848133723638ac7577ddbfb9d364",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T21:58:43.148Z",
+  "usage": {
+    "inputTokens": 5941,
+    "cachedInputTokens": 4864,
+    "outputTokens": 585
+  },
+  "output": {
+    "id": "st1Filling",
+    "code": "ST1",
+    "title": "Fill 250 mL body lotion",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Fill 250 mL",
+        "color": null,
+        "minZ": -0.8,
+        "maxZ": 1.2,
+        "walkwayZ": 0.9,
+        "panelX": null,
+        "conveyorLength": 4.4,
+        "carrierLength": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "st1Conveyor",
+        "type": "beltConveyor",
+        "why": "Conveys bottles through the fill work zone.",
+        "place": "line",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "lotionSupplyTank",
+        "type": "supplyTank",
+        "why": "Provide thick body lotion to the filler.",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "lotionFiller",
+        "type": "filler",
+        "why": "Volumetrically fill the bottle to the target volume.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "st1Conveyor",
+    "ports": null,
+    "ops": [
+      "fill"
+    ]
+  }
+}

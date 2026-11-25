@@ -1,0 +1,60 @@
+{
+  "key": "60e569e2bd970859ff6dfb2dc3dc2a31eee9577b8d4edf495f37f6878c6c12b6",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T21:59:39.983Z",
+  "usage": {
+    "inputTokens": 9715,
+    "cachedInputTokens": 0,
+    "outputTokens": 674
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "operate",
+        "machine": "pcbPresencePhotoEye",
+        "seconds": 2,
+        "label": "Verify carrier/board present (photo-eye)",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "operate",
+        "machine": "pcbPresenceVision",
+        "seconds": 2,
+        "label": "Confirm board presence (vision)",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "operate",
+        "machine": "solderPasteDispense",
+        "seconds": 10,
+        "label": "Dispense solder paste pattern onto PCB pads",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "wait",
+        "seconds": 1,
+        "label": "Dwell to clear strings",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "indexBatches",
+        "seconds": 4,
+        "conveyors": [
+          "st1BeltConveyor"
+        ],
+        "label": "Index carrier to next placement station",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

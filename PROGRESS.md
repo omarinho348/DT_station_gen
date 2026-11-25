@@ -3099,7 +3099,7 @@ Checked in the browser (dev server, the same API calls the panel makes; screensh
 
 **Next:** step 8.6, the first live calls (with your OK first): one station of a brief through the three gates on gpt-5.4-nano, recorded as mock fixtures, and the real token counts compared with my estimates.
 
-### Step 8.6: the first live calls (done)
+### Step 8.6: the first live calls (approved)
 
 Step 8.5 approved by the owner (2026-11-24: "ok do the next step").
 
@@ -3160,3 +3160,529 @@ Step 8.5 approved by the owner (2026-11-24: "ok do the next step").
 ## Phase 8 status: done
 
 The LLM layer (budget guard, cache, mock mode, ledger, status in the UI), the agents' catalog, strict schemas for the three phases, the placer, the Builder with retries, the approval UI with diffs, and a first live station recorded for mock replay. Next phase: **Phase 9, the Spec agent and the SDD flow** (chat drawer, guided questions, templates, `.md` upload, constitution / brief / plan with approval). Its plan.md feeds the Builder's start button.
+
+## Phase 9: Spec agent and SDD flow
+
+Phase 8 approved by the owner moving on (2026-11-24: "ok next continue working").
+
+**Design** (Claude.md rules 1 and 3):
+- The Spec agent answers in **JSON** (Structured Outputs), never free markdown. The three `.md` documents are **rendered from that JSON by templates**, and the Builder reads the plan JSON directly, so no markdown is parsed back.
+- **constitution.md** is fixed rules, rendered from `lib/core/conventions.js` with **no model call**.
+- An uploaded `.md`, a template or the guided answers are all just owner text for the Spec agent.
+
+**Split** (proposed 2026-11-24, done under the "don't wait" rule):
+
+| Step | Content |
+|---|---|
+| 9.1 | Brief and plan schemas (strict), checks in code, markdown templates, plan → Builder job |
+| 9.2 | The Spec agent: brief (with follow-up questions), plan, retries on refusals |
+| 9.3 | Spec session, `/api/spec`, approved documents saved to `sdd/<line>/` |
+| 9.4 | Setup page: chat / guided / template / `.md` upload, document review, Build → Builder |
+| 9.5 | First live Spec calls (asks the owner first), recorded for mock replay |
+
+### Step 9.1: the SDD documents as data (approved)
+
+- `agents/spec/schemas.js`:
+  - `briefSchema`: id, title, product (name, description, model: a catalog product or a parametric shape, each typed by its own params; `serial` is never asked), `targetPerHour`, `runSize`, steps (name, does), quality, constraints, assumptions, questions (topic, question, why)
+  - `planSchema`: transport (catalog conveyors with in and out ports and a length: agvCart, beltConveyor, gravityChute, palletConveyor, rollerConveyor, turntableTransfer), stations (id, code, title, does, steps, `seconds` budget, `covers` brief steps, `machines` hint), notes
+  - Sizes (÷3): brief ≈3.2k tokens (mostly the catalog products' params), plan ≈0.5k
+- `spec/sdd/checks.js`:
+  - `taktOf`, `productOf`
+  - `checkBrief`: camelCase id, title ≤ 60, product params against the product's own schema, unique step names
+  - `checkPlan`: every station within the takt, every brief step covered and no unknown ones, unique ids, machine hints in the catalog
+  - `jobFromSdd` (the Builder session's `{ line, product, plan }`)
+- `spec/sdd/render.js`: `renderConstitution`, `renderBrief` (product, takt, steps table, open questions), `renderPlan` (line graph, stations table, each station's steps, takt budget with shares)
+- `tests/spec/sdd.test.js` (9), `tests/spec/fixtures.js` (a small juice brief and plan)
+
+### Step 9.2: the Spec agent (approved)
+
+- `agents/spec/spec.js`, `createSpec({ registry, llm })`:
+  - `draftBrief({ conversation, previous, feedback })` and `draftPlan({ brief, previous, feedback })`
+  - each answer checked in code and refused back with its problems and the previous answer (at most 2 retries), then `ok: false` with the problems
+  - the plan is asked of the **strong** model, which the LLM layer only uses if `LLM_STRONG_ENABLED` (off now, so nano)
+- `agents/prompts/spec.md`: write down what the owner said; a sensible value where they gave none, listed as an assumption; at most 3 questions that change the plan; a straight line; every brief step covered by exact name; every budget within the takt. The stable start is instructions + catalog, like the Builder's.
+- The prompt's variable part:
+  - brief: `CONVERSATION` (who said what; an uploaded text over 12,000 characters is cut, with a note)
+  - plan: `BRIEF` (without its questions), `TAKT`, `STEP NAMES`
+  - both: `PREVIOUS ANSWER` and `FEEDBACK` on a retry or a rejection
+- `tests/agents/spec.test.js` (9, scripted model)
+
+### Step 9.3: the Spec session and `/api/spec` (approved)
+
+- `agents/spec/session.js`:
+  - constitution drafted at once; owner messages (re)draft the brief; the agent's questions are added to the conversation, so the owner's answers follow them
+  - approving the brief drafts the plan; a new brief resets the plan
+  - reject with a comment for the brief or plan (the constitution can't be redrafted: it comes from code)
+  - `retry` after an LLM error; `job` once all three are approved
+- `server/specApi.js`:
+  - `GET /api/spec` (session and templates); `POST message | approve | reject | retry | reset`
+  - LLM refusals → 409 with `code`
+  - session in `.agent-cache/spec/session.json`
+  - **approved** documents written to `sdd/<line id>/` (`constitution.md`, `factory-brief.md`, `plan.md`, `brief.json`, `plan.json`); drafts stay in the session
+- `spec/sdd/templates/`: juice bottling, desktop 3D printer assembly, face cream jars (written the way an owner would describe a line)
+- `tests/agents/spec-session.test.js` (6): the full flow with files; reject rules; refusals; retry after an error; the API with templates, documents on disk, restart, reset; mock mode → 409
+
+### Step 9.4: the setup page's Spec steps (approved)
+
+- `app/pages/setup/specSteps.js` (new), mounted into steps 2–4 of `SetupPage.js`:
+  - **Brief:** the four methods are live:
+    - chat: a thread, with the agent's questions as bubbles
+    - guided: product, size, rate per hour / shift / day, steps one per line, quality, constraints, sent as one message
+    - template: cards from `spec/sdd/templates/`
+    - upload: `.md` / `.txt` up to 400 KB, previewed first
+    - a status card shows the draft, line, rate, takt, cost and the open questions ("answer in the chat, or approve the brief with its assumptions")
+  - **Documents:**
+    - each document with its status (Waiting / Draft to review / Approved / Failed its checks), draft number, refusals and cost
+    - the first one waiting for review is opened, rendered as markdown, with Approve and Reject… (comment)
+    - "Draft the plan again" after an error
+  - **Build:** the approved line (stations, budgets, takt, transport) and **Build the line**, which hands `job` to `/api/builder/start` and opens the twin. A refusal there (e.g. mock mode without a recording) is shown on the page, not hidden behind the jump.
+- `app/ui/markdown.js` (new): a small markdown renderer (headings, lists, tables, bold / italic / code), **everything escaped first**
+- `app/styles/spec.css` (new)
+- `tests/app/markdown.test.js` (3): the marks, escaping (no `<img>` or `<script>` gets through), the three documents render with nothing left raw
+
+**Checked in the browser:** no live call is allowed yet, so I seeded the session with the test fixtures' scripted answers (marked as a check, not recorded as fixtures). Screenshots:
+- `spec-brief.png`: the chat with the agent's two questions and the brief card
+- `spec-docs.png`: constitution open
+- `spec-plan.png`: brief approved, plan open
+- `spec-build.png`: all approved
+
+The constitution and plan were approved through the API. "Build the line"'s call reached the Builder, which mock mode refused with its reason, as expected. Afterwards I reset both sessions and **deleted the `sdd/juiceLine/` files the check had written** (fixture data, not yours).
+
+**Fixed on the way:**
+- `num()` in the templates kept trailing zeros ("0.90 m")
+- the documents step always opened the brief; it now opens the next document waiting for review
+- an old dev server of mine (started during 8.5) kept port 5173 after I stopped its parent processes, so a later restart silently didn't happen; stopped and restarted cleanly
+
+**Results**
+- `npm test`: 72 files, **2154 tests passed** (+27)
+- no live call; nothing spent in Phase 9
+
+**Limits**
+- Straight lines only (the plan has no branches or parallel stations; the Builder chains stations too).
+- No GLB product from the Spec flow (it needs a file upload).
+- Owners can't edit a document's text directly, only reject it with a comment: there is no markdown → JSON parsing, by design.
+- `sdd/<line>/` is committed source (not git-ignored); tell me if you'd rather keep it out of git.
+
+**Next:** step 9.5, the first live Spec calls (with your OK): the juice-bottling template through brief → plan on gpt-5.4-nano (my estimate about $0.002–0.004), recorded as fixtures, and the brief and plan quality reported honestly.
+
+### Step 9.5: the first live Spec calls (approved)
+
+Steps 9.1–9.4 approved by the owner ("ok i allow", 2026-11-24, also the OK for these live calls).
+
+**Result first:** the juice-bottling template went through the real Spec session on **gpt-5.4-nano**: brief → (approved with its assumptions) → plan. Both passed the checks; the plan hands the Builder a 4-station job. **$0.0055** for 3 billed calls; the ledger total is now **$0.0118**, so **$4.4882 of the $4.50 cap is left**.
+
+| Call | Input (billed) | Cached | Output (incl. reasoning) | My estimate (÷3) | Cost | Time |
+|---|---|---|---|---|---|---|
+| brief #1 | 6332 | 0 | 679 | 8269 | $0.00212 | 8.7 s |
+| brief #2 (retry) | 7021 | 5888 | 722 | 9275 | $0.00125 | 8.0 s |
+| plan | 5071 | 0 | 903 | 6043 | $0.00214 | 6.2 s |
+
+- Over my $0.002–0.004 estimate because of the one retry. Without it, ≈ $0.004 for brief + plan.
+- Estimates ~25 % high again; caching only within a retry of the same call, as with the Builder.
+
+**What the model wrote** (rendered documents in `.agent-cache/spec-live/juice-bottling/`, not in `sdd/`, since they are not your approvals):
+- **Brief:** faithful to the template:
+  - line `appleJuiceBottling`; a parametric glass bottle at 90 × 90 × 260 mm with a red cap
+  - 240/h (takt 15 s); steps Fill / Cap / Label / Inspect
+  - the constraints as given; four assumptions listed
+- **Three questions, all relevant:**
+  - cycle times for capping and labelling
+  - where rejects are diverted
+  - whether bottles arrive clean, with caps fed separately
+- **One refusal fixed:** its first label text was 25 characters (limit 24); it came back with the path and reason and was shortened.
+- **Plan:** ST1 Filling (6 s), ST2 Capping (6 s), ST3 Labelling (4 s), ST4 Vision inspection + reject (8 s), on `beltConveyor`. Each station has 6–7 concrete steps. Machine hints are **all real catalog types** (filler, supplyTank, photoEye, capper, labelApplicator, labelHead, visionScanner, sidePusher).
+
+**Quality, honestly:**
+- **Filling's 6 s budget is too tight:** the template says 6 s of filling alone, before nozzle down/up and transfers. Code can't catch this (it checks budgets against the takt, not against the steps). The Builder's played run will show the real time; Phase 11's critique is where it should be flagged.
+- **No bottle will ever be rejected:** the brief leaves the product's `rejectEvery` at its default 0, even though the owner described rejects. A check for that (rejects described ⇒ `rejectEvery` > 0) is a small follow-up.
+- One irrelevant assumption ("8 h shift basis", although the rate was already per hour).
+
+**Recorded and replayed:**
+- the 3 answers are in `agents/fixtures/responses/` (no key in them)
+- `tests/agents/spec-live.test.js` replays the whole flow in mock mode: 3 mock answers, 0 live, $0
+- in the browser, the setup page replayed it from the template (`screenshots/spec-live-brief.png`, `spec-live-plan.png`); afterwards the session was reset and the `sdd/appleJuiceBottling/` files my API approval wrote were deleted
+
+**Changed**
+- `scripts/spec-live.mjs` (new), `npm run spec:live`:
+  - a template through the real session, live
+  - per call: tokens against the estimate, cost and time
+  - the rendered documents written to `.agent-cache/spec-live/<template>/`; answers recorded as fixtures
+  - writes nothing to `sdd/`
+- `agents/fixtures/responses/*.json` (3 new)
+- `tests/agents/spec-live.test.js` (new)
+
+**Results**
+- `npm test`: 73 files, **2155 tests passed**
+- spent $0.0055 in this step
+
+**Note:** like the Builder's replay test, this one is tied to the exact prompt, template and schemas. A change there fails it with a mock-mode error naming the key; re-recording costs about $0.005.
+
+## Phase 9 status: done
+
+The Spec agent (brief with follow-up questions, plan), the SDD documents rendered from its JSON, the constitution from code, approval with comments on the setup page, approved documents in `sdd/<line>/`, and the plan handed to the Builder. Next phase: **Phase 10, the Editor agent** (natural-language edits as JSON Patch on factory.json, review, partial recompile, hot reload, version history and undo).
+
+## Phase 10: Editor agent
+
+Phase 9 approved by the owner moving on (2026-11-24: "ok next").
+
+**Split** (proposed 2026-11-24, done under the "don't wait" rule):
+
+| Step | Content |
+|---|---|
+| 10.1 | Line store: `lines/<id>/factory.json` with a version per change, compiled to `generated/<folder>/`; the Builder saves finished lines there; the reject warning from 9.5 |
+| 10.2 | Editor agent: request → JSON Patch, checked by applying it, the IR schema and the reviewer; refusals back |
+| 10.3 | `/api/lines`: propose → apply / discard, undo, copy an example to edit |
+| 10.4 | Twin page: edit mode with the Editor panel, history and undo; saved lines and "Save the line" in the Builder panel |
+| 10.5 | First live Editor calls (asks the owner first) |
+
+### Step 10.1: the line store (approved)
+
+**Decision (the open point from 8.5):** a line's factory.json lives in **`lines/<id>/factory.json`** (committed source, rule 2), with **`lines/<id>/versions/v0001.json`** per change (`{ version, time, by, message, request?, patch, factory }`: the RFC 6902 patch from the previous version, for display, plus the full factory, for undo). Tell me if you'd rather keep the versions out of git.
+
+- `server/lineStore.js`: `createLineStore` (`list`, `load`, `save`, `create`, `history`, `version`, `undo`, `recompile`) and `projectLineStore`:
+  - validated by the IR schema
+  - compiled into `generated/<folder>/` after every save; `writeCompiled` rewrites **only the files whose text changed**, so Vite reloads only those
+- **Undo** saves the previous version again as a new version (`by: 'undo'`): the history only grows, and an undo can itself be undone.
+- **Guards:**
+  - a line's id can't change
+  - **an example line's id is reserved**: `generated/printer-line` and its siblings are the visual reference, so an example is edited as a copy under a new id
+  - "nothing changed" isn't a version
+  - a refused save writes nothing
+- `POST /api/builder/save` (`{ id? }`): a finished build becomes `lines/<id>/` version 1 (`by: builder`, "built by the Builder: 4 stations (rehearsal)").
+- **The reject warning (from 9.5)** is a **warning shown to the owner, not a refusal**:
+  - `briefWarnings` notices that the brief describes rejects while the product's every-Nth-fails setting is 0 or unset
+  - it's shown in factory-brief.md under "Checks" and on the brief and document cards
+  - why not a refusal: the recorded live brief would then need a retry nobody recorded, i.e. a paid re-record. The owner rejects the brief with a comment instead.
+- Tests:
+  - `tests/server/lineStore.test.js` (3): versions, patches, partial recompile (2 of 7 files for a run-size + title change), undo twice; refusals; no compiler
+  - `tests/spec/sdd.test.js` (+1): warnings
+  - `tests/agents/builder-api.test.js` (+1): save
+
+### Step 10.2: the Editor agent (approved)
+
+- `agents/editor/schemas.js`: `factoryPatch`: summary, ops `{ op: add | remove | replace, path, valueJson }`, questions. Strict mode can't type "any JSON value", so each value comes as JSON text and is parsed in code.
+- `agents/editor/editor.js`, `createEditor({ registry, llm })`:
+  - `propose({ factory, request, feedback })` → `{ ok, summary, ops, factory, diff, findings, questions, attempts, cost, problems }`; nothing is saved here
+  - the prompt: instructions and catalog (stable), then REQUEST, LINE (the whole factory.json), TIMING (each station's cycle time and the bottleneck), DETAIL
+  - DETAIL covers only the stations the request names by id, code or title, as whole words; none named → all
+- **Checks before anything is shown:**
+  1. fixed paths (`/line/id`, `/version`, the whole document) refused
+  2. values must be JSON; add / replace need one
+  3. the patch must apply (`PatchError`: a path that isn't there)
+  4. the IR schema
+  5. the deterministic reviewer: **only findings the patch brings in count against it** (a line's existing warnings don't block an edit); clashes block
+  6. then the run is played
+
+  A refusal goes back with the problems and the previous answer (at most 2 retries).
+- `agents/prompts/editor.md`:
+  - the smallest patch; nothing the owner didn't ask for
+  - JSON Pointers counted from 0; ranges from DETAIL
+  - "faster" → the seconds of the ops that take the time
+  - ask instead of guessing
+- `tests/agents/editor.test.js` (7):
+  - strict schema
+  - a request → patch → applied, reviewed, played; diff and prompt sections; only the named station's detail
+  - questions
+  - a motion out of range refused by the reviewer and fixed
+  - six code refusals (fixed path, not JSON, missing value, missing path, invalid id, nothing at all)
+  - the owner's comment; station targeting
+
+### Step 10.3: `/api/lines` (approved)
+
+- `server/linesApi.js`:
+  - `GET /api/lines` (lines and examples); `POST /api/lines/import` (an example copied under a new id)
+  - `GET /api/lines/<id>` (line, folder, history, pending)
+  - `POST …/propose` (`{ request }`, kept as pending, not saved)
+  - `POST …/apply` (a new version, recompiled)
+  - `POST …/discard` (`{ comment? }`: with a comment, the Editor tries again with it)
+  - `POST …/undo`
+- **A stale patch is refused:** if the line changed since the proposal, apply answers 409 "propose it again". Undo drops a pending patch.
+- Pending patches are kept in `.agent-cache/editor/<id>.json`; LLM refusals → 409 with `code`.
+- `tests/agents/lines-api.test.js` (3): import → propose → apply → undo with compiled files; stale patch, discard with a comment, questions can't be applied; bad requests and mock mode → 409
+
+### Step 10.4: the twin page's Editor (approved)
+
+- **`#/twin?edit=<id>`:** the stored line's compiled files (`generated/<folder>/line.js`, from the glob, or by plain dynamic import for a line saved after the page loaded) playing in the 3D view, with the **Editor panel** (`app/pages/twin/EditorPanel.js`):
+  - the request box
+  - the proposal: summary, the request, the version it's based on, cost, questions, refusals, the reviewer's findings on the changed line, the diff (the same rows as the Builder's)
+  - Apply / Discard… (optional comment)
+  - the history (who, what, how many ops) and **Undo version N**
+- **The Builder panel:**
+  - **"Save the line"** when a build is finished (→ `lines/<id>/`, opens edit mode)
+  - a **"Saved lines"** list with links to edit mode
+  - **"Copy to edit"** (example + new id)
+- Checked in the browser (no live call: a pending patch was seeded from the scripted test model, as a check):
+  - `editor-empty.png`: a copied bottling line playing, the request box, history v1
+  - `editor-pending.png`: "Filling takes 5 s instead of 6, and Capping is renamed Screw capping", 2 ops with old → new values, the played run
+  - `editor-applied.png`: version 2 in the history, Undo
+  - `builder-saved-lines.png`
+  - Apply rewrote **4 of the 7 compiled files** (`fill1.js`, `fill2.js`, `cap.js`, `line.js`).
+- **Not observed:** the hot reload in an open browser (Vite reloading the page when the compiled files change). Each screenshot loads a fresh page, so I saw the result, not the reload itself.
+- Afterwards I deleted my check data (`lines/bottlingEdit/`, `generated/bottling-edit/`, the pending file).
+
+**Results**
+- `npm test`: 76 files, **2170 tests passed** (+15)
+- no live call; nothing spent in Phase 10
+
+**Limits**
+- The Editor sees the whole factory.json (the printer line is ≈15k tokens, about $0.003 per call on nano). Fine within the budget; a larger line would need the LINE section cut down to the named stations.
+- Array edits by index: an insertion in the middle of a list shows as a run of replaced items in the diff (correct, but not as readable as it could be).
+- The station targeting is by words. A request naming no station sends every station's detail; a one-letter station code (the bottling line's "C") can be matched by accident.
+
+**Next:** step 10.5, the first live Editor calls (with your OK): two or three requests on a copy of the bottling line (a timing change, a rename, one that should make it ask), about $0.002–0.004 each on nano, recorded for mock replay, with the quality reported.
+
+### Step 10.5: the first live Editor calls (approved)
+
+Steps 10.1–10.4 approved by the owner ("ok continue i allow you", 2026-11-24, also the OK for these live calls).
+
+**Result first:** three requests on a copy of the bottling line (`bottlingEdit`, made exactly as "Copy to edit" makes it), each proposed on version 1, on **gpt-5.4-nano**. **All three right on the first answer, no refusals.** $0.0043 in total; the ledger total is now **$0.0161** (**$4.4839 of the $4.50 cap left**).
+
+| Request | The Editor's answer | Input (cached) | Output | Est. | Cost |
+|---|---|---|---|---|---|
+| "Make Filling 1 second faster." | one replace: `stations › fill › process › [2] › seconds` 6 → 5; checked and played (run of 10 in 139.3 s) | 7915 (0) | 119 | 9061 | $0.00173 |
+| "Rename the Inspection station to Vision check and give it the code V." | two replaces: title "Inspection" → "Vision check", code "Q" → "V"; nothing else touched | 8071 (3840) | 140 | 9197 | $0.00110 |
+| "Make it better." | **no patch**; 4 questions: what "better" means (throughput / quality / flow), whether to shorten the bottleneck station `pack`, the reject rate (`rejectEvery` 4), whether rework should loop back to inspection | 9105 (3840) | 259 | 10478 | $0.00145 |
+
+**Quality, honestly:**
+- The patches are minimal and exactly on target. The model picked the right op index for "Filling" from the LINE alone.
+- The questions are specific to this line, using its real numbers and station names.
+- One small inaccuracy in a question: it calls the `pack` station's 4 s op its cycle time, but TIMING shows 10.48 s with the transfers. Harmless in a question; worth a sharper TIMING description later.
+- Real input ≈ 8–9k tokens (the bottling line itself ≈ 2.3k), about **$0.0011–0.0017 per edit**. The printer line would be roughly twice that.
+- The shared prefix (instructions + catalog, 3840 tokens) was cached from the second call on, unlike the Builder's and Spec's calls.
+
+**Recorded and replayed:**
+- the 3 answers are in `agents/fixtures/responses/`; `tests/agents/editor-live.test.js` replays them (3 mock answers, 0 live)
+- in the app, the copy + propose replayed for $0 (`screenshots/editor-live-pending.png`: the rename diff; `editor-live-questions.png`: the four questions with only Discard offered)
+- afterwards I deleted the check copy (`lines/bottlingEdit/`, `generated/bottling-edit/`, the pending file)
+
+**Changed**
+- `scripts/editor-live.mjs` (new), `npm run editor:live`: the job's requests proposed live (never applied), tokens / cost / time per call, answers recorded
+- `agents/fixtures/jobs/editor-bottling.json` (new), `agents/fixtures/responses/*.json` (3 new)
+- `tests/agents/editor-live.test.js` (new)
+
+**Results**
+- `npm test`: 77 files, **2171 tests passed**
+- spent $0.0043 in this step
+
+## Phase 10 status: done
+
+Lines stored with a version per change, compiled after each save (only changed files rewritten), the Builder's finished lines saved there, the Editor agent (request → checked JSON Patch, or questions), apply / discard / undo from the twin page, and three live edits recorded for replay.
+
+**Spend so far:** $0.0161 of the $4.50 cap (Builder $0.0063, Spec $0.0055, Editor $0.0043).
+
+Next phase: **Phase 11, LLM critique, SimPy and KPIs**: the Reviewer's critique pass (a short text summary of the line checked against the brief, only after the deterministic checks pass), the SimPy emitter from `timing.js`, running SimPy and feeding its event trace into a KPI overlay, and the zip download. One decision from Claude.md §13 comes up there: **how the SimPy event traces and KPIs connect to your teammates' parts (format, interface)**.
+
+## Phase 11: LLM critique, SimPy and KPIs
+
+Phase 10 approved by the owner moving on (2026-11-24).
+
+**Decisions** (Claude.md §13, asked 2026-11-24): the SimPy output goes to the teammates as **my recommended format**: `trace.jsonl` (one event per line) plus `kpis.json`, in `simpy/<line>/`, documented in `simpy/FORMAT.md`; available **both** as files and over HTTP; the **default KPIs** (throughput, takt achieved, utilisation per station, WIP, lead time, reject rate).
+
+| Step | Content |
+|---|---|
+| 11.1 | SimPy emitter from the timing table, per unit; runner; `simpy/FORMAT.md` |
+| 11.2 | `/api/simpy` (run, KPIs, trace) |
+| 11.3 | KPI overlay on the twin page (live 3D numbers next to the SimPy KPIs) |
+| 11.4 | Zip download; the Reviewer's LLM critique (summary text against the brief, after the checks pass) |
+| 11.5 | First live critique call (asks the owner first) |
+
+### Steps 11.1–11.2: the SimPy model and its API (approved)
+
+**Result first:** every line gets a SimPy model generated from its factory.json, and it agrees with the 3D twin's own played run:
+
+| Line | SimPy makespan | Twin, played | Difference | Rejects |
+|---|---|---|---|---|
+| bottling (parallel copies, reject branch to rework, a buffer of 3) | 140.2 s | 140.3 s | 0.1 % | 2 (serials 4, 8) |
+| printer (rejects parked on ST5's lane) | 772.1 s | 771.4 s | 0.1 % | 2 (serials 5, 8) |
+| lubricant (indexing station, batches / cases / pallets) | 911.0 s | 964.7 s | **5.6 % short** | 0 |
+
+- **How** (`compiler/simpy.js`):
+  - `simData` plans **each unit with its own facts**, in serial order: the product's (a quality verdict by serial) and the bay facts the twin keeps per station (`<port>Slot`: units sent to a slotted port so far, in turn)
+  - so every unit has each station's real cycle time and the port it leaves by: a reject takes the reject branch's time and leaves by the reject port, exactly as the twin plays it
+  - `emitSimPy` writes `model.py`: a **fixed Python template with the data embedded** (rule 1). Stations hold one unit; transfers hold their capacity, first in first out; whoever can't hand over re-checks every 0.25 s, as the twin does. Nothing random.
+- **Bugs found on the way**, by comparing with the twin:
+  1. my first model let a station hold one unit while the next waited in its slot (two per station)
+  2. the printer's rejects decide on a second fact (`rejectSlot`), which the plan didn't get, so no unit was ever rejected
+  3. a unit left on a stack (the palletiser's pallet) first counted as a reject (all 27 lubricant cases). Now only an exit by another port is a reject; a stack is a normal end.
+- **The lubricant gap** is real and documented in FORMAT.md: its indexing and batch stations hold several units at once, which the unit-by-unit model doesn't capture yet.
+- `compiler/timing.js`: each station row now also has `exit` and `stacked`.
+- `server/simpyRun.js`: `writeModel` (`simpy/<folder>/model.py`), `runModel` (Python from `PYTHON` or `python`; clear errors for no Python / no simpy / a failed model), `readResults`.
+- `scripts/simpy.mjs`, `npm run simpy`: every example (or `--line <id>`), the KPIs next to the twin's estimate.
+- `server/simpyApi.js`:
+  - `POST /api/simpy/run { line | example }`
+  - `GET /api/simpy/<folder>/kpis.json`
+  - `GET /api/simpy/<folder>/trace.jsonl?since=<t>` (NDJSON)
+- `simpy/FORMAT.md`: files, every event and its fields, every KPI, the HTTP routes, the model and its agreement with the twin. For your teammates.
+- Run outputs (`trace.jsonl`, `kpis.json`) are git-ignored; `model.py` is generated like `generated/`. The dev server's watcher ignores `simpy/`.
+- `tests/compiler/simpy.test.js` (6; the runs skip when Python or simpy is missing):
+  - per-unit data and rejects; the printer's slot fact; the template
+  - bottling and printer within **0.5 %** of the twin's played run, the trace's format and order, every unit released and leaving once, the KPIs consistent
+  - the lubricant line within 10 %
+  - the API
+
+### Step 11.3: the KPI overlay (approved)
+
+- `app/pages/twin/KpiOverlay.js`, bottom left on the twin page (edit mode and compiled lines; never in golden screenshots or frozen `?t` views):
+  - **3D twin, live:** sim time, units out, units in the line, rate so far
+  - **SimPy model:** throughput, takt achieved against planned, lead time (mean, range), WIP (mean, max), the run's makespan and good units, rejects, a utilisation bar per station, the planned bottleneck, links to the trace and kpis.json
+  - **Run SimPy** runs it on demand; the last results are shown when the page opens; it folds away
+- Screenshots: `kpi-printer.png` (ST3 at 78 % is the bottleneck), `phase11-edit.png`.
+
+### Step 11.4: zip download and the Reviewer's critique (approved)
+
+- **Zip** (`server/lineZip.js`, `GET /api/lines/<id>/zip`, a ".zip" link in the Editor panel; dependency `fflate` 0.8.3, pre-approved in §5, 0 audit issues): `factory.json`, `history.json`, `generated/*.js`, `simpy/model.py` + the last `kpis.json` / `trace.jsonl` + `FORMAT.md`, `sdd/*` when the line came from the Spec flow, and a README saying what each is. Deterministic for a fixed time. A copied bottling line's zip: 21.5 KB.
+- **Critique** (`agents/reviewer/critique.js`, `agents/prompts/critic.md`):
+  - **only after the deterministic checks pass** (rule 3; with errors it answers "fix those first" and makes no call)
+  - the model reads a **short text summary** of the line (`lineSummary`: line, timing and bottleneck, per station its machines, op count and work labels, the flow, the SimPy KPIs, the checks' warnings; **no code**, rule 7) next to the approved brief (`sdd/<id>/brief.json`, when there is one)
+  - it answers `{ verdict: fits | concerns | misfit, summary, issues: [{ severity, station, issue, request }] }`; a station it names that the line hasn't got becomes "the whole line"
+  - each issue's `request` is a plain-words change the **Editor** can carry out: in the panel, one click proposes it (and you still apply or discard)
+- `POST /api/lines/<id>/critique`: kept in `.agent-cache/critique/<id>.json` with the version it read; shown as stale once the line changes.
+- **Not done from §7.3:** the critique's failures don't go back to the **Builder** automatically yet. They go to you, and through the Editor, as requests.
+- Tests: `tests/server/lineZip.test.js` (2), `tests/agents/critique.test.js` (3).
+
+**Results**
+- `npm test`: 80 files, **2182 tests passed** (+11)
+- no live call in steps 11.1–11.4; nothing spent
+- check data (a copied line, its SimPy run) deleted afterwards
+
+**Limits**
+- The lubricant line's batch stations (above).
+- The KPI card covers the left end of a long line on the twin page; it folds away, and the camera doesn't yet leave room for it.
+- The zip's Three.js files import the project's `lib/`, so they run inside the project, not on their own (the README says so).
+
+**Next:** step 11.5, the first live critique call (with your OK): the critic on a copy of the bottling line with its SimPy KPIs (about $0.002 on nano), recorded for replay, and its advice judged honestly.
+
+### Step 11.5: the first live critique (approved)
+
+Steps 11.1–11.4 approved by the owner ("ok continue", 2026-11-24, also the OK for this live call).
+
+**Result first:** the Reviewer on gpt-5.4-nano, reading a copy of the bottling line, its SimPy KPIs and a brief that deliberately asks for more than the line does (300/h, a Label step the line hasn't got). Verdict **concerns**, with 5 issues. Two calls: $0.00195 and $0.00137; the ledger total is now **$0.0195** (**$4.4805 of the $4.50 cap left**).
+
+**The first answer exposed two of my bugs** (hence a second call):
+1. **My throughput KPI was misleading for a short run.** "205 good units/h" was good units over the whole 140 s makespan, filling the empty line included, and the model read it as missing 300/h by a third. At the achieved takt of 9.75 s the line holds 369 units/h, about **295 good/h**.
+   - New KPI `steadyPerHour` (3600 / takt achieved × the good share), in kpis.json, FORMAT.md, the overlay ("Throughput, steady 295/h, 205/h over this run") and the critic's summary (both figures, labelled).
+2. **Every issue's station was lost:** the model names stations by code ("P"), and my mapping only knew ids. It now maps id, code or title.
+
+**The re-recorded answer:**
+
+| Severity | Issue | Judged |
+|---|---|---|
+| high | Rework is a placeholder; reworked bottles don't return to the flow | right (the placeholder warning, and rework's output leads nowhere) |
+| high | Case packing is a placeholder | right |
+| medium | 295 good/h against the 300/h target, no margin; pack is the bottleneck | right, with the fixed KPI |
+| medium | No Label station though the brief has a Label step | right (the planted miss) |
+| medium | Food grade isn't reflected in the machine choices | not actionable: the catalog has no food-grade setting |
+
+**Weak points:**
+- Its summary first says the line "implements Fill → Cap → Label → Inspect → Pack", then lists the missing Label station.
+- It calls 344/h "including the empty-line transient", but 344/h is the planned rate.
+- It still leaves the station field empty.
+- Its requests are long, and two need things the Editor can't do (a new station, catalog choices beyond a param change).
+
+The advice is useful for a person; as automatic input to the Builder it would need the summary contradiction checked in code.
+
+**Recorded and replayed:**
+- the answer is in `agents/fixtures/responses/` (the first, superseded recording deleted)
+- the line, brief and KPIs are kept in `agents/fixtures/jobs/critic-bottling.json`
+- `tests/agents/critic-live.test.js` replays it
+- in the app: a copy of the line + its own SimPy run + the brief in `sdd/bottlingEdit/` → the critique replayed for $0 (`screenshots/critique.png`); check data deleted afterwards
+
+**Changed**
+- `compiler/simpy.js` (`steadyPerHour`), `simpy/FORMAT.md`, `app/pages/twin/KpiOverlay.js`, `scripts/simpy.mjs`
+- `agents/reviewer/critique.js`: station by id / code / title; the summary's simulation line with both throughputs
+- `scripts/critic-live.mjs` (new), `agents/fixtures/jobs/critic-bottling.json` (new), `tests/agents/critic-live.test.js` (new)
+
+**Results**
+- `npm test`: 81 files, **2183 tests passed**
+- spent $0.0033 in this step
+
+## Phase 11 status: done
+
+SimPy models from the IR, agreeing with the 3D twin within 0.1 % on the bottling and printer lines (lubricant 5.6 % short, documented); the trace and KPI files and HTTP routes for the teammates (`simpy/FORMAT.md`); the KPI overlay; the zip download; the Reviewer's critique after the deterministic checks, with Editor-ready requests.
+
+**Spend so far:** $0.0195 of the $4.50 cap (Builder $0.0063, Spec $0.0055, Editor $0.0043, Reviewer $0.0033).
+
+Next phase: **Phase 12, benchmarks** (Claude.md §10): 10–15 briefs from different industries in `benchmarks/briefs/`; 5 used to tune the library, 5 held out; the DIN 8580 / VDI 2860 / DIN 8593 coverage table in `benchmarks/coverage.md`; metrics (share of named / composite / placeholder parts, first-pass reviewer success, edit success, cost and time per line, a visual rating of screenshots). This is the phase that spends most of the budget: each brief through Spec → Builder → Reviewer is about $0.04–0.06 on nano, so 10 briefs ≈ $0.5.
+
+## Phase 12: Benchmarks
+
+Phase 11 approved by the owner moving on (2026-11-24: "continue as you prefer", also for the Phase 12 plan and its budget of about $0.5).
+
+### Step 12.1: coverage table and briefs (done)
+
+- **`benchmarks/coverage.map.json`**: every catalog component (77) and op (32) mapped to **DIN 8580** (main groups 1–6), **DIN 8593** (joining 4.1–4.9) and **VDI 2860** (store, change quantity, move, secure, check). Station furniture and timing ops are marked as no process.
+- `scripts/coverage.mjs` / `scripts/coverage-lib.js`, `npm run coverage`:
+  - checks the map against the registry (unmapped, stale, unknown codes)
+  - writes **`benchmarks/coverage.md`**, where a process is covered by **named** parts, by **basic** blocks only (a composite), or not at all (a placeholder)
+- **Result:** 11 of 20 processes named, 5 basic only, 4 none:
+  - **none:** primary shaping (DIN 8580 1), joining by primary shaping (4.4: potting), **soldering** (4.7), **textile joining** (4.9)
+  - **basic only:** separating / cutting (3), coating (5), changing properties (6), welding (4.6), riveting (4.5)
+- **10 briefs** in `benchmarks/briefs/` (`index.json`), written as owners would describe them:
+  - tuning set: water bottling, lotion filling, PCB assembly, battery modules, car-door sub-assembly
+  - held-out set: sliced bread packing, tablet blisters, furniture panel cutting, t-shirt folding, coffee capsules (deliberately including the gaps: cutting, sealing, soldering-free but folding / textile)
+- `tests/scripts/coverage.test.js` (3)
+
+### Step 12.2: the benchmark runner and five tuning rounds (done, results honest)
+
+- **`agents/benchmark.js`** `runBrief`, the whole pipeline without a person:
+  - Spec brief, auto-approved with its assumptions → plan → Builder station by station
+  - the whole-line review with a played run → SimPy → the standard edit ("Make the slowest station about 10 percent faster.") → the critique
+  - metrics per brief; `summarize` for the §10 metrics
+- **`scripts/benchmark.mjs`**, `npm run benchmark -- --set tuning|heldOut [--live]`:
+  - records every live answer as a fixture (a run replays for $0)
+  - writes `benchmarks/results/runs/*.json`, `lines/*.factory.json` and `benchmark.md`
+- `tests/agents/benchmark.test.js` (3): the whole pipeline with a scripted model; an LLM refusal stops the run with its reason; the summary.
+- **Five live tuning rounds** (`benchmarks/results/tuning-log.md`), $0.264 plus $0.016 of re-recordings. After each, the generic causes were fixed (12 fixes, none brief-specific):
+  - **library:** ops declare what they need: `needs.motions` (operate: state + progress; pick-and-place: x, y, z, yaw), `needs.valueMotion` (toolOn), `needs.product` (installPart / driveScrew: parts; routeCable: cables)
+  - **Builder schemas:**
+    - a shell's geometry no longer set by agents (labels and colour only)
+    - `item` args typed to the station's items
+    - each op offered only the machines that can drive it
+    - ops needing product features only for products that have them
+  - **Builder code:**
+    - the layout told what each shell provides
+    - conveyor repairs (the shell's, the station's only one, or a new one of the line's transport)
+    - titles shortened
+    - the station id from the plan
+    - edge transport chosen by the goods passed
+    - **every listed op checked at the layout phase against the station's machines**, the refusal naming catalog types that can do it
+  - **LLM layer:** an answer cut off at the output limit is retried once with twice the limit (mock replays the longer one)
+  - **runner:** stage labels
+- **Result after round 5: no tuning line completes unaided.**
+  - The first station built on up to 4 of 5 lines (round 3); the stations stop in the **process phase** on op semantics (which machine an op drives, motion names and value types, a decision's branches).
+  - The answers vary a lot between runs, so each round surfaces new failure kinds.
+  - **The Spec agent was reliable** (every brief and plan passed its checks, ≈ $0.004 per brief).
+- The Builder's replay fixture (8.6) was re-recorded twice as the schemas changed; it now passes first time (tank, filler, nozzle).
+
+**Results**
+- `npm test`: 83 files, **2190 tests passed**
+- **spend:** Phase 12 $0.276; total $0.2955 of the $4.50 cap (Builder $0.260, Spec $0.028, Editor $0.004, Reviewer $0.003)
+
+**Open (needs the owner's decision):** how to go on with the Builder's reliability before the held-out run (below in the report).
+
+### Step 12.3: mini round, held-out run, findings (done)
+
+Asked 2026-11-25 how to go on; the owner chose **gpt-5.4-mini for the Builder** and 4 retries per station for a tuning round, then the held-out set once.
+
+- **`LLM_STRONG_AGENTS`** (new, `agents/llm.js`): agents that always use the strong model (here only the Builder, for the benchmark run via `--strong builder`); `LLM_STRONG_ENABLED` for plan.md stays off; strong prices required when used; tested. `.env` untouched.
+- `scripts/benchmark.mjs`: `--strong <agents>`, `--retries <n>`; each run records the models and retries used.
+- **Mini round** ($0.170): the same two first stations built as on nano, no more. **The stronger model was not the answer.** It exposed two defects in my code, now fixed:
+  - the pallet transfer chosen by goods got default params (its carrier length didn't fit): it now carries the station's carriers
+  - goods continuity between stations is told to the layout phase and refused there
+- **Held-out set** (nano, 4 retries, run once, $0.096): **5 / 5 briefs and plans valid; 4 of 31 stations built (3 first time); no line complete**.
+- **`benchmarks/results/findings.md`:**
+  - what worked: the Spec agent reliable, the deterministic layer catching every mistake
+  - what failed: the Builder's process phase on op semantics, goods, composites and length
+  - what that means: assisted, not autonomous
+  - what would help: per-machine process templates as data, a per-machine op vocabulary, deterministic process defaults
+- `benchmarks/results/benchmark.md` (both sets) and `tuning-log.md` (all seven runs).
+
+**Results**
+- `npm test`: 83 files, **2191 tests passed**
+- **spend:** Phase 12 $0.542; **total $0.5614 of the $4.50 cap**
+
+## Phase 12 status: done (measured; the results are weak for the Builder and say so)
+
+All 12 phases of Claude.md are now built. The benchmark shows the system works as an **assisted** builder (approved documents reliably; the Builder needs the owner's corrections for most stations) rather than an autonomous one.
+
+**Next, the owner's call:** the step most likely to make lines complete unaided is **per-machine process templates** (each named component ships its standard process as data, so the model picks and parameterizes instead of composing ops). It is library work beyond Claude.md's phases.

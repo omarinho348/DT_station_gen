@@ -1,0 +1,88 @@
+{
+  "key": "30d8358a69899057100858c6ffb4f350ac1c045fd161fbb4a02488873d886418",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:27:46.098Z",
+  "usage": {
+    "inputTokens": 5952,
+    "cachedInputTokens": 4864,
+    "outputTokens": 951
+  },
+  "output": {
+    "id": "placeRegulator",
+    "code": "ST1",
+    "title": "Mount window regulator",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Mount window regulator",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "regulatorCradle",
+        "type": "partCradle",
+        "why": "Presents window regulator mounting parts for pick",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "carrierGuideRails",
+        "type": "guideRails",
+        "why": "Locates/clamps the trim carrier to present regulator holes",
+        "place": "rear",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "regulatorPickRobot",
+        "type": "abbIrb6760",
+        "why": "Picks the regulator and places it onto the carrier with required pose",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "autoScrewdriver",
+        "type": "screwdriver",
+        "why": "Drives the 4 regulator screws to set torque/length",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "screwdriveCycle",
+        "type": "genericMachine",
+        "why": "Runs the timed fastening/verification cycle used by operate in the process",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "indexBatches",
+      "stopConveyors",
+      "pickPlace",
+      "toolOn",
+      "operate",
+      "decide",
+      "wait"
+    ]
+  }
+}

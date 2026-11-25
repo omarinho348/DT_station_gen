@@ -1,0 +1,41 @@
+{
+  "key": "b45f8e5ae6edcd394804622385acfe08014afe0573d656afa8d54613a1634445",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:07:10.759Z",
+  "usage": {
+    "inputTokens": 8325,
+    "cachedInputTokens": 0,
+    "outputTokens": 422
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "fill",
+        "machine": "fillerUnit",
+        "item": "product",
+        "units": "Bottles in position",
+        "liquid": "Apple juice",
+        "timing": {
+          "inPosition": 0.4,
+          "descend": 1.5,
+          "engage": 0.3,
+          "valveOpen": 0.35,
+          "dispense": 6,
+          "valveClose": 0.35,
+          "drip": 0.3,
+          "retract": 1.4,
+          "after": 0.3
+        },
+        "supply": null,
+        "label": "Dispensing apple juice",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

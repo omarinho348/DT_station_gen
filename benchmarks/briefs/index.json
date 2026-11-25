@@ -1,0 +1,5 @@
+{
+  "about": "Phase 12 benchmark briefs (Claude.md §10). The tuning set is used to improve the library and prompts; the held-out set is run once, without tuning for it. Each brief goes through the Spec agent (brief + plan), the Builder, the deterministic reviewer, SimPy and the Reviewer's critique (scripts/benchmark.mjs).",
+  "tuning": ["water-bottles", "lotion-pumps", "pcb-assembly", "battery-modules", "door-subassembly"],
+  "heldOut": ["bread-loaves", "pharma-blister", "panel-cutting", "tshirt-folding", "coffee-capsules"]
+}

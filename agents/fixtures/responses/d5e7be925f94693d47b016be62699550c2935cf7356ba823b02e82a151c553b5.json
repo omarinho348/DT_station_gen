@@ -1,0 +1,166 @@
+{
+  "key": "d5e7be925f94693d47b016be62699550c2935cf7356ba823b02e82a151c553b5",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-25T02:26:52.699Z",
+  "usage": {
+    "inputTokens": 5200,
+    "cachedInputTokens": 3840,
+    "outputTokens": 1194
+  },
+  "output": {
+    "transport": "beltConveyor",
+    "stations": [
+      {
+        "id": "capsuleLoading",
+        "code": "ST1",
+        "title": "Load capsule bodies",
+        "does": "Places empty aluminium capsule bodies into the filling/tamping positions.",
+        "steps": [
+          "Verify station has available empty capsules",
+          "Index next capsule positions into filling/tamping queue",
+          "Place/seat empty capsule body into each position"
+        ],
+        "seconds": 1,
+        "covers": [
+          "LoadCapsuleBodies"
+        ],
+        "machines": [
+          "vibratoryFeeder",
+          "accumulationTable",
+          "bufferLane"
+        ]
+      },
+      {
+        "id": "weighFill",
+        "code": "ST2",
+        "title": "Weigh + fill (groups of 6)",
+        "does": "Dispense ground coffee by weight into capsules, filled in groups of 6.",
+        "steps": [
+          "Index the next group-of-6 capsule bodies under the filler heads",
+          "For each cavity: weigh coffee dose then dispense into capsule",
+          "Wait for dispense complete per head",
+          "Hold capsules at fill position for tamp handoff"
+        ],
+        "seconds": 1,
+        "covers": [
+          "WeighFillGroundCoffee"
+        ],
+        "machines": [
+          "filler",
+          "supplyTank",
+          "dispenseNozzle"
+        ]
+      },
+      {
+        "id": "tamping",
+        "code": "ST3",
+        "title": "Tamp filled coffee",
+        "does": "Tamp the filled coffee to the required compaction before sealing.",
+        "steps": [
+          "Index the filled capsule group under tamping plungers",
+          "Lower tamp plunger into each capsule to set depth",
+          "Dwell to achieve compaction",
+          "Retract plungers and release to seal queue"
+        ],
+        "seconds": 1,
+        "covers": [
+          "TampCoffee"
+        ],
+        "machines": [
+          "pressRam"
+        ]
+      },
+      {
+        "id": "foilSealing",
+        "code": "ST4",
+        "title": "Seal foil lid",
+        "does": "Seal a foil lid onto each capsule using a sealing head.",
+        "steps": [
+          "Index next group under sealing head",
+          "Pick and position foil lid onto each capsule rim",
+          "Seal: clamp then heat/press to form seal",
+          "Release sealing head and allow capsules to cool momentarily"
+        ],
+        "seconds": 1,
+        "covers": [
+          "SealFoilLid"
+        ],
+        "machines": [
+          "capper",
+          "toolOn",
+          "dispenseNozzle"
+        ]
+      },
+      {
+        "id": "sealVisionInspect",
+        "code": "ST5",
+        "title": "Camera seal inspection",
+        "does": "Use a camera to check every sealed lid for seal correctness.",
+        "steps": [
+          "Index capsule to camera inspection point",
+          "Capture image(s) of lid seal area",
+          "Run vision check for seal correctness",
+          "Store verdict (pass/reject) for routing"
+        ],
+        "seconds": 1,
+        "covers": [
+          "CameraCheckLidSeal"
+        ],
+        "machines": [
+          "visionScanner",
+          "visionCamera",
+          "photoEye"
+        ]
+      },
+      {
+        "id": "rejectAndDivert",
+        "code": "ST6",
+        "title": "Reject bad seals",
+        "does": "Divert capsules with a bad seal to a reject path instead of sending them to packing.",
+        "steps": [
+          "Read stored verdict for the current capsule",
+          "If PASS: keep capsule on main flow",
+          "If REJECT: actuate diversion (side pusher/cross transfer) to move capsule to reject bin",
+          "Update reject counter"
+        ],
+        "seconds": 1,
+        "covers": [
+          "RejectBadSeal"
+        ],
+        "machines": [
+          "sidePusher",
+          "crossTransfer"
+        ]
+      },
+      {
+        "id": "packingBoxTen",
+        "code": "ST7",
+        "title": "Pack into boxes of ten",
+        "does": "Pack passing capsules into boxes containing 10 capsules each.",
+        "steps": [
+          "Accumulate passing capsules into a 10-count hopper/box form position",
+          "For each passing capsule: place into the current box until count reaches 10",
+          "When count == 10: close box-insert stage (box is pre-erected)",
+          "Advance filled box to boxing exit position and reset counter"
+        ],
+        "seconds": 1,
+        "covers": [
+          "PackToBoxOfTen"
+        ],
+        "machines": [
+          "tote",
+          "caseSource",
+          "caseCloser"
+        ]
+      }
+    ],
+    "notes": [
+      "Food-grade hygienic design is required (washdown-safe materials, sealed enclosures at filler/seal zones, cleanability between changeovers).",
+      "The line is budgeted to 1.0 s per finished capsule at each station; the fill/tamp/seal operations are assumed to run in a synchronized group-of-6 cycle with indexing so the average throughput still meets 3600/hour.",
+      "Foil lids are assumed pre-fed to ST4; no foil web forming is included.",
+      "Packing ‘10 per box’ is implemented as count-and-fill with a continuously fed stream; box supply and any box closing are represented as machine actions, but the exact box type/mechanism is not specified in the brief—confirm."
+    ]
+  }
+}

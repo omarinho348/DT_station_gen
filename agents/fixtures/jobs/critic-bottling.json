@@ -1,0 +1,78 @@
+{
+  "about": "Step 11.5: the first live critique. The bottling example copied as below (as /api/lines/import makes it), its SimPy KPIs, and a brief that asks for more than the line does (300/h, a labelling step): a good reviewer should say so. The KPIs used are written back here by scripts/critic-live.mjs, so the replay test sends the same prompt.",
+  "example": "bottling-line",
+  "id": "bottlingEdit",
+  "brief": {
+    "id": "bottlingEdit",
+    "title": "Apple juice bottling",
+    "product": {
+      "name": "Apple juice, 1 L glass bottle"
+    },
+    "targetPerHour": 300,
+    "steps": [
+      {
+        "name": "Fill",
+        "does": "Fill each bottle with juice"
+      },
+      {
+        "name": "Cap",
+        "does": "Screw a cap on"
+      },
+      {
+        "name": "Label",
+        "does": "Put the paper label on"
+      },
+      {
+        "name": "Inspect",
+        "does": "Camera check of fill level, cap and label; bad bottles to rework"
+      },
+      {
+        "name": "Pack",
+        "does": "Pack good bottles into cases"
+      }
+    ],
+    "quality": "A camera checks every bottle; failed bottles go to a rework bench.",
+    "constraints": [
+      "Food grade"
+    ]
+  },
+  "kpis": {
+    "line": "bottlingEdit",
+    "title": "Juice bottling (generic level)",
+    "runSize": 10,
+    "unitsOut": 10,
+    "goodUnits": 8,
+    "rejects": {
+      "count": 2,
+      "rate": 0.2
+    },
+    "makespan": 140.240861,
+    "throughputPerHour": 205.360975,
+    "steadyPerHour": 295.384615,
+    "taktAchieved": 9.75,
+    "taktPlanned": 10.477778,
+    "bottleneckPlanned": {
+      "kind": "station",
+      "id": "pack",
+      "time": 10.477778
+    },
+    "leadTime": {
+      "mean": 68.735118,
+      "min": 52.490861,
+      "max": 92.212144
+    },
+    "wip": {
+      "mean": 4.901219,
+      "max": 9
+    },
+    "utilisation": {
+      "fill1": 0.521721,
+      "fill2": 0.521721,
+      "cap": 0.686913,
+      "inspect": 0.551815,
+      "pack": 0.597702,
+      "rework": 0.20647
+    },
+    "finished": true
+  }
+}

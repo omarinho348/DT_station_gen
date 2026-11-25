@@ -6,6 +6,7 @@ import { href } from '../../router.js';
 import { CREW, SETUP_STEPS } from '../../data/crew.js';
 import { APP_NAME, APP_VERSION } from '../../brand.js';
 import { loadTheme, saveTheme, nextTheme } from '../../ui/theme.js';
+import { createSpecStore, mountBrief, mountDocs, mountBuild } from './specSteps.js';
 
 const PLACEHOLDER_TIP = 'Placeholder until the LLM layer is connected (Phase 8)';
 
@@ -60,6 +61,12 @@ export function SetupPage(outlet, route) {
   });
   applyTheme();
 
+  // The Spec steps (brief, documents, build) share one store: /api/spec's session for this visit.
+  const spec = createSpecStore();
+  const MOUNTS = { brief: mountBrief, docs: mountDocs, build: mountBuild };
+  let unmountStep = null;
+  let specLoading = null;
+
   function render({ sub }) {
     const index = Math.max(0, SETUP_STEPS.findIndex((s) => s.id === sub));
     const step = SETUP_STEPS[index];
@@ -82,6 +89,13 @@ export function SetupPage(outlet, route) {
       </div>
       ${STEP_VIEWS[step.id]()}
     `;
+    unmountStep?.();
+    unmountStep = null;
+    const mount = MOUNTS[step.id];
+    if (mount) {
+      unmountStep = mount(panel.querySelector('.spec-mount'), spec);
+      specLoading ??= spec.load();
+    }
     panel.classList.remove('is-entering');
     void panel.offsetWidth; // restart the enter animation
     panel.classList.add('is-entering');
@@ -99,7 +113,9 @@ export function SetupPage(outlet, route) {
       </div>`;
 
     applyStatus();
-    window.__appReady = true;
+    // Ready for screenshots once the Spec state (if this step shows it) has been drawn.
+    if (mount) specLoading.then(() => requestAnimationFrame(() => (window.__appReady = true)));
+    else window.__appReady = true;
   }
 
   // The LLM layer's state, fetched once per visit; shown in the top bar and the crew table.
@@ -142,7 +158,7 @@ export function SetupPage(outlet, route) {
   render(route);
   return {
     update: render,
-    unmount: () => root.remove(),
+    unmount: () => { unmountStep?.(); root.remove(); },
   };
 }
 
@@ -207,77 +223,8 @@ const STEP_VIEWS = {
       <p class="note">${icon('Lock', { size: 14 })} Your OpenAI key stays in <code>.env</code> on this machine. Every call goes through a budget guard and a response cache.</p>`;
   },
 
-  brief() {
-    const methods = [
-      ['MessageSquare', 'Chat', 'Describe the line in your own words', true],
-      ['ListTodo', 'Guided questions', 'Answer a short questionnaire'],
-      ['LayoutTemplate', 'Template', 'Start from an example line'],
-      ['Upload', 'Upload .md', 'Use a brief you already wrote'],
-    ];
-    return `
-      <div class="method-grid" role="radiogroup" aria-label="How to give the brief">
-        ${methods
-          .map(
-            ([ic, title, text, on]) => `
-          <button class="method${on ? ' is-selected' : ''}" role="radio" aria-checked="${!!on}" type="button">
-            <span class="method__icon">${icon(ic, { size: 20 })}</span>
-            <span class="method__title">${title}</span>
-            <span class="method__text">${text}</span>
-          </button>`,
-          )
-          .join('')}
-      </div>
-      <div class="card composer">
-        <textarea rows="6" placeholder="Example: A line that assembles desktop 3D printers. 6 stations: frame, gantry, extruder, electronics, enclosure, final test. Target 1 unit every 90 seconds."></textarea>
-        <div class="composer__bar">
-          <span class="hint">${icon('Sparkles', { size: 14 })} The Spec agent is connected in Phase 9.</span>
-          <button class="btn btn--primary" type="button" disabled>Send to Spec</button>
-        </div>
-      </div>`;
-  },
-
-  docs() {
-    const docs = [
-      ['constitution.md', 'Fixed rules: units, axes, flow direction, ports, naming, determinism'],
-      ['factory-brief.md', 'Product, throughput and takt, stations, constraints'],
-      ['plan.md', 'Station list, process steps, line graph, takt budget'],
-    ];
-    return `
-      <div class="doc-list">
-        ${docs
-          .map(
-            ([file, text]) => `
-          <article class="card doc">
-            <span class="doc__icon">${icon('FileText', { size: 22 })}</span>
-            <div class="doc__body">
-              <h3 class="doc__file">${file}</h3>
-              <p class="doc__text">${text}</p>
-            </div>
-            <span class="status status--waiting">${icon('CircleDashed', { size: 14 })} Waiting for brief</span>
-            <button class="btn btn--ghost" type="button" disabled>Review</button>
-          </article>`,
-          )
-          .join('')}
-      </div>`;
-  },
-
-  build() {
-    const phases = [
-      ['Layout', 'Station shells, conveyors and transfers placed by the layout engine'],
-      ['Machines', 'Equipment from the catalog, composites or placeholders'],
-      ['Motions & process', 'Ops wired into each station cycle, checked against takt'],
-    ];
-    return `
-      <div class="card build">
-        <ol class="build__phases">
-          ${phases
-            .map(
-              ([t, d], i) => `
-            <li><span class="build__num">${i + 1}</span><span><b>${t}</b><span class="muted">${d}</span></span></li>`,
-            )
-            .join('')}
-        </ol>
-        <p class="note">Each phase is run for each station and waits for your approval in the 3D view.</p>
-      </div>`;
-  },
+  // Interactive (app/pages/setup/specSteps.js): mounted into these after each render.
+  brief: () => '<div class="spec-mount"></div>',
+  docs: () => '<div class="spec-mount"></div>',
+  build: () => '<div class="spec-mount"></div>',
 };

@@ -1,0 +1,36 @@
+{
+  "key": "228bef33dc4cd69a8f1d9eb0d595da2bd9f0273f9db01c9ab3af5ce36445dd7e",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:23:49.253Z",
+  "usage": {
+    "inputTokens": 5773,
+    "cachedInputTokens": 4864,
+    "outputTokens": 328
+  },
+  "output": {
+    "id": "inspectCavities",
+    "code": "ST3",
+    "title": "Camera-inspect filled cavities",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "visionInspectScanner",
+        "type": "visionScanner",
+        "why": "Scans the 10-up strip to verify each cavity is filled",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "runRoutine",
+      "decide"
+    ]
+  }
+}

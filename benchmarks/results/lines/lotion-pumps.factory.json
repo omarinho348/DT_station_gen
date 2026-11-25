@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "line": {
+    "id": "bodyLotionFilling",
+    "title": "Body lotion: fill 250 mL, pump head, label, weigh",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "bottle",
+      "length": 0.06,
+      "width": 0.04,
+      "height": 0.17,
+      "finish": "plastic",
+      "color": "#ffffff",
+      "liquid": "#f5c9a8",
+      "fillLevel": 1,
+      "capColor": "#000000",
+      "labelText": "front label"
+    }
+  },
+  "stations": [
+    {
+      "id": "filling",
+      "code": "ST1",
+      "title": "Fill 250 mL",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Fill 250 mL"
+        }
+      },
+      "equipment": [
+        {
+          "id": "filler",
+          "type": "filler",
+          "params": {
+            "heads": 4,
+            "pitch": 0.4,
+            "tipHeight": 0.3,
+            "stroke": 0.25
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "supplyTank",
+          "type": "supplyTank",
+          "params": {
+            "radius": 0.45,
+            "height": 1.3,
+            "legHeight": 0.55,
+            "pumpOffset": 0.975,
+            "tag": "T-101",
+            "contents": "Body lotion · 800 L"
+          },
+          "position": [
+            -0.52,
+            0,
+            -1.735
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "fill",
+          "machine": "filler",
+          "item": "product",
+          "units": "Bottles",
+          "liquid": "body lotion",
+          "timing": {
+            "dispense": 5
+          },
+          "supply": {
+            "machine": "filler",
+            "draw": 1,
+            "refillBelow": 0.2,
+            "refillTo": 1
+          },
+          "label": "Fill 250 mL",
+          "state": "FILL",
+          "status": {
+            "fillLevel": "100%"
+          }
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    }
+  ],
+  "graph": {
+    "edges": []
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "key": "1cd10e38674c4c48483e68d9ff089e6da555fe60ce8c13093711fcc56a18fb09",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:26:20.870Z",
+  "usage": {
+    "inputTokens": 5552,
+    "cachedInputTokens": 4864,
+    "outputTokens": 587
+  },
+  "output": {
+    "id": "shirtLoad",
+    "code": "ST1",
+    "title": "Manual shirt load",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Manual shirt load",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "foldInputStopMachine",
+        "type": "genericMachine",
+        "why": "Represents the folding machine input stop/entry where the operator places the laid-flat T-shirt",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "grip",
+      "release",
+      "operate",
+      "wait"
+    ]
+  }
+}

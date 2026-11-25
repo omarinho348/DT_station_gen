@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "line": {
+    "id": "slicedBreadPacking",
+    "title": "Sliced bread loaf packing (cool, slice, bag, label, crate)",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "box",
+      "length": 0.28,
+      "width": 0.11,
+      "height": 0.12,
+      "finish": "cardboard",
+      "color": "#b5651d",
+      "labelText": "Date"
+    }
+  },
+  "stations": [
+    {
+      "id": "coolingBuffer",
+      "code": "ST1",
+      "title": "Cool loaves by dwell",
+      "equipment": [
+        {
+          "id": "coolTable",
+          "type": "accumulationTable",
+          "params": {
+            "radius": 0.6,
+            "openingWidth": 0.25,
+            "color": "machineGrey"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "safetyFence",
+          "type": "guardFence",
+          "params": {
+            "length": 4.1,
+            "height": 2,
+            "panelWidth": 1.6
+          },
+          "position": [
+            0,
+            0,
+            -1.01
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "stationSign",
+          "type": "stationSign",
+          "params": {
+            "code": "ST1",
+            "title": "Cool loaves by dwell",
+            "color": "#2c5d8f",
+            "width": 2,
+            "height": 3.1,
+            "scale": 0.9
+          },
+          "position": [
+            0,
+            0,
+            0.994
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "coolTable",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "accumulate",
+          "items": [
+            {
+              "item": "product",
+              "conveyor": "coolTable",
+              "to": {
+                "machine": "coolTable",
+                "port": "output"
+              }
+            }
+          ],
+          "blend": 0.06,
+          "stopping": {
+            "label": "Loaves dwell stop"
+          },
+          "label": "Register loaf on cooling dwell table"
+        },
+        {
+          "op": "wait",
+          "seconds": 2.5,
+          "label": "Cooling dwell",
+          "status": {
+            "stationCode": "ST1"
+          }
+        }
+      ],
+      "feed": {
+        "fromLift": false
+      }
+    },
+    {
+      "id": "slicingStation",
+      "code": "ST2",
+      "title": "Slice loaves to sandwiches",
+      "equipment": [
+        {
+          "id": "slicingConveyor",
+          "type": "beltConveyor",
+          "params": {
+            "length": 4,
+            "beltWidth": 0.34,
+            "guides": true,
+            "guideGap": 0.22,
+            "drive": true,
+            "carries": "unit"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "slicerClampsAndHead",
+          "type": "genericMachine",
+          "params": {
+            "length": 1.6,
+            "depth": 1.2,
+            "height": 1.9,
+            "passThrough": true,
+            "carries": "unit"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "safetyGuardFence",
+          "type": "guardFence",
+          "params": {
+            "length": 4.1,
+            "height": 2,
+            "panelWidth": 1.6
+          },
+          "position": [
+            0.0125,
+            0,
+            -0.615
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "slicingConveyor",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "grip",
+          "machine": "slicerClampsAndHead",
+          "item": "product",
+          "motion": "grip",
+          "to": 1,
+          "indicator": "holding",
+          "seconds": 0.3,
+          "label": "Clamp loaf"
+        },
+        {
+          "op": "operate",
+          "machine": "slicerClampsAndHead",
+          "seconds": 2.8,
+          "label": "Slice loaves"
+        },
+        {
+          "op": "release",
+          "machine": "slicerClampsAndHead",
+          "item": "product",
+          "motion": "grip",
+          "to": 0,
+          "indicator": "holding",
+          "seconds": 0.3,
+          "label": "Release slices to conveyor"
+        }
+      ],
+      "feed": {
+        "fromLift": false
+      }
+    }
+  ],
+  "graph": {
+    "edges": [
+      {
+        "from": "coolingBuffer.output",
+        "to": "slicingStation.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "beltConveyor",
+          "params": {}
+        }
+      }
+    ]
+  }
+}

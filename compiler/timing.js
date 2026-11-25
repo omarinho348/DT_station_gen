@@ -129,6 +129,10 @@ export function lineTiming(registry, lineData, { ctx = {}, conventions = CONVENT
     process: round(s.plan.process.duration),
     output: round(s.plan.output.duration),
     cycleTime: round(s.plan.cycleTime),
+    // The port the unit leaves by when it isn't the output (a reject lane), as planned with `facts`.
+    exit: s.plan.exit ?? null,
+    // Left on a stack (a reject lane's slots) instead: it leaves the line there.
+    stacked: s.plan.stacked ?? null,
     steps: s.plan.steps.length,
     rows: stationTable(s.plan),
   }));

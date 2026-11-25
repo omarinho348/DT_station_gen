@@ -1,0 +1,27 @@
+{
+  "key": "6157aadd5f9a5037df6f94ee14f6e2a49b869e2f442f2afc1f7f10161c2f43ab",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:08:58.053Z",
+  "usage": {
+    "inputTokens": 5274,
+    "cachedInputTokens": 3840,
+    "outputTokens": 165
+  },
+  "output": {
+    "params": {
+      "visionScanner": {
+        "length": null,
+        "width": null,
+        "railHeight": null,
+        "archWidth": null,
+        "archBottom": null
+      },
+      "dispenseNozzle": {
+        "jetLength": null,
+        "liquid": "glue"
+      }
+    }
+  }
+}

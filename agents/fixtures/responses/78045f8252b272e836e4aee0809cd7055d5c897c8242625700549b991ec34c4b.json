@@ -1,0 +1,36 @@
+{
+  "key": "78045f8252b272e836e4aee0809cd7055d5c897c8242625700549b991ec34c4b",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:27:30.765Z",
+  "usage": {
+    "inputTokens": 5971,
+    "cachedInputTokens": 0,
+    "outputTokens": 212
+  },
+  "output": {
+    "params": {
+      "dispensePasteNozzle": {
+        "jetLength": 0.12,
+        "liquid": "sealant"
+      },
+      "pastePresenceScanner": {
+        "length": 2.7,
+        "width": 1.44,
+        "railHeight": 2.05,
+        "archWidth": 1,
+        "archBottom": 1.2
+      },
+      "pasteDispenseControl": {
+        "name": "Solder paste dispenser",
+        "note": "Timed multi-pass dispense control",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 2.34,
+        "passThrough": true,
+        "carries": "unit"
+      }
+    }
+  }
+}

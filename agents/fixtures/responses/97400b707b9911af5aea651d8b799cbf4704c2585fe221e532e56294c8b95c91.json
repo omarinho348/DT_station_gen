@@ -1,0 +1,87 @@
+{
+  "key": "97400b707b9911af5aea651d8b799cbf4704c2585fe221e532e56294c8b95c91",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-24T20:19:04.877Z",
+  "usage": {
+    "inputTokens": 6332,
+    "cachedInputTokens": 0,
+    "outputTokens": 679
+  },
+  "output": {
+    "id": "appleJuiceBottling",
+    "title": "Cloudy apple juice bottling (1L glass bottles)",
+    "product": {
+      "name": "1 litre cloudy apple juice bottle",
+      "description": "One-litre glass bottle of cloudy apple juice, filled by nozzle, then capped with a red screw cap and wrapped with a paper label.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "bottle",
+          "length": 0.09,
+          "width": 0.09,
+          "height": 0.26,
+          "finish": "glass",
+          "color": null,
+          "processedColor": null,
+          "liquid": "#c77a1f",
+          "fillLevel": null,
+          "capColor": "#c51d1d",
+          "labelText": "Paper label (apple juice)",
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 240,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "Fill",
+        "does": "Fill each 1L bottle with cloudy apple juice through a nozzle (about 6 seconds per bottle filling)."
+      },
+      {
+        "name": "Cap",
+        "does": "Screw on the red cap to the filled bottle."
+      },
+      {
+        "name": "Label",
+        "does": "Apply the paper label to the capped bottle."
+      },
+      {
+        "name": "Inspect",
+        "does": "Use a camera to check fill level, cap presence/quality, and label presence/placement; reject bad bottles off the line."
+      }
+    ],
+    "quality": "Camera inspection checks fill level, cap, and label; bottles that fail inspection are rejected and do not continue on the line.",
+    "constraints": [
+      "Food grade handling required.",
+      "Stainless steel frames for the line/handling area.",
+      "One bottle at a time (in sequence) on a belt conveyor.",
+      "Takt must support 240 bottles/hour with no station slower than the takt."
+    ],
+    "assumptions": [
+      "A 1-shift calculation basis of 8 hours applies for converting the target rate to a line takt (rate itself is already in bottles/hour, so this mainly supports timing assumptions).",
+      "The screw-capping and labeling operations can be completed within the line takt, since only filling time (6 s) was explicitly given.",
+      "Reject handling routes bad bottles to a separate discard position (no rework).",
+      "The belt carries individual bottles without accumulating batches (no case/pallet level buffering described)."
+    ],
+    "questions": [
+      {
+        "topic": "throughput",
+        "question": "240 bottles/hour implies a takt of 15.0 s per bottle. You specified ~6 s filling, but what are the expected cycle times for capping and labeling (seconds each)?",
+        "why": "Station seconds must all fit within the 15.0 s takt; if cap/label are slower, the line design would need parallel heads or different cadence."
+      },
+      {
+        "topic": "quality",
+        "question": "For “bad bottles go off the line”, do you want rejection immediately at the inspection station (single-lane divert), or keep them on the belt for a downstream divert point?",
+        "why": "This affects layout and transport (diver timing, buffer space, and how the off-line chute/roller section is placed)."
+      },
+      {
+        "topic": "product",
+        "question": "Do bottles arrive already rinsed/sanitized and empty (with caps supplied separately), or does the line also need a bottle wash/sanitization and cap feeding step?",
+        "why": "If sanitization/cap supply is required, it adds discrete stations before Fill and changes what “off the line” means for bad units."
+      }
+    ]
+  }
+}

@@ -7,8 +7,8 @@ import { icon } from '../../ui/icon.js';
 
 const PHASES = [['layout', 'Layout'], ['machines', 'Machines'], ['process', 'Process']];
 
-const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const usd = (v) => `$${Number(v ?? 0).toFixed(v > 0 && v < 0.01 ? 4 : 2)}`;
+export const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+export const usd = (v) => `$${Number(v ?? 0).toFixed(v > 0 && v < 0.01 ? 4 : 2)}`;
 const short = (v) => {
   const text = JSON.stringify(v);
   return text === undefined ? '—' : text;
@@ -30,7 +30,7 @@ function outline(v) {
 }
 
 /** One diff op as a row: short values inline, long ones folded. */
-function diffRow(d) {
+export function diffRow(d) {
   const sign = { add: '+', remove: '−', replace: '~' }[d.op] ?? d.op;
   const inline = (v) => {
     const t = short(v);
@@ -56,6 +56,7 @@ export function BuilderPanel(host, { onDraft, onReady = null }) {
 
   let view = null;
   let rehearsals = [];
+  let lines = { lines: [], examples: [] }; // stored lines (/api/lines), to open in the Editor
   let busy = null; // what is running ('Building the next draft…')
   let error = null;
   let rejecting = false;
@@ -143,11 +144,12 @@ export function BuilderPanel(host, { onDraft, onReady = null }) {
           <p>No build yet. A real build starts from an approved plan (the Spec agent, Phase 9).</p>
           <p class="muted">A rehearsal runs the whole approval flow at $0: the Builder, the placer and the reviewer are real; the model's answers are scripted from a hand-written example line.</p>
           ${rehearsals.map((r) => `<button type="button" class="bp-btn bp-btn--primary" data-act="start" data-name="${esc(r)}">${icon('Play', { size: 14 })} Rehearse: ${esc(r)}</button>`).join('')}
-        </section>`;
+        </section>
+        ${linesBlock()}`;
     } else if (view.gate) {
       body = gateCard(view.gate);
     } else if (view.finished) {
-      body = `<section class="bp-empty"><p class="bp-done">${icon('CircleCheck', { size: 16 })} Every planned station is built and approved (${view.plan.length}).</p><p class="muted">The approved line is in the 3D view; its factory.json is saved as generated/_draft/&lt;line&gt;/approved.factory.json.</p><button type="button" class="bp-btn bp-btn--ghost" data-act="reset">${icon('RotateCcw', { size: 14 })} Start over</button></section>`;
+      body = `<section class="bp-empty"><p class="bp-done">${icon('CircleCheck', { size: 16 })} Every planned station is built and approved (${view.plan.length}).</p><p class="muted">The approved line is in the 3D view. Save it to keep it as lines/${esc(view.line.id)}/factory.json (version 1) and edit it in plain words.</p><div class="bp-actions"><button type="button" class="bp-btn bp-btn--ghost" data-act="reset">${icon('RotateCcw', { size: 14 })} Start over</button><button type="button" class="bp-btn bp-btn--primary" data-act="save">${icon('Save', { size: 14 })} Save the line</button></div></section>`;
     } else {
       body = `<section class="bp-empty"><p>Next: the ${esc(view.phase)} of “${esc(view.plan[view.index]?.title ?? '')}”.</p><button type="button" class="bp-btn bp-btn--primary" data-act="next">${icon('Play', { size: 14 })} Build the next draft</button></section>`;
     }
@@ -167,10 +169,27 @@ export function BuilderPanel(host, { onDraft, onReady = null }) {
     if (ta) ta.focus();
   }
 
+  /** Stored lines to open in the Editor, and examples to copy for editing. */
+  function linesBlock() {
+    const stored = lines.lines.length ? `<ul class="bp-list bp-lines">${lines.lines.map((l) => `<li><a href="#/twin?edit=${esc(l.id)}">${icon('PencilRuler', { size: 13 })} ${esc(l.title)}</a> <span class="muted">${esc(l.id)} · v${l.version} · ${l.stations} stations</span></li>`).join('')}</ul>` : '<p class="muted">No saved lines yet.</p>';
+    const copy = lines.examples.length ? `<form class="bp-copy" data-form="copy"><select name="example">${lines.examples.map((x) => `<option>${esc(x)}</option>`).join('')}</select><input name="id" placeholder="new id, e.g. bottlingEdit" pattern="[a-z][a-zA-Z0-9]*" required><button type="submit" class="bp-btn bp-btn--ghost">${icon('Copy', { size: 14 })} Copy to edit</button></form>` : '';
+    return `<section class="bp-block bp-saved"><h4>Saved lines · edit in plain words</h4>${stored}${copy}</section>`;
+  }
+
   el.addEventListener('click', (e) => {
     const b = e.target.closest('[data-act]');
     if (!b || busy) return;
     const a = b.dataset.act;
+    if (a === 'save') {
+      busy = 'Saving the line…';
+      render();
+      fetch('/api/builder/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).then((r) => r.json()).then((d) => {
+        busy = null;
+        if (d.saved) location.hash = `#/twin?edit=${d.saved.id}`;
+        else { error = d.error ?? 'not saved'; render(); }
+      });
+      return;
+    }
     if (a === 'start') act('Building the first draft…', '/start', { rehearsal: b.dataset.name });
     else if (a === 'approve') act(view.gate.done && view.index + 1 >= view.plan.length ? 'Approving…' : 'Approved · building the next draft…', '/approve');
     else if (a === 'reject') { rejecting = true; render(); }
@@ -180,12 +199,27 @@ export function BuilderPanel(host, { onDraft, onReady = null }) {
   });
   el.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (e.target.dataset.form === 'copy') {
+      const f = new FormData(e.target);
+      busy = 'Copying the example…';
+      render();
+      fetch('/api/lines/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ example: f.get('example'), id: f.get('id') }) }).then((r) => r.json()).then((d) => {
+        busy = null;
+        if (d.line) location.hash = `#/twin?edit=${d.line.id}`;
+        else { error = d.error ?? 'not copied'; render(); }
+      });
+      return;
+    }
     const comment = new FormData(e.target).get('comment');
     if (String(comment).trim()) act('Sent back · rebuilding this phase…', '/reject', { comment });
   });
 
   api('')
-    .then((data) => { view = data.session; rehearsals = data.rehearsals ?? []; })
+    .then(async (data) => {
+      view = data.session;
+      rehearsals = data.rehearsals ?? [];
+      lines = await fetch('/api/lines').then((r) => r.json()).catch(() => lines);
+    })
     .catch((e) => { error = `The Builder API is not there (${e.message}): run the dev server.`; })
     .then(show)
     .then(() => onReady?.());

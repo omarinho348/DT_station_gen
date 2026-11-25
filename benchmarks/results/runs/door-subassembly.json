@@ -1,0 +1,83 @@
+{
+  "name": "door-subassembly",
+  "stage": "builder",
+  "ok": false,
+  "cost": {
+    "spec": 0,
+    "builder": 0.04739399999999999,
+    "editor": 0,
+    "reviewer": 0
+  },
+  "seconds": 38.792,
+  "brief": {
+    "status": "draft",
+    "retries": 0,
+    "questions": 3,
+    "warnings": [
+      "The brief says bad units are rejected, but product.model.params.rejectEvery is unset: no unit will ever fail, so the reject path never runs in the twin. Reject the brief with how often one should fail (e.g. \"every 10th fails\")."
+    ],
+    "problems": []
+  },
+  "target": {
+    "perHour": 40,
+    "title": "Car door inner module pre-assembly",
+    "steps": 4
+  },
+  "plan": {
+    "status": "draft",
+    "retries": 0,
+    "problems": []
+  },
+  "planned": 4,
+  "stations": [
+    {
+      "id": "placeRegulator",
+      "title": "Mount window regulator",
+      "ok": true,
+      "refusals": 2,
+      "phases": [
+        "layout",
+        "layout"
+      ],
+      "kind": "named",
+      "types": [
+        "partCradle",
+        "guideRails",
+        "screwdriver"
+      ],
+      "problems": []
+    },
+    {
+      "id": "fitSpeaker",
+      "title": "Install speaker",
+      "ok": false,
+      "refusals": 5,
+      "phases": [
+        "layout",
+        "layout",
+        "layout",
+        "layout",
+        "layout"
+      ],
+      "kind": "placeholder",
+      "types": [
+        "partNest",
+        "abbIrb6760",
+        "genericMachine",
+        "screwdriver"
+      ],
+      "problems": [
+        "(line): the line does not build headless: Invalid params for \"palletConveyor\": carrierLength: carrierLength must be at least 0.12 m shorter than length (room for the stop pin)"
+      ]
+    }
+  ],
+  "reason": "station \"fitSpeaker\" still failing after the retries: (line): the line does not build headless: Invalid params for \"palletConveyor\": carrierLength: carrierLength must be at least 0.12 m shorter than length (room for the stop pin)",
+  "totalCost": 0.04739399999999999,
+  "mode": "live",
+  "models": {
+    "builder": "gpt-5.4-mini",
+    "others": "gpt-5.4-nano"
+  },
+  "retries": 4,
+  "time": "2026-11-25T02:20:35.343Z"
+}

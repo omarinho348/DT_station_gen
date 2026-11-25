@@ -1,0 +1,46 @@
+{
+  "key": "ece6837807c8b75c145220cf0336b4c0e44f6eca527b8322c51a009c7fa3c9c3",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:24:32.686Z",
+  "usage": {
+    "inputTokens": 6663,
+    "cachedInputTokens": 0,
+    "outputTokens": 272
+  },
+  "output": {
+    "params": {
+      "glueDispense": {
+        "jetLength": 0.12,
+        "liquid": "glue"
+      },
+      "edgePress": {
+        "stroke": 0.08,
+        "bore": 0.08,
+        "headSize": 0.1
+      },
+      "bandTrimLaser": {
+        "focusDistance": 0.15,
+        "beamColor": "red"
+      },
+      "edgeInspect": {
+        "length": 2.7,
+        "width": 1.44,
+        "railHeight": 2.05,
+        "archWidth": 1,
+        "archBottom": 1
+      },
+      "bayMarking": {
+        "length": 1.55,
+        "width": 1.45,
+        "color": "green"
+      },
+      "statusView": {
+        "height": 1.45,
+        "screenWidth": 0.7,
+        "screenHeight": 0.42
+      }
+    }
+  }
+}

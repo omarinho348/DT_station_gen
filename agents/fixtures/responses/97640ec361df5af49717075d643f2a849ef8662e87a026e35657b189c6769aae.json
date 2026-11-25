@@ -1,0 +1,188 @@
+{
+  "key": "97640ec361df5af49717075d643f2a849ef8662e87a026e35657b189c6769aae",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:27:39.374Z",
+  "usage": {
+    "inputTokens": 10089,
+    "cachedInputTokens": 8960,
+    "outputTokens": 1094
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "indexBatches",
+        "seconds": 1,
+        "conveyors": [
+          "capsuleBuffer"
+        ],
+        "label": "Index next capsule positions",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "capsulePickRobot",
+        "item": "product",
+        "from": {
+          "item": "product",
+          "ref": "grasp",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "item": "product",
+          "ref": "capSeat",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Seat capsule into position 1",
+        "gap": 0.06,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "capsulePickRobot",
+        "item": "product",
+        "from": {
+          "item": "product",
+          "ref": "grasp",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "item": "product",
+          "ref": "capSeat",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Seat capsule into position 2",
+        "gap": 0.06,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "capsulePickRobot",
+        "item": "product",
+        "from": {
+          "item": "product",
+          "ref": "grasp",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "item": "product",
+          "ref": "capSeat",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Seat capsule into position 3",
+        "gap": 0.06,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "capsulePickRobot",
+        "item": "product",
+        "from": {
+          "item": "product",
+          "ref": "grasp",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "item": "product",
+          "ref": "capSeat",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Seat capsule into position 4",
+        "gap": 0.06,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "wait",
+        "seconds": 1,
+        "label": "Settle/seat capsules",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

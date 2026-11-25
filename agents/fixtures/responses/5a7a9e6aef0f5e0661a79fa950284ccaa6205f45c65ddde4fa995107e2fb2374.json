@@ -1,0 +1,90 @@
+{
+  "key": "5a7a9e6aef0f5e0661a79fa950284ccaa6205f45c65ddde4fa995107e2fb2374",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:27:20.907Z",
+  "usage": {
+    "inputTokens": 8846,
+    "cachedInputTokens": 0,
+    "outputTokens": 460
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "fill",
+        "machine": "filler",
+        "item": "product",
+        "units": "Cans in position",
+        "liquid": "body lotion",
+        "timing": {
+          "inPosition": 0.4,
+          "descend": 1.5,
+          "engage": 0.3,
+          "valveOpen": 0.35,
+          "dispense": 5,
+          "valveClose": 0.35,
+          "drip": 0.3,
+          "retract": 1.4,
+          "after": 0.3
+        },
+        "supply": {
+          "machine": "filler",
+          "motion": null,
+          "draw": null,
+          "refillBelow": null,
+          "refillTo": null
+        },
+        "label": "Fill 250 mL",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "decide",
+        "on": "quality",
+        "cases": [
+          {
+            "key": "pass",
+            "value": [
+              {
+                "op": "transform",
+                "item": "product",
+                "stage": "filled",
+                "set": null,
+                "at": "end",
+                "seconds": null,
+                "label": "Mark as filled (pass)",
+                "state": null,
+                "status": null
+              }
+            ]
+          },
+          {
+            "key": "reject",
+            "value": [
+              {
+                "op": "transform",
+                "item": "product",
+                "stage": "processed",
+                "set": null,
+                "at": "end",
+                "seconds": null,
+                "label": "Mark as processed (reject)",
+                "state": null,
+                "status": null
+              }
+            ]
+          }
+        ],
+        "otherwise": null,
+        "planAs": "otherwise",
+        "label": "Quality verdict",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "processed"
+  }
+}

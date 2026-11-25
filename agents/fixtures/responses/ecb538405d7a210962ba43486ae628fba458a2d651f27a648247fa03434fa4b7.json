@@ -1,0 +1,44 @@
+{
+  "key": "ecb538405d7a210962ba43486ae628fba458a2d651f27a648247fa03434fa4b7",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:18:43.449Z",
+  "usage": {
+    "inputTokens": 6179,
+    "cachedInputTokens": 0,
+    "outputTokens": 204
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "cap",
+        "machine": "capper",
+        "item": "product",
+        "units": "Bottles",
+        "turns": 3,
+        "engageAt": 0.95,
+        "timing": {
+          "inPosition": 0.4,
+          "descend": 1.3,
+          "engage": 0.15,
+          "tighten": 1.2,
+          "torque": 0.25,
+          "retract": 1.3,
+          "feed": 0.7
+        },
+        "label": "Cap",
+        "state": "CAPPING",
+        "status": [
+          {
+            "key": "capColor",
+            "value": "blue"
+          }
+        ]
+      }
+    ],
+    "output": null,
+    "inputStage": "filled"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "key": "16f9be89121506bba89650351c7990f052288166f83f31419a24ee5a45c8ec0a",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:19:03.252Z",
+  "usage": {
+    "inputTokens": 5557,
+    "cachedInputTokens": 5120,
+    "outputTokens": 691
+  },
+  "output": {
+    "id": "pasteSolderPaste",
+    "code": "ST1",
+    "title": "Solder paste dispense",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Solder paste dispense",
+        "color": "#00A000"
+      }
+    },
+    "equipment": [
+      {
+        "id": "dispenseRig",
+        "type": "composite",
+        "why": "Dispense solder paste onto pads",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "visionScanner",
+        "type": "visionScanner",
+        "why": "Verify carrier and board presence",
+        "place": "overLine",
+        "at": "input",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "conveyor",
+    "ports": null,
+    "ops": [
+      "decide",
+      "move",
+      "operate",
+      "stopConveyors",
+      "transfer",
+      "toolOn",
+      "wait"
+    ]
+  }
+}

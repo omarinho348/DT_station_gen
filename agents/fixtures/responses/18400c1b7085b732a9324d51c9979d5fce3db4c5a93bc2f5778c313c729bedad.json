@@ -1,0 +1,96 @@
+{
+  "key": "18400c1b7085b732a9324d51c9979d5fce3db4c5a93bc2f5778c313c729bedad",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-25T02:26:06.302Z",
+  "usage": {
+    "inputTokens": 6294,
+    "cachedInputTokens": 5888,
+    "outputTokens": 1054
+  },
+  "output": {
+    "id": "tshirtPackingLine",
+    "title": "T-shirt fold, bag, seal, label, tote pack",
+    "product": {
+      "name": "Online t-shirt shipment unit",
+      "description": "A printed cotton T-shirt laid flat, machine-folded to 250 × 300 mm, placed into a poly bag, sealed, and labeled with an address sticker. Shipped as a unit inside a tote.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "box",
+          "length": 0.25,
+          "width": 0.3,
+          "height": 0.02,
+          "finish": "cardboard",
+          "color": "#ffffff",
+          "processedColor": null,
+          "liquid": null,
+          "fillLevel": null,
+          "capColor": null,
+          "labelText": "address label",
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 400,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "LoadFlatShirt",
+        "does": "An operator places one laid-flat printed T-shirt onto the folding machine input."
+      },
+      {
+        "name": "FoldTo250x300",
+        "does": "The machine folds the T-shirt to approximately 250 × 300 mm."
+      },
+      {
+        "name": "InsertIntoPolyBag",
+        "does": "The folded shirt is slipped into a poly bag."
+      },
+      {
+        "name": "SealPolyBag",
+        "does": "The poly bag is sealed."
+      },
+      {
+        "name": "PrintAndApplyAddressLabel",
+        "does": "An address label is printed and stuck onto the sealed bag."
+      },
+      {
+        "name": "PlaceBagIntoTote",
+        "does": "The labeled sealed bag is placed into a tote for the shipping area."
+      }
+    ],
+    "quality": "A second operator performs end-of-line quality checks (bag sealed correctly, label present and readable, no mis-folds). Any bad units are rejected/removed before entering the tote.",
+    "constraints": [
+      "Discrete manufacturing/assembly line (not a continuous process).",
+      "Throughput requirement: 400 finished shirts per hour.",
+      "Two operators total: one for loading, one for quality checking.",
+      "Space/budget/machine availability were not specified; plan must fit within a straight conveyor-style line with a manual load and quality checkpoint."
+    ],
+    "assumptions": [
+      "400 shirts/hour is for completed packed units (sealed bag with label, placed into tote).",
+      "The shift length is 8 hours/day (since none was given).",
+      "The folded shirt thickness is ~20 mm (used only to size the product footprint; owner can correct).",
+      "Each unit is handled individually on the line (not batch cases/pallets).",
+      "Quality decision happens after label application and before the tote."
+    ],
+    "questions": [
+      {
+        "topic": "product",
+        "question": "What are the poly bag and label specifics: bag size (L×W) and how it’s sealed (heat sealer width/type vs. adhesive seal)?",
+        "why": "Determines the bag-handling and sealing station mechanics and cycle time."
+      },
+      {
+        "topic": "throughput",
+        "question": "Is 400 shirts/hour the guaranteed sustained rate for the fully finished unit (after sealing + label), and is it per 8-hour shift?",
+        "why": "Sets the takt time budget across stations; affects whether any step needs to be parallelized."
+      },
+      {
+        "topic": "layout",
+        "question": "How many bags per tote (or tote size/weight limit), and is tote packing done continuously or in 'tote loads'?",
+        "why": "Determines the tote staging/accumulation behavior and the discharge/transfer station."
+      }
+    ]
+  }
+}

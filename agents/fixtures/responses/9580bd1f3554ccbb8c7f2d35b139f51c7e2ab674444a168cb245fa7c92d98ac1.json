@@ -1,0 +1,77 @@
+{
+  "key": "9580bd1f3554ccbb8c7f2d35b139f51c7e2ab674444a168cb245fa7c92d98ac1",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:19:23.697Z",
+  "usage": {
+    "inputTokens": 5564,
+    "cachedInputTokens": 5120,
+    "outputTokens": 686
+  },
+  "output": {
+    "id": "loadCells",
+    "code": "ST1",
+    "title": "Load 12 cells",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Load 12 cells",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "vibratoryFeeder",
+        "type": "vibratoryFeeder",
+        "why": "Present cells for pick-up",
+        "place": "upstream",
+        "at": "input",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "workTable",
+        "type": "workTable",
+        "why": "Stage the module frame and trays",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "robot",
+        "type": "abbIrb6760",
+        "why": "Pick and place the 12 cells",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "gripper",
+        "type": "fingerGripper",
+        "why": "Grip individual cylindrical cells",
+        "place": "onTop",
+        "at": "whole",
+        "on": "robot",
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "conveyor",
+    "ports": null,
+    "ops": [
+      "decide",
+      "grip",
+      "pickPlace",
+      "release",
+      "transfer",
+      "wait"
+    ]
+  }
+}

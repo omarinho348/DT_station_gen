@@ -1,0 +1,30 @@
+{
+  "key": "c51ee5f8905751196c5f4a97ea2aaa5fa506f95ed42dfc0ac3dcf09b4511fa85",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:18:25.402Z",
+  "usage": {
+    "inputTokens": 5602,
+    "cachedInputTokens": 0,
+    "outputTokens": 241
+  },
+  "output": {
+    "params": {
+      "filler": {
+        "heads": 4,
+        "pitch": 0.4,
+        "tipHeight": 0.353,
+        "stroke": 0.25
+      },
+      "supplyTank": {
+        "radius": 0.45,
+        "height": 1.3,
+        "legHeight": 0.55,
+        "pumpOffset": 0.975,
+        "tag": "T-101",
+        "contents": "Still mineral water"
+      }
+    }
+  }
+}

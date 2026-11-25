@@ -1,0 +1,211 @@
+{
+  "version": 1,
+  "line": {
+    "id": "stillWaterBottling",
+    "title": "Still water 0.5 L PET bottling",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "bottle",
+      "length": 0.065,
+      "width": 0.065,
+      "height": 0.21,
+      "finish": "plastic",
+      "color": "#ffffff",
+      "liquid": "#00A3FF",
+      "capColor": "#1E5BFF",
+      "labelText": "wrap label"
+    }
+  },
+  "stations": [
+    {
+      "id": "filling",
+      "code": "ST1",
+      "title": "Fill 0.5 L",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Fill 0.5 L",
+          "color": "#1E5BFF"
+        }
+      },
+      "equipment": [
+        {
+          "id": "filler",
+          "type": "filler",
+          "params": {
+            "heads": 4,
+            "pitch": 0.4,
+            "tipHeight": 0.353,
+            "stroke": 0.25
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "supplyTank",
+          "type": "supplyTank",
+          "params": {
+            "radius": 0.45,
+            "height": 1.3,
+            "legHeight": 0.55,
+            "pumpOffset": 0.975,
+            "tag": "T-101",
+            "contents": "Still mineral water"
+          },
+          "position": [
+            -0.52,
+            0,
+            -1.735
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "fill",
+          "machine": "filler",
+          "item": "product",
+          "units": "Bottles",
+          "liquid": "still mineral water",
+          "timing": {
+            "inPosition": 0.4,
+            "descend": 1.5,
+            "engage": 0.3,
+            "valveOpen": 0.35,
+            "dispense": 5,
+            "valveClose": 0.35,
+            "drip": 0.3,
+            "retract": 1.4,
+            "after": 0.3
+          },
+          "supply": {
+            "machine": "filler",
+            "motion": "headTravel",
+            "draw": 1,
+            "refillBelow": 0.2,
+            "refillTo": 1
+          },
+          "label": "Fill 0.5 L bottles",
+          "state": "FILLING",
+          "status": {
+            "volume": "0.5 L"
+          }
+        },
+        {
+          "op": "transfer",
+          "conveyor": "line",
+          "to": "output",
+          "from": "work",
+          "item": "product",
+          "also": [],
+          "speed": 1,
+          "ramp": 0.5,
+          "label": "Index bottles forward",
+          "state": "INDEXING",
+          "status": {
+            "stage": "filled"
+          }
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "capping",
+      "code": "ST2",
+      "title": "Screw cap",
+      "equipment": [
+        {
+          "id": "line",
+          "type": "beltConveyor",
+          "params": {
+            "length": 4,
+            "beltWidth": 0.34,
+            "guides": true,
+            "guideGap": 0.12,
+            "drive": true,
+            "carries": "unit"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "capper",
+          "type": "capper",
+          "params": {
+            "heads": 4,
+            "pitch": 0.12,
+            "seatHeight": 0.23,
+            "stroke": 0.15,
+            "capRadius": 0.015,
+            "capHeight": 0.025,
+            "capColor": "blue"
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "filled",
+      "process": [
+        {
+          "op": "cap",
+          "machine": "capper",
+          "item": "product",
+          "units": "Bottles",
+          "turns": 3,
+          "engageAt": 0.95,
+          "timing": {
+            "inPosition": 0.4,
+            "descend": 1.3,
+            "engage": 0.15,
+            "tighten": 1.2,
+            "torque": 0.25,
+            "retract": 1.3,
+            "feed": 0.7
+          },
+          "label": "Cap",
+          "state": "CAPPING",
+          "status": {
+            "capColor": "blue"
+          }
+        }
+      ],
+      "feed": {
+        "fromLift": false
+      }
+    }
+  ],
+  "graph": {
+    "edges": [
+      {
+        "from": "filling.output",
+        "to": "capping.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      }
+    ]
+  }
+}

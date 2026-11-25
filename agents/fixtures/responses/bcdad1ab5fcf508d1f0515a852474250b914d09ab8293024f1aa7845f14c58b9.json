@@ -1,0 +1,140 @@
+{
+  "key": "bcdad1ab5fcf508d1f0515a852474250b914d09ab8293024f1aa7845f14c58b9",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-24T21:58:25.403Z",
+  "usage": {
+    "inputTokens": 5207,
+    "cachedInputTokens": 3840,
+    "outputTokens": 837
+  },
+  "output": {
+    "transport": "beltConveyor",
+    "stations": [
+      {
+        "id": "filling",
+        "code": "ST1",
+        "title": "Fill 250 mL",
+        "does": "Fill one 250 mL bottle with thick body lotion using a timed/volumetric fill (about 5 seconds per bottle).",
+        "steps": [
+          "Fill"
+        ],
+        "seconds": 5,
+        "covers": [
+          "Fill"
+        ],
+        "machines": [
+          "filler",
+          "supplyTank"
+        ]
+      },
+      {
+        "id": "pumpHeadPlacement",
+        "code": "ST2",
+        "title": "Place pump head",
+        "does": "Place the pump head onto the bottle opening/neck position.",
+        "steps": [
+          "PlacePumpHead"
+        ],
+        "seconds": 3,
+        "covers": [
+          "PlacePumpHead"
+        ],
+        "machines": [
+          "robot",
+          "vibratoryFeeder"
+        ]
+      },
+      {
+        "id": "pumpScrewDown",
+        "code": "ST3",
+        "title": "Screw-down pump",
+        "does": "Screw the pump head down to secure it (screw-down operation).",
+        "steps": [
+          "ScrewDownPump"
+        ],
+        "seconds": 2,
+        "covers": [
+          "ScrewDownPump"
+        ],
+        "machines": [
+          "capper"
+        ]
+      },
+      {
+        "id": "frontLabeling",
+        "code": "ST4",
+        "title": "Apply front label",
+        "does": "Apply a front label to the bottle.",
+        "steps": [
+          "FrontLabel"
+        ],
+        "seconds": 2,
+        "covers": [
+          "FrontLabel"
+        ],
+        "machines": [
+          "labelApplicator"
+        ]
+      },
+      {
+        "id": "weighAndVisionCheck",
+        "code": "ST5",
+        "title": "Weigh + camera inspection",
+        "does": "Weigh the filled-and-labeled bottle and perform camera inspection; compare against acceptance limits.",
+        "steps": [
+          "WeighAndCameraCheck"
+        ],
+        "seconds": 5,
+        "covers": [
+          "WeighAndCameraCheck"
+        ],
+        "machines": [
+          "visionScanner",
+          "photoEye"
+        ]
+      },
+      {
+        "id": "rejectEject",
+        "code": "ST6",
+        "title": "Remove rejected bottles",
+        "does": "Remove any rejected bottles from the line.",
+        "steps": [
+          "RemoveRejects"
+        ],
+        "seconds": 1,
+        "covers": [
+          "RemoveRejects"
+        ],
+        "machines": [
+          "sidePusher"
+        ]
+      },
+      {
+        "id": "casePacking",
+        "code": "ST7",
+        "title": "Pack 12 per case",
+        "does": "Pack finished, accepted bottles into cases with 12 bottles per case.",
+        "steps": [
+          "PackTwelvePerCase"
+        ],
+        "seconds": 8,
+        "covers": [
+          "PackTwelvePerCase"
+        ],
+        "machines": [
+          "caseSource",
+          "caseErector",
+          "caseCloser",
+          "genericMachine"
+        ]
+      }
+    ],
+    "notes": [
+      "Takt is 12 s/unit (300/h). All station budgets are set to be ≤12 s so the line runs at the slowest station without falling behind.",
+      "Packing “12 per case” is handled by a case packer that indexes/positions cases and bottles; this is budgeted as 8 s per bottle to keep the overall takt.",
+      "Clean-room requirement is assumed to be satisfied by enclosing ST1–ST5 and using sealed conveyors/tunnels; operators only at end-of-line after ST6 (consistent with your constraint)."
+    ]
+  }
+}

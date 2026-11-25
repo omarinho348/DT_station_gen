@@ -1,0 +1,34 @@
+{
+  "key": "e47c123bffc4572348e1b889a27bde2b5eb2e8dc163aca217d77cd6806b8ee2a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:20:34.099Z",
+  "usage": {
+    "inputTokens": 5921,
+    "cachedInputTokens": 4864,
+    "outputTokens": 149
+  },
+  "output": {
+    "params": {
+      "abbIrb6760": {
+        "padLength": 0.5,
+        "padWidth": 0.34
+      },
+      "fingerGripper": {
+        "fingerLength": 0.12,
+        "maxGap": 0.2
+      },
+      "pickToLight": {
+        "color": "green"
+      },
+      "visionScanner": {
+        "length": 2.7,
+        "width": 1.44,
+        "railHeight": 2.05,
+        "archWidth": 1,
+        "archBottom": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "about": "Step 10.5: the first live Editor calls. Each request is proposed on version 1 of a copy of spec/examples/bottling-line.factory.json under the id below (the same copy /api/lines/import makes), recorded in agents/fixtures/responses/ for mock replay.",
+  "example": "bottling-line",
+  "id": "bottlingEdit",
+  "requests": [
+    "Make Filling 1 second faster.",
+    "Rename the Inspection station to Vision check and give it the code V.",
+    "Make it better."
+  ]
+}

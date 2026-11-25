@@ -1,0 +1,48 @@
+{
+  "key": "a240500ff7bb746001728d45f8cbcce630e141ce1b46b077c38f1a90d1efaecd",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:22:41.487Z",
+  "usage": {
+    "inputTokens": 5572,
+    "cachedInputTokens": 0,
+    "outputTokens": 374
+  },
+  "output": {
+    "id": "slicingStation",
+    "code": "ST2",
+    "title": "Slice loaves to sandwiches",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "slicerClampsAndHead",
+        "type": "genericMachine",
+        "why": "Clamp loaf and perform slicing cycle",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "safetyGuardFence",
+        "type": "guardFence",
+        "why": "Enclose slicing zone for operator safety",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "slicingConveyor",
+    "ports": null,
+    "ops": [
+      "grip",
+      "operate",
+      "release",
+      "transfer"
+    ]
+  }
+}

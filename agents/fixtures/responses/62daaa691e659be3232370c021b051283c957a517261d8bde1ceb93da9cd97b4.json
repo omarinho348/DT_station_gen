@@ -1,0 +1,54 @@
+{
+  "key": "62daaa691e659be3232370c021b051283c957a517261d8bde1ceb93da9cd97b4",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:23:31.055Z",
+  "usage": {
+    "inputTokens": 5552,
+    "cachedInputTokens": 4864,
+    "outputTokens": 697
+  },
+  "output": {
+    "id": "doseTablets",
+    "code": "ST2",
+    "title": "Dose tablets into cavities",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Dose tablets into cavities",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "tabletDoseUnit",
+        "type": "genericMachine",
+        "why": "Drops/tablet-doses one dose per blister cavity under the dosing head",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "cavityIndexingPhotoEye",
+        "type": "photoEye",
+        "why": "Detects cavity position for accurate dispense timing with web indexing",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "lineConveyor",
+    "ports": null,
+    "ops": [
+      "operate",
+      "indexBatches",
+      "decide"
+    ]
+  }
+}

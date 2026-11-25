@@ -1,0 +1,95 @@
+{
+  "key": "5c85cbeb157557adfc41e83e7e5114873b3486161eeb7be755406ddb0af37dd7",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:09:19.656Z",
+  "usage": {
+    "inputTokens": 5574,
+    "cachedInputTokens": 0,
+    "outputTokens": 1153
+  },
+  "output": {
+    "id": "loadCells",
+    "code": "ST1",
+    "title": "Load 12 cells",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Load 12 cells",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "cellFeeder",
+        "type": "vibratoryFeeder",
+        "why": "Escapement/feeding of incoming cylindrical cells to robot pick zone",
+        "place": "upstream",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "moduleWorkTable",
+        "type": "workTable",
+        "why": "Holds the 12-cell plastic module frame carrier for cell insertion",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "cellLoaderRobot",
+        "type": "abbIrb6760",
+        "why": "Pick and place 12 cylindrical cells into corresponding module seats",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "cellFingerGripper",
+        "type": "fingerGripper",
+        "why": "Grips one cylindrical cell for precise seat alignment",
+        "place": "onTop",
+        "at": "work",
+        "on": "cellLoaderRobot",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "seatPresenceCheck",
+        "type": "photoEye",
+        "why": "Verifies cell seat presence/depth at the module frame seats (pass/fail)",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "stationStatus",
+        "type": "statusMonitor",
+        "why": "Displays load/seat confirmation results for the current carrier",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "st1Conveyor",
+    "ports": null,
+    "ops": [
+      "pickPlace",
+      "decide",
+      "wait",
+      "release"
+    ]
+  }
+}

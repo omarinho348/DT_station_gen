@@ -1,0 +1,42 @@
+{
+  "key": "ee1a047c8a79b9335accea252c5b41cfb3a7814fa6f5655b0551a8f9d4db1345",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:20:30.354Z",
+  "usage": {
+    "inputTokens": 6514,
+    "cachedInputTokens": 0,
+    "outputTokens": 186
+  },
+  "output": {
+    "params": {
+      "partNest": {
+        "length": 0.34,
+        "width": 0.34,
+        "height": 0.72,
+        "guides": "locators",
+        "guideX": 0.13,
+        "guideZ": 0.13,
+        "postHeight": 0.2
+      },
+      "pickRobot": {
+        "padLength": 0.5,
+        "padWidth": 0.34
+      },
+      "processUnit": {
+        "name": "SPEAKER CHECK",
+        "note": "timed assembly confirmation",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": false,
+        "carries": "unit"
+      },
+      "screwdriver": {
+        "fingerLength": 0.12,
+        "offsetX": 0.13
+      }
+    }
+  }
+}

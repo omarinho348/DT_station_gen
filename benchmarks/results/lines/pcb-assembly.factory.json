@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "line": {
+    "id": "controlBoardAssembly",
+    "title": "Control board assembly on pallet carriers",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "box",
+      "length": 0.16,
+      "width": 0.1,
+      "height": 0.1,
+      "finish": "cardboard",
+      "color": "#00A000",
+      "processedColor": "#00A000"
+    }
+  },
+  "stations": [
+    {
+      "id": "pasteSolderPaste",
+      "code": "ST1",
+      "title": "Solder paste dispense",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Solder paste dispense",
+          "color": "#00A000"
+        }
+      },
+      "equipment": [
+        {
+          "id": "dispenseRig",
+          "type": "composite",
+          "params": {
+            "parts": [
+              {
+                "id": "base",
+                "type": "portalFrame",
+                "params": {
+                  "span": 0.8,
+                  "height": 1.5
+                },
+                "position": [
+                  0,
+                  0,
+                  0
+                ],
+                "rotationY": 0
+              },
+              {
+                "id": "cross",
+                "type": "linearAxis",
+                "params": {
+                  "stroke": 0.5,
+                  "hang": true
+                },
+                "on": "base.beam",
+                "position": [
+                  0,
+                  0,
+                  0
+                ],
+                "rotationY": 1.5707963267948966
+              },
+              {
+                "id": "lift",
+                "type": "verticalAxis",
+                "params": {
+                  "stroke": 0.25,
+                  "bodyLength": 0.35
+                },
+                "on": "cross.carriage",
+                "position": [
+                  0,
+                  0,
+                  0
+                ],
+                "rotationY": 0
+              },
+              {
+                "id": "nozzle",
+                "type": "dispenseNozzle",
+                "params": {
+                  "jetLength": 0.15
+                },
+                "on": "lift.ram",
+                "position": [
+                  0,
+                  0,
+                  0
+                ],
+                "rotationY": 0
+              }
+            ],
+            "motions": {
+              "crossTravel": "cross.travel",
+              "liftExtend": "lift.extend",
+              "nozzleFlow": "nozzle.flow"
+            },
+            "anchors": {
+              "base": "base",
+              "baseBeam": "base.beam",
+              "baseBeamTop": "base.beamTop",
+              "cross": "cross",
+              "crossCarriage": "cross.carriage",
+              "lift": "lift",
+              "liftRam": "lift.ram",
+              "nozzle": "nozzle"
+            }
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "visionScanner",
+          "type": "visionScanner",
+          "params": {
+            "length": 2.7,
+            "width": 1.44,
+            "railHeight": 2.05,
+            "archWidth": 1,
+            "archBottom": 1
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "process": [],
+      "feed": {
+        "fromLift": true
+      }
+    }
+  ],
+  "graph": {
+    "edges": []
+  }
+}

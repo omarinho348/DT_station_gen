@@ -1,0 +1,32 @@
+{
+  "key": "df156aee8f651bfa94da997527b86f857624b6769a78307575cc0d425e060081",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:23:20.376Z",
+  "usage": {
+    "inputTokens": 5717,
+    "cachedInputTokens": 4864,
+    "outputTokens": 149
+  },
+  "output": {
+    "params": {
+      "formingEnclosure": {
+        "length": 1.64,
+        "width": 1.12,
+        "height": 2.05,
+        "shutterRise": 0.82,
+        "extraction": true
+      },
+      "thermoformer": {
+        "name": "THERMOFORMER",
+        "note": "PVC thermoforming (10-up)",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      }
+    }
+  }
+}

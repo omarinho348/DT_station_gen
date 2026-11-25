@@ -1,0 +1,74 @@
+{
+  "key": "8a30a0a5782f70b862017836c37729526fba73c81b8af0a7ca6b7d1f5dc94783",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:13:59.690Z",
+  "usage": {
+    "inputTokens": 5903,
+    "cachedInputTokens": 4864,
+    "outputTokens": 661
+  },
+  "output": {
+    "id": "placeBusbars",
+    "code": "ST2",
+    "title": "Place copper busbars",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "busbarPlacerRobot",
+        "type": "abbIrb6760",
+        "why": "Pick and place copper busbars onto cell-top positions",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "busbarVision",
+        "type": "visionScanner",
+        "why": "Verify presence and correct seating of each busbar location",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "busbarPickToLight",
+        "type": "pickToLight",
+        "why": "Indicate required busbar orientation/variant for the current carrier",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "busbarGripper",
+        "type": "fingerGripper",
+        "why": "Grip busbars for reliable transfer from staging to the carrier",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "decide",
+      "replenish",
+      "pickPlace",
+      "operate",
+      "grip",
+      "release",
+      "toolOn",
+      "wait",
+      "indexBatches",
+      "transfer"
+    ]
+  }
+}

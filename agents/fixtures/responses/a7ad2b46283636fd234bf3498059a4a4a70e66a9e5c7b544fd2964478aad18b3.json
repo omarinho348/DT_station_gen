@@ -1,0 +1,101 @@
+{
+  "key": "a7ad2b46283636fd234bf3498059a4a4a70e66a9e5c7b544fd2964478aad18b3",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:00:19.951Z",
+  "usage": {
+    "inputTokens": 6070,
+    "cachedInputTokens": 4864,
+    "outputTokens": 1060
+  },
+  "output": {
+    "id": "loadCells",
+    "code": "ST1",
+    "title": "Load 12 cells",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Load 12 cells",
+        "color": null,
+        "minZ": null,
+        "maxZ": null,
+        "walkwayZ": null,
+        "panelX": null,
+        "conveyorLength": null,
+        "carrierLength": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "cellsFeeder",
+        "type": "vibratoryFeeder",
+        "why": "Present 12 cylindrical cells for the robot to pick",
+        "place": "upstream",
+        "at": "input",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "moduleBeltConveyor",
+        "type": "beltConveyor",
+        "why": "Carry the module carrier through the station",
+        "place": "line",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "moduleWorkTable",
+        "type": "workTable",
+        "why": "Hold the plastic module frame/carrier in the pick-and-seat position",
+        "place": "rear",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "cellPickRobot",
+        "type": "abbIrb6760",
+        "why": "Pick each cylindrical cell and place it into its seat",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "cellFingerGripper",
+        "type": "fingerGripper",
+        "why": "Grip the cylindrical cells for transfer into the 12-cell seats",
+        "place": "onTop",
+        "at": "work",
+        "on": "cellPickRobot",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "seatQualityCheck",
+        "type": "photoEye",
+        "why": "Detect seat-stop/contact confirmation per seat for pass/reject",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "moduleBeltConveyor",
+    "ports": null,
+    "ops": [
+      "decide",
+      "pickPlace",
+      "release",
+      "wait"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "key": "c2b5ff6eb2dfc35623b69da3b08500ba239c2aa2a7179eb10291cda92c4b64ab",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-24T21:58:52.692Z",
+  "usage": {
+    "inputTokens": 6337,
+    "cachedInputTokens": 5888,
+    "outputTokens": 1132
+  },
+  "output": {
+    "id": "controlBoardAssembly",
+    "title": "Control board assembly on pallet carriers",
+    "product": {
+      "name": "Control board (PCB)",
+      "description": "Small PCB assembled on a pallet carrier: 160 × 100 mm, 1.6 mm thick. The finished item is the populated board after reflow and optical inspection.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "box",
+          "length": 0.16,
+          "width": 0.1,
+          "height": 0.1,
+          "finish": "cardboard",
+          "color": "#00A000",
+          "processedColor": "#00A000",
+          "liquid": null,
+          "fillLevel": null,
+          "capColor": null,
+          "labelText": null,
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 80,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "ApplySolderPaste",
+        "does": "Dispense solder paste onto the PCB pads on the board mounted to the carrier."
+      },
+      {
+        "name": "PlaceComponents",
+        "does": "A SCARA robot places about 20 components onto the pasted pads using parts from feeders."
+      },
+      {
+        "name": "ReflowSolder",
+        "does": "Send the board through a reflow oven so the solder paste reflows and solders the components."
+      },
+      {
+        "name": "AOIInspect",
+        "does": "Automated optical inspection checks every board for soldering and component placement defects."
+      },
+      {
+        "name": "RouteRejectOrGood",
+        "does": "If AOI reports a failure, route the board to a reject lane; otherwise keep it in the good flow."
+      },
+      {
+        "name": "OffCarrierToTote",
+        "does": "Remove good boards from the carrier into a tote."
+      }
+    ],
+    "quality": "AOI checks every board; failed boards are diverted to a reject lane.",
+    "constraints": [
+      "ESD-safe area",
+      "Guarded cells (safety fencing/containment around robot and oven areas)",
+      "Discrete, pallet-carrier throughput (board completes as one unit on the line)"
+    ],
+    "assumptions": [
+      "Target of one board every 45 seconds is fixed: takt = 45 s and line is sized to 80 finished boards/hour.",
+      "Pallet-carrier indexing between stations is synchronized to keep every station within 45 s per board.",
+      "The ‘carrier returns underneath’ means the empty carriers travel back to the start via a lower return path and do not interfere with forward flow.",
+      "The board remains attached/located on the carrier from paste application through AOI; removal happens only after AOI (good) and/or at the reject lane (bad).",
+      "Component feeders supply all ~20 components per board without changeover during the simulated run."
+    ],
+    "questions": [
+      {
+        "topic": "layout",
+        "question": "What carrier hardware is used (e.g., dedicated PCB fixture on a pallet), and how exactly does the pallet conveyor carry and re-return under the board process?",
+        "why": "This determines the correct conveyor/fixture station interfaces and how the SCARA picks/places relative to the board."
+      },
+      {
+        "topic": "throughput",
+        "question": "Does the reflow oven process time (including indexing/dwell and any cool-down needed before AOI) fit within the 45 s takt per board, or is it a batch/continuous oven with multiple boards in flight?",
+        "why": "The oven model affects station timing and whether AOI can run 1-board-per-takt."
+      },
+      {
+        "topic": "quality",
+        "question": "When a board fails AOI, how is it handled end-to-end: is it placed into a reject tote immediately, held on a separate reject carrier, or reworked?",
+        "why": "This changes the reject-lane station actions and the required pick/transfer operations after AOI."
+      }
+    ]
+  }
+}

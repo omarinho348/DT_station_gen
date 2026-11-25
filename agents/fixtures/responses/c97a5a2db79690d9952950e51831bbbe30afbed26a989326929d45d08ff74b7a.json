@@ -1,0 +1,75 @@
+{
+  "key": "c97a5a2db79690d9952950e51831bbbe30afbed26a989326929d45d08ff74b7a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:27:09.867Z",
+  "usage": {
+    "inputTokens": 5843,
+    "cachedInputTokens": 4864,
+    "outputTokens": 554
+  },
+  "output": {
+    "id": "capsuleLoading",
+    "code": "ST1",
+    "title": "Load capsule bodies",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Load capsule bodies",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "capsuleFeeder",
+        "type": "vibratoryFeeder",
+        "why": "Feeds empty capsule bodies into the station flow",
+        "place": "upstream",
+        "at": "input",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "capsuleBuffer",
+        "type": "bufferLane",
+        "why": "Accumulates a small queue of capsule bodies at filling/tamping positions",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "capsulePickRobot",
+        "type": "scara",
+        "why": "Places and seats empty capsule bodies into the filling/tamping positions",
+        "place": "rear",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "capsuleGripper",
+        "type": "fingerGripper",
+        "why": "Grips capsule bodies for placement into the queue positions",
+        "place": "onTop",
+        "at": "work",
+        "on": "capsulePickRobot",
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "replenish",
+      "indexBatches",
+      "pickPlace",
+      "wait"
+    ]
+  }
+}

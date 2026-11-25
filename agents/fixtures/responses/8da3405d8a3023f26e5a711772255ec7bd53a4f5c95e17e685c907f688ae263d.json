@@ -1,0 +1,151 @@
+{
+  "key": "8da3405d8a3023f26e5a711772255ec7bd53a4f5c95e17e685c907f688ae263d",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-24T21:59:12.019Z",
+  "usage": {
+    "inputTokens": 6098,
+    "cachedInputTokens": 4864,
+    "outputTokens": 1027
+  },
+  "output": {
+    "transport": "palletConveyor",
+    "stations": [
+      {
+        "id": "pasteSolderPaste",
+        "code": "ST1",
+        "title": "Solder paste dispense",
+        "does": "Dispenses solder paste onto PCB pads on the carrier-mounted board.",
+        "steps": [
+          "Verify carrier arrival and correct board present with a photo-eye check.",
+          "Lower dispense nozzle to the carrier-defined standoff above the PCB pads.",
+          "Dispense solder paste pattern onto the pads (multi-passes as required by the stencil).",
+          "Retract nozzle and dwell to clear strings.",
+          "Index conveyor to send carrier to component placement."
+        ],
+        "seconds": 20,
+        "covers": [
+          "ApplySolderPaste"
+        ],
+        "machines": [
+          "dispenseNozzle",
+          "visionScanner"
+        ]
+      },
+      {
+        "id": "placeComponents",
+        "code": "ST2",
+        "title": "SCARA component placement",
+        "does": "Places ~20 components onto pasted pads using feeders.",
+        "steps": [
+          "Confirm board on carrier (photo-eye) and pick-up datum alignment.",
+          "SCARA picks components from the parts feeders (at least two-gripper orientation handled by tool change or gripper rotation).",
+          "For each component: move to placement pose, lower to contact, release, and lift.",
+          "Perform a brief post-placement settling wait for paste compliance.",
+          "Index conveyor to the reflow oven station."
+        ],
+        "seconds": 25,
+        "covers": [
+          "PlaceComponents"
+        ],
+        "machines": [
+          "scara",
+          "fingerGripper",
+          "vibratoryFeeder",
+          "visionCamera"
+        ]
+      },
+      {
+        "id": "reflowOven",
+        "code": "ST3",
+        "title": "Reflow soldering",
+        "does": "Runs the carrier through a reflow oven to reflow paste and solder components.",
+        "steps": [
+          "Gate carrier into the reflow conveyor/zone.",
+          "Apply the oven thermal profile (preheat, soak, reflow, cool) for the timed dwell required by the process recipe.",
+          "Cool enough to avoid board shift after leaving the oven zone.",
+          "Transfer carrier out of oven to AOI inlet position.",
+          "Index conveyor to the AOI station."
+        ],
+        "seconds": 40,
+        "covers": [
+          "ReflowSolder"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "aoiInspection",
+        "code": "ST4",
+        "title": "AOI optical inspection",
+        "does": "Automated optical inspection checks each board for soldering and placement defects.",
+        "steps": [
+          "Hold carrier at the AOI scan position.",
+          "Capture required images (top and, if configured, angled views) using the vision system.",
+          "Run AOI pass/fail algorithms for pad wetting, tombstoning, missing/shifted components, and solder bridge checks.",
+          "Store inspection result associated with the board/carrier ID.",
+          "Release carrier to the routing sorter."
+        ],
+        "seconds": 15,
+        "covers": [
+          "AOIInspect"
+        ],
+        "machines": [
+          "visionScanner",
+          "visionCamera"
+        ]
+      },
+      {
+        "id": "rejectGoodRouting",
+        "code": "ST5",
+        "title": "Route reject or good flow",
+        "does": "If AOI fails, route to reject lane; otherwise continue good flow.",
+        "steps": [
+          "Read AOI result tied to the carrier ID.",
+          "If FAIL: actuate a side pusher/transfer mechanism to divert the carrier to the reject lane.",
+          "If PASS: keep the carrier on the main flow path.",
+          "Ensure diverted FAIL carriers clear the main conveyor guide before index.",
+          "Index main flow carriers onward (PASS only) to off-carrier removal."
+        ],
+        "seconds": 5,
+        "covers": [
+          "RouteRejectOrGood"
+        ],
+        "machines": [
+          "sidePusher",
+          "photoEye",
+          "crossTransfer"
+        ]
+      },
+      {
+        "id": "offCarrierToTote",
+        "code": "ST6",
+        "title": "Remove board to tote",
+        "does": "Removes good boards from the carrier into a tote.",
+        "steps": [
+          "Confirm carrier is the PASS flow stream (reject lanes already removed).",
+          "Pick the PCB from the pallet carrier using a vacuum pad (or equivalent end-effector) with controlled descent to prevent smearing.",
+          "Lift PCB clear of carrier and move to the tote pickup zone.",
+          "Place PCB into tote position; release vacuum.",
+          "Index conveyor to return empty carriers to the start via the lower return path."
+        ],
+        "seconds": 15,
+        "covers": [
+          "OffCarrierToTote"
+        ],
+        "machines": [
+          "scara",
+          "vacuumPad",
+          "turntableTransfer"
+        ]
+      }
+    ],
+    "notes": [
+      "Takt is 45 s/unit at 80 boards/hour; the reflow station is budgeted at 40 s to stay within takt. If your reflow recipe + cooling time requires >45 s dwell, the line throughput cannot meet 80/h without buffering or parallel oven capacity.",
+      "Routing is modeled as: FAIL carriers are diverted out of the main flow and do not proceed to ST6; PASS carriers continue linearly to ST6.",
+      "The empty-carrier return path is assumed to be physically separated and non-interfering with forward flow (lower return path)."
+    ]
+  }
+}

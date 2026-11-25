@@ -1,0 +1,473 @@
+{
+  "key": "1baeca033a8c32d75598c4e64ea2fc297a2f3ec6ecd8a3ce6a8fdaf8b72eb54b",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:23:31.610Z",
+  "usage": {
+    "inputTokens": 8161,
+    "cachedInputTokens": 0,
+    "outputTokens": 2042
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "blocked",
+        "then": "clear",
+        "seconds": 0.5,
+        "label": "Check carrier/board presence",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "beacon",
+        "motion": "motion",
+        "value": "off",
+        "then": "off",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "operate",
+        "machine": "dispensePasteNozzle",
+        "seconds": 15,
+        "label": "Dispense solder paste",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "wait",
+        "seconds": 1,
+        "label": "Dwell to clear strings",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "clear",
+        "then": "clear",
+        "seconds": 0,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "indexBatches",
+        "seconds": 4,
+        "conveyors": [
+          "line"
+        ],
+        "label": "Index carriers to next station",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

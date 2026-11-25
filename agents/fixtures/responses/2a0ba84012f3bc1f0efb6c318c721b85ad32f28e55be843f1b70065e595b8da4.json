@@ -1,0 +1,62 @@
+{
+  "key": "2a0ba84012f3bc1f0efb6c318c721b85ad32f28e55be843f1b70065e595b8da4",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:19:22.424Z",
+  "usage": {
+    "inputTokens": 8393,
+    "cachedInputTokens": 7936,
+    "outputTokens": 282
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "toolOn",
+        "machine": "pastePresencePhotoEye",
+        "motion": "beam",
+        "value": "blocked",
+        "then": "clear",
+        "seconds": 0,
+        "label": "Verify carrier/board present",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "dispensePasteNozzle",
+        "motion": "flow",
+        "value": "1",
+        "then": "0",
+        "seconds": 15,
+        "label": "Dispense solder paste pattern",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "toolOn",
+        "machine": "dispensePasteNozzle",
+        "motion": "flow",
+        "value": "0",
+        "then": "0",
+        "seconds": 2,
+        "label": "Retract / dwell to clear strings",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "indexBatches",
+        "seconds": 3,
+        "conveyors": [
+          "palletConveyor"
+        ],
+        "label": "Index carrier to next station",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

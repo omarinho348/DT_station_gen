@@ -1,0 +1,55 @@
+{
+  "key": "d9da2da71fe4697f2d004a053bbc9b02e21d9608cb48276ef439209ecc0e891a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:18:26.947Z",
+  "usage": {
+    "inputTokens": 5538,
+    "cachedInputTokens": 4864,
+    "outputTokens": 575
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Fill 250 mL body lotion",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Fill 250 mL",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "filler",
+        "type": "filler",
+        "why": "Volumetric timed fill of the lotion bottle to target volume",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "supplyTank",
+        "type": "supplyTank",
+        "why": "Stores thick body-lotion supply for the filler heads",
+        "place": "besideLine",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "st1Conveyor",
+    "ports": null,
+    "ops": [
+      "fill",
+      "operate",
+      "decide",
+      "transform"
+    ]
+  }
+}

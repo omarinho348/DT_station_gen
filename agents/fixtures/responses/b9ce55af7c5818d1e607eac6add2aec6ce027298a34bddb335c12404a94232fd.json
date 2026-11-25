@@ -1,0 +1,38 @@
+{
+  "key": "b9ce55af7c5818d1e607eac6add2aec6ce027298a34bddb335c12404a94232fd",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T21:59:24.400Z",
+  "usage": {
+    "inputTokens": 6126,
+    "cachedInputTokens": 0,
+    "outputTokens": 275
+  },
+  "output": {
+    "params": {
+      "st1BeltConveyor": {
+        "length": 4,
+        "beltWidth": 0.34,
+        "guides": true,
+        "guideGap": 0.22,
+        "drive": true,
+        "carries": "unit"
+      },
+      "pcbPresencePhotoEye": {
+        "span": 0.4
+      },
+      "pasteVisionCheck": {
+        "length": 2.7,
+        "width": 1.44,
+        "railHeight": 2.05,
+        "archWidth": 1,
+        "archBottom": 1
+      },
+      "solderPasteDispense": {
+        "jetLength": 0.12,
+        "liquid": "glue"
+      }
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "key": "468bdd3be021484977871bf3e0aadac2365a4575800618e0ea6e9c193672f23f",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:28:24.650Z",
+  "usage": {
+    "inputTokens": 5564,
+    "cachedInputTokens": 4864,
+    "outputTokens": 1091
+  },
+  "output": {
+    "id": "fitSpeaker",
+    "code": "ST2",
+    "title": "Install speaker",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Install speaker",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "speakerNest",
+        "type": "partNest",
+        "why": "Provides the speaker part location(s) for pickup and placement.",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "screwdriver3x",
+        "type": "screwdriver",
+        "why": "Drives the 3 fastening screws to secure the seated speaker.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "stackLight",
+        "type": "stackLight",
+        "why": "Signals station status for screw-driving and completion.",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": "walkway",
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "indexBatches",
+      "replenish",
+      "spawn",
+      "decide",
+      "toolOn",
+      "move",
+      "operate",
+      "grip",
+      "release",
+      "transfer",
+      "pickPlace",
+      "palletize",
+      "pickPlace",
+      "push",
+      "release",
+      "wait",
+      "runRoutine",
+      "transform",
+      "dispatch",
+      "stopConveyors",
+      "haulStack",
+      "transfer",
+      "connectLead",
+      "fill",
+      "cap",
+      "closeCase",
+      "pickPlace",
+      "toolOn",
+      "operate",
+      "groupPickPlace",
+      "pickPlace",
+      "move",
+      "runRoutine",
+      "decide",
+      "dispatch",
+      "palletize",
+      "pickPlace",
+      "toolOn",
+      "operate",
+      "wait",
+      "transfer"
+    ]
+  }
+}

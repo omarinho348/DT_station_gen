@@ -1,0 +1,48 @@
+{
+  "key": "ef4f34a559d85227a4f33a3b5c857bddf73acf38c1201e6c9ca1b33936ff7142",
+  "model": "gpt-5.4-nano",
+  "agent": "reviewer",
+  "schemaName": "lineCritique",
+  "recordedAt": "2026-11-24T21:38:27.484Z",
+  "usage": {
+    "inputTokens": 4790,
+    "cachedInputTokens": 3840,
+    "outputTokens": 883
+  },
+  "output": {
+    "verdict": "concerns",
+    "summary": "The line implements the requested sequence (Fill→Cap→Label→Inspect→Pack) and uses camera-based inspection with a reject path to rework, which matches the brief’s core quality intent. However, it misses key execution details: there are placeholder “genericMachine” stations for both rework and case packing, the achieved rate is slightly under the 300/h target, and the Food-grade constraint isn’t reflected in the station choices/materialized equipment. ",
+    "issues": [
+      {
+        "severity": "high",
+        "station": "R (Rework)",
+        "issue": "The rework station is implemented as a placeholder genericMachine (“Rework bench”), but the brief requires a specific rework bench process for failed bottles. A placeholder can’t guarantee the intended rework routing (e.g., whether bottles re-enter at the correct stage and whether rejects are handled per the brief).",
+        "request": "Replace station R “genericMachine” with a catalog rework/bench-capable machine (or a composite made of catalog parts) and ensure the reworked bottles return to the correct upstream step (likely after the failing operation) before going to Pack."
+      },
+      {
+        "severity": "high",
+        "station": "P (Case packing)",
+        "issue": "Case packing is also modeled as a placeholder genericMachine (“Case packer”). The brief explicitly asks “Pack good bottles into cases”; using a placeholder risks wrong throughput/packaging behavior and does not validate the required packaging mechanism.",
+        "request": "Replace station P “genericMachine” with the nearest catalog equivalent (e.g., a case erector/closer/taper + case pack flow) or build a composite of catalog packing components that performs carton/case packing and matches the required item/case type."
+      },
+      {
+        "severity": "medium",
+        "station": "line overall",
+        "issue": "Target rate is 300 units/h but the simulation reports ~295 good units/h once full (344 units/h including the empty-line transient). That’s very close, but the brief’s target is not met with margin, and the pack station being the bottleneck increases the risk of falling below target once realistic rework/variance is considered.",
+        "request": "Increase effective output to meet 300/h with margin—e.g., reduce Pack cycle time or add a parallel pack lane/case packer so Pack is no longer the bottleneck."
+      },
+      {
+        "severity": "medium",
+        "station": "Q (Inspect)",
+        "issue": "The brief step order includes Label before Inspect, but the provided station list includes Filling (F), Capping (C), Inspection (Q), Rework (R), and Case packing (P) only—there is no explicit Label station or label application step in the modeled flow. This is a functional miss versus the brief’s “Label: Put the paper label on”.",
+        "request": "Add a Label station between C (Capping) and Q (Inspection) using a catalog labelApplicator (or composite) and connect it in the flow so every bottle is labeled before inspection."
+      },
+      {
+        "severity": "medium",
+        "station": "line overall",
+        "issue": "Constraint “Food grade” is not reflected in any described machine/material choices. The twin as described doesn’t demonstrate food-grade-compatible equipment selection (e.g., filling/capping/contact surfaces, conveyors/closures suitable for food liquids).",
+        "request": "Update station selections/configurations to use food-grade compatible catalog components (or composites) for contact surfaces in Fill (and any other liquid/contact areas) and document the food-grade configuration in the model parameters."
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "key": "eb382aacc79957bd2ae57601ab003ac0748a8545993836d3cc80d06d6ce12b4d",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:08:03.259Z",
+  "usage": {
+    "inputTokens": 8424,
+    "cachedInputTokens": 0,
+    "outputTokens": 335
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "fill",
+        "machine": "filler",
+        "item": "product",
+        "units": "Bottles in position",
+        "liquid": "Still mineral water",
+        "timing": {
+          "inPosition": 0.4,
+          "descend": 1.5,
+          "engage": 0.3,
+          "valveOpen": 0.35,
+          "dispense": 5,
+          "valveClose": 0.35,
+          "drip": 0.3,
+          "retract": 1.4,
+          "after": 0.3
+        },
+        "supply": {
+          "machine": "filler",
+          "motion": null,
+          "draw": null,
+          "refillBelow": null,
+          "refillTo": null
+        },
+        "label": "Filling still mineral water",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "processed"
+  }
+}

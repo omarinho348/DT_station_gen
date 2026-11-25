@@ -1,0 +1,86 @@
+{
+  "key": "b1f6c9061dfdad1decac0714c1158c216cb28531701dbe33ec3babc55d6385a3",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-24T21:58:04.724Z",
+  "usage": {
+    "inputTokens": 5115,
+    "cachedInputTokens": 0,
+    "outputTokens": 516
+  },
+  "output": {
+    "transport": "beltConveyor",
+    "stations": [
+      {
+        "id": "filling",
+        "code": "ST1",
+        "title": "Fill 0.5 L",
+        "does": "Fills each bottle with still mineral water to the target fill volume and indexes it forward.",
+        "steps": [
+          "Fill"
+        ],
+        "seconds": 3,
+        "covers": [
+          "Fill"
+        ],
+        "machines": [
+          "filler",
+          "supplyTank"
+        ]
+      },
+      {
+        "id": "capping",
+        "code": "ST2",
+        "title": "Screw cap",
+        "does": "Screws a blue cap onto each filled bottle and indexes it forward.",
+        "steps": [
+          "Cap"
+        ],
+        "seconds": 1.5,
+        "covers": [
+          "Cap"
+        ],
+        "machines": [
+          "capper"
+        ]
+      },
+      {
+        "id": "labeling",
+        "code": "ST3",
+        "title": "Apply wrap label",
+        "does": "Applies the wrap-around label to each capped bottle and indexes it forward.",
+        "steps": [
+          "Label"
+        ],
+        "seconds": 1.2,
+        "covers": [
+          "Label"
+        ],
+        "machines": [
+          "labelApplicator"
+        ]
+      },
+      {
+        "id": "inspectionDivert",
+        "code": "ST4",
+        "title": "Camera inspect & reject",
+        "does": "Inspects each bottle for fill level and cap presence/condition; rejects failing bottles by pushing them off the line while good bottles continue.",
+        "steps": [
+          "InspectAndReject"
+        ],
+        "seconds": 5,
+        "covers": [
+          "InspectAndReject"
+        ],
+        "machines": [
+          "visionScanner"
+        ]
+      }
+    ],
+    "notes": [
+      "Takt is 5.0 s/unit (720 units/h). Station budgets must not exceed takt; the slowest station sets line rate. Station ST4 (inspection/divert) is kept at the full 5.0 s budget; if your camera/IO cycle time is faster, you can reduce ST4’s seconds and potentially enable margin elsewhere.",
+      "Exact target fill volume/headspace, label application method (wet/dry, heat required or not), and cap torque/engagement criteria were not provided; builder should parameterize these based on the actual product specification."
+    ]
+  }
+}

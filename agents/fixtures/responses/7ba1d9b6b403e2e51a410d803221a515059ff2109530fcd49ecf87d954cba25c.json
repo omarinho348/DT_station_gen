@@ -1,0 +1,30 @@
+{
+  "key": "7ba1d9b6b403e2e51a410d803221a515059ff2109530fcd49ecf87d954cba25c",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:18:53.616Z",
+  "usage": {
+    "inputTokens": 5602,
+    "cachedInputTokens": 4352,
+    "outputTokens": 248
+  },
+  "output": {
+    "params": {
+      "filler": {
+        "heads": 4,
+        "pitch": 0.4,
+        "tipHeight": 0.3,
+        "stroke": 0.25
+      },
+      "supplyTank": {
+        "radius": 0.45,
+        "height": 1.3,
+        "legHeight": 0.55,
+        "pumpOffset": 0.975,
+        "tag": "T-101",
+        "contents": "Body lotion · 800 L"
+      }
+    }
+  }
+}

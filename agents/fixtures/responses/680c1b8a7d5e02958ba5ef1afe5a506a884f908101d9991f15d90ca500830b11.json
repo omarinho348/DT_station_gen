@@ -1,0 +1,52 @@
+{
+  "key": "680c1b8a7d5e02958ba5ef1afe5a506a884f908101d9991f15d90ca500830b11",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:18:51.344Z",
+  "usage": {
+    "inputTokens": 5538,
+    "cachedInputTokens": 5120,
+    "outputTokens": 242
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Fill 250 mL",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Fill 250 mL",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "filler",
+        "type": "filler",
+        "why": "Dispense body lotion into each bottle",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "supplyTank",
+        "type": "supplyTank",
+        "why": "Hold the bulk lotion feed",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "conveyor",
+    "ports": null,
+    "ops": [
+      "fill"
+    ]
+  }
+}

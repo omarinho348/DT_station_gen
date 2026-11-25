@@ -1,0 +1,30 @@
+{
+  "key": "a897faf43f72445dac8b5bcd051e4b44471c35b7ebc53992cb9c33dd6032c12d",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:07:58.331Z",
+  "usage": {
+    "inputTokens": 5618,
+    "cachedInputTokens": 0,
+    "outputTokens": 294
+  },
+  "output": {
+    "params": {
+      "supplyTank": {
+        "radius": 0.45,
+        "height": 1.3,
+        "legHeight": 0.55,
+        "pumpOffset": 0.975,
+        "tag": "T-101",
+        "contents": "Still mineral water · 800 L"
+      },
+      "filler": {
+        "heads": 4,
+        "pitch": 0.4,
+        "tipHeight": 0.353,
+        "stroke": 0.25
+      }
+    }
+  }
+}

@@ -1,0 +1,467 @@
+{
+  "version": 1,
+  "line": {
+    "id": "batteryModuleAssembly",
+    "title": "Battery module assembly (12-cell frame)",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "box",
+      "length": 0.3,
+      "width": 0.12,
+      "height": 0.07,
+      "finish": "plastic"
+    }
+  },
+  "stations": [
+    {
+      "id": "loadCells",
+      "code": "ST1",
+      "title": "Load 12 cells",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Load 12 cells"
+        }
+      },
+      "equipment": [
+        {
+          "id": "vibratoryFeeder",
+          "type": "vibratoryFeeder",
+          "params": {
+            "bowlDiameter": 0.26,
+            "hoseLength": 1.2
+          },
+          "position": [
+            -1.72,
+            0,
+            -0.08
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "workTable",
+          "type": "workTable",
+          "params": {
+            "length": 1.2,
+            "width": 0.7,
+            "height": 0.9,
+            "top": "stainless"
+          },
+          "position": [
+            0,
+            0,
+            -0.76
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "robot",
+          "type": "abbIrb6760",
+          "params": {
+            "padLength": 0.5,
+            "padWidth": 0.34
+          },
+          "position": [
+            0,
+            0,
+            -4.31
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "gripper",
+          "type": "fingerGripper",
+          "params": {
+            "fingerLength": 0.12,
+            "maxGap": 0.2
+          },
+          "position": [
+            0,
+            4.2,
+            -4.31
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat1"
+          },
+          "name": "Load cell 1",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 1"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat2"
+          },
+          "name": "Load cell 2",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 2"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat3"
+          },
+          "name": "Load cell 3",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 3"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat4"
+          },
+          "name": "Load cell 4",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 4"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat5"
+          },
+          "name": "Load cell 5",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 5"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat6"
+          },
+          "name": "Load cell 6",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 6"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat7"
+          },
+          "name": "Load cell 7",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 7"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat8"
+          },
+          "name": "Load cell 8",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 8"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat9"
+          },
+          "name": "Load cell 9",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 9"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat10"
+          },
+          "name": "Load cell 10",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 10"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat11"
+          },
+          "name": "Load cell 11",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 11"
+        },
+        {
+          "op": "pickPlace",
+          "machine": "robot",
+          "item": "product",
+          "from": {
+            "machine": "robot",
+            "port": "gripper"
+          },
+          "to": {
+            "item": "product",
+            "ref": "seat12"
+          },
+          "name": "Load cell 12",
+          "gap": 0.04,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12,
+          "label": "Load cell 12"
+        },
+        {
+          "op": "wait",
+          "seconds": 60,
+          "label": "Confirm seat sensors"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    }
+  ],
+  "graph": {
+    "edges": []
+  }
+}

@@ -33,13 +33,27 @@ export const ALONG = Object.freeze(['input', 'work', 'output', 'whole']);
 const jsonOf = (schema) => z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any' });
 
 /**
+ * A shell's params as the layout phase may set them: only its labels and colour (string params). Its
+ * geometry params keep the tuned defaults: set freely they made a shell's own furniture clash (benchmark
+ * tuning set, step 12.2).
+ */
+function shellLabels(params) {
+  const json = jsonOf(params);
+  const keep = Object.entries(json.properties ?? {}).filter(([, p]) => p.type === 'string');
+  return { ...json, properties: Object.fromEntries(keep), required: (json.required ?? []).filter((k) => keep.some(([n]) => n === k)) };
+}
+
+/**
  * Phase 1: the station's layout. The answer names the station, picks a shell (or none), lists the
  * machines by catalog type with a placement hint each, names the conveyor units travel on, and the
  * ops its process will use (the process phase is typed by exactly those).
  */
-export function layoutSchema(registry) {
+export function layoutSchema(registry, { product = null } = {}) {
   const types = registry.components().map((d) => d.type).sort();
-  const ops = registry.ops().map((d) => d.op).sort();
+  // Ops that need something of the product (parts, cables) only when the product has it.
+  const productDef = product ? registry.getProduct(product) : null;
+  const has = (need) => (productDef?.[need]?.length ?? 0) > 0;
+  const ops = registry.ops().filter((d) => !productDef || (d.needs?.product ?? []).every(has)).map((d) => d.op).sort();
   const shells = registry.shells();
   const source = {
     type: 'object',
@@ -51,7 +65,7 @@ export function layoutSchema(registry) {
         description: 'Shared furniture preset (slab, fence, station conveyor, lifts, sign, HMI, stack light), or null for none',
         anyOf: shells.map((d) => ({
           type: 'object',
-          properties: { type: { const: d.type }, params: jsonOf(d.params) },
+          properties: { type: { const: d.type }, params: shellLabels(d.params) },
           required: ['type', 'params'],
         })),
       },
@@ -117,23 +131,41 @@ export function machinesSchema(registry, equipment) {
 /** Is this schema node a loose nested op entry ({ op } plus anything)? Then it becomes the op union. */
 const isOpEntry = (s) => s && s.type === 'object' && Object.keys(s.properties ?? {}).join() === 'op' && s.additionalProperties && typeof s.additionalProperties === 'object';
 
-/** Replaces nested op entries with a reference to the union, and limits machine / conveyor args to the station's ids. */
-function shapeOpArgs(node, machines) {
+/**
+ * Replaces nested op entries with a reference to the union, limits machine / conveyor args to the
+ * station's ids (machine: those that have what the op needs) and item args to the station's items.
+ */
+function shapeOpArgs(node, { machines, conveyors = machines, items = null }) {
   if (!node || typeof node !== 'object') return node;
   if (isOpEntry(node)) return { $ref: '#/$defs/op' };
-  if (Array.isArray(node)) return node.map((n) => shapeOpArgs(n, machines));
+  if (Array.isArray(node)) return node.map((n) => shapeOpArgs(n, { machines, conveyors, items }));
   const out = {};
   for (const [k, v] of Object.entries(node)) {
     if (k === 'properties') {
       out.properties = Object.fromEntries(Object.entries(v).map(([name, p]) => {
-        const limit = (name === 'machine' || name === 'conveyor') && p.type === 'string' && machines.length;
-        return [name, limit ? { ...p, pattern: undefined, enum: machines } : shapeOpArgs(p, machines)];
+        const list = name === 'machine' ? machines : name === 'conveyor' ? conveyors : name === 'item' ? items : null;
+        const limit = list?.length && p.type === 'string';
+        return [name, limit ? { ...p, pattern: undefined, enum: list } : shapeOpArgs(p, { machines, conveyors, items })];
       }).map(([name, p]) => [name, Object.fromEntries(Object.entries(p).filter(([, x]) => x !== undefined))]));
     } else {
-      out[k] = shapeOpArgs(v, machines);
+      out[k] = shapeOpArgs(v, { machines, conveyors, items });
     }
   }
   return out;
+}
+
+/** The machines an op can drive: all of them, or those with the named op / every motion it needs. */
+function machinesFor(def, machines, info) {
+  const needs = def.needs ?? {};
+  if (!info || (!needs.machineOp && !needs.motions?.length && !needs.valueMotion)) return machines;
+  const fit = machines.filter((m) => {
+    const i = info[m];
+    if (!i) return true;
+    if (needs.machineOp && !i.ops.includes(needs.machineOp)) return false;
+    if (needs.valueMotion && !(i.valueMotions ?? []).length) return false;
+    return (needs.motions ?? []).every((x) => i.motions.includes(x));
+  });
+  return fit.length ? fit : machines; // none fits: the checks will say why
 }
 
 /**
@@ -143,12 +175,14 @@ function shapeOpArgs(node, machines) {
  * @param {object} o
  * @param {string[]} o.ops       the ops the layout phase chose
  * @param {string[]} o.machines  every equipment id of the station (shell's included)
+ * @param {object} [o.info]      { id: { ops, motions } } per machine (its component's ops and motions)
+ * @param {string[]} [o.items]   the items the station's ops can name (the unit is "product")
  */
-export function processSchema(registry, { ops, machines }) {
+export function processSchema(registry, { ops, machines, info = null, items = null }) {
   const branches = [...new Set(ops)].map((op) => {
     const def = registry.getOp(op);
     if (!def) throw new Error(`unknown op "${op}"`);
-    const args = shapeOpArgs(jsonOf(def.args), machines);
+    const args = shapeOpArgs(jsonOf(def.args), { machines: machinesFor(def, machines, info), conveyors: machines, items });
     return {
       type: 'object',
       description: def.summary,

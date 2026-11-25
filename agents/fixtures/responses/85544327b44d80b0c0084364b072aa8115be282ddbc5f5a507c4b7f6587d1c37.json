@@ -1,0 +1,56 @@
+{
+  "key": "85544327b44d80b0c0084364b072aa8115be282ddbc5f5a507c4b7f6587d1c37",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:08:56.222Z",
+  "usage": {
+    "inputTokens": 5813,
+    "cachedInputTokens": 4864,
+    "outputTokens": 354
+  },
+  "output": {
+    "id": "pasteSolderPaste",
+    "code": "ST1",
+    "title": "Solder paste dispense",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Solder paste dispense",
+        "color": "#00A000"
+      }
+    },
+    "equipment": [
+      {
+        "id": "visionScanner",
+        "type": "visionScanner",
+        "why": "Checks PCB/board presence and pad position before dispensing",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "dispenseNozzle",
+        "type": "dispenseNozzle",
+        "why": "Dispenses solder paste onto carrier-mounted PCB pads",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "operate",
+      "decide",
+      "toolOn",
+      "indexBatches",
+      "wait"
+    ]
+  }
+}

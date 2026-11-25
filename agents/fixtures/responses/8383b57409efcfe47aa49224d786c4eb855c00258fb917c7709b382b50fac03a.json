@@ -1,0 +1,25 @@
+{
+  "key": "8383b57409efcfe47aa49224d786c4eb855c00258fb917c7709b382b50fac03a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:26:22.733Z",
+  "usage": {
+    "inputTokens": 5147,
+    "cachedInputTokens": 0,
+    "outputTokens": 151
+  },
+  "output": {
+    "params": {
+      "foldInputStopMachine": {
+        "name": "T-shirt fold infeed stop",
+        "note": "Operator placement point",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      }
+    }
+  }
+}

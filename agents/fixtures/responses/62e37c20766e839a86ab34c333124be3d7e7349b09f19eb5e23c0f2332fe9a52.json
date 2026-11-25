@@ -1,0 +1,33 @@
+{
+  "key": "62e37c20766e839a86ab34c333124be3d7e7349b09f19eb5e23c0f2332fe9a52",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:18:41.178Z",
+  "usage": {
+    "inputTokens": 5777,
+    "cachedInputTokens": 0,
+    "outputTokens": 370
+  },
+  "output": {
+    "params": {
+      "line": {
+        "length": 4,
+        "beltWidth": 0.34,
+        "guides": true,
+        "guideGap": 0.12,
+        "drive": true,
+        "carries": "unit"
+      },
+      "capper": {
+        "heads": 4,
+        "pitch": 0.12,
+        "seatHeight": 0.23,
+        "stroke": 0.15,
+        "capRadius": 0.015,
+        "capHeight": 0.025,
+        "capColor": "blue"
+      }
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "key": "3dca3e2ec2df468f36f3c6acb0c15f225d934cb4bfca98475de5815c930d9016",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T21:59:21.684Z",
+  "usage": {
+    "inputTokens": 5984,
+    "cachedInputTokens": 4864,
+    "outputTokens": 837
+  },
+  "output": {
+    "id": "pasteSolderPaste",
+    "code": "ST1",
+    "title": "Solder paste dispense (PCB pads)",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Solder paste dispense",
+        "color": "#00A000",
+        "minZ": null,
+        "maxZ": null,
+        "walkwayZ": null,
+        "panelX": null,
+        "conveyorLength": null,
+        "carrierLength": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "st1BeltConveyor",
+        "type": "beltConveyor",
+        "why": "Convey PCB carriers through the dispense/vision checking area",
+        "place": "line",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "pcbPresencePhotoEye",
+        "type": "photoEye",
+        "why": "Detect carrier/board arrival for the start condition",
+        "place": "besideLine",
+        "at": "input",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "pasteVisionCheck",
+        "type": "visionScanner",
+        "why": "Scan/verify correct PCB presence and alignment before dispensing",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "solderPasteDispense",
+        "type": "dispenseNozzle",
+        "why": "Dispense solder paste stencil pattern onto PCB pads",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "st1BeltConveyor",
+    "ports": null,
+    "ops": [
+      "decide",
+      "operate",
+      "indexBatches",
+      "move",
+      "wait"
+    ]
+  }
+}

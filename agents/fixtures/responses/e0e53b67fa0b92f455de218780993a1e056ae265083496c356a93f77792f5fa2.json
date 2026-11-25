@@ -1,0 +1,97 @@
+{
+  "key": "e0e53b67fa0b92f455de218780993a1e056ae265083496c356a93f77792f5fa2",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:24:40.102Z",
+  "usage": {
+    "inputTokens": 5968,
+    "cachedInputTokens": 0,
+    "outputTokens": 1036
+  },
+  "output": {
+    "id": "applyEdgeBand",
+    "code": "ST2",
+    "title": "Edge band gluing & press",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Edge band gluing & press",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "glueDispense",
+        "type": "dispenseNozzle",
+        "why": "Dispense adhesive around the panel perimeter for edge banding",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "edgePress",
+        "type": "pressRam",
+        "why": "Press/hold the edge band against the glued panel edges",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "bandTrimLaser",
+        "type": "laserHead",
+        "why": "Trim/flush any edge band overhang to the panel perimeter",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "edgeInspect",
+        "type": "visionScanner",
+        "why": "Verify edge band position/coverage before accepting or rejecting",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "walkway",
+        "turned": null
+      },
+      {
+        "id": "bayMarking",
+        "type": "bayMarking",
+        "why": "Mark the edge-banding work bay on the floor for operator/process alignment",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "statusView",
+        "type": "statusMonitor",
+        "why": "Show live station status and scan/decision results",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "move",
+      "toolOn",
+      "wait",
+      "decide",
+      "transform",
+      "release"
+    ]
+  }
+}

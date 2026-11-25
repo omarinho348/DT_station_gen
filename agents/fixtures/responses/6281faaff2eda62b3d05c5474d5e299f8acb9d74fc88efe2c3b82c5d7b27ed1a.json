@@ -1,0 +1,88 @@
+{
+  "key": "6281faaff2eda62b3d05c5474d5e299f8acb9d74fc88efe2c3b82c5d7b27ed1a",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:20:28.257Z",
+  "usage": {
+    "inputTokens": 6293,
+    "cachedInputTokens": 5376,
+    "outputTokens": 501
+  },
+  "output": {
+    "id": "fitSpeaker",
+    "code": "ST2",
+    "title": "Install speaker",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Install speaker",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "partNest",
+        "type": "partNest",
+        "why": "holds the speaker ready for pick",
+        "place": "upstream",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "pickRobot",
+        "type": "abbIrb6760",
+        "why": "picks and places the speaker",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "processUnit",
+        "type": "genericMachine",
+        "why": "provides a timed process signal for assembly confirmation",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "screwdriver",
+        "type": "screwdriver",
+        "why": "drives the 3 mounting screws",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": false
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "indexBatches",
+      "pickPlace",
+      "transfer",
+      "operate",
+      "move",
+      "rotate",
+      "toolOn",
+      "release",
+      "grip",
+      "decide",
+      "dispatch",
+      "stopConveyors",
+      "runRoutine",
+      "swapUnit",
+      "transform",
+      "dischargeBatch",
+      "wait"
+    ]
+  }
+}

@@ -12,6 +12,10 @@ import { createBuildSession, SessionError } from '../../agents/builder/session.j
 import { loadRehearsal, REHEARSALS, RehearsalError } from '../../agents/builder/rehearsal.js';
 import { createLlm, LlmError } from '../../agents/llm.js';
 import { createBuilderService } from '../../server/builderApi.js';
+import { projectLineStore } from '../../server/lineStore.js';
+import { parseFactory } from '../../spec/factory.schema.js';
+import { compileFactory } from '../../compiler/emit.js';
+import { writeCompiled } from '../../compiler/write.js';
 
 /** A project root with what a rehearsal reads (its example line). */
 function tempRoot() {
@@ -22,7 +26,8 @@ function tempRoot() {
 }
 
 function service(root) {
-  const load = async () => ({ registry, createBuilder, createBuildSession, SessionError, loadRehearsal, REHEARSALS, RehearsalError, LlmError });
+  const lineStore = projectLineStore({ root, registry, parseFactory, compileFactory, writeCompiled });
+  const load = async () => ({ registry, createBuilder, createBuildSession, SessionError, loadRehearsal, REHEARSALS, RehearsalError, LlmError, lineStore });
   let llm = null;
   return createBuilderService({ root, load, llm: () => (llm ??= createLlm({ env: { LLM_MODE: 'mock' }, root })) });
 }
@@ -100,4 +105,21 @@ describe('/api/builder', () => {
     expect(r.body.session).toMatchObject({ source: { kind: 'llm', mode: 'mock' }, gate: null, phase: 'layout' });
     expect((await post(svc, '/next')).body.code).toBe('mock');
   });
+
+  it('save: only a finished build; it becomes lines/<id>/ version 1, compiled to generated/', async () => {
+    const root = tempRoot();
+    const svc = service(root);
+    await post(svc, '/start', { rehearsal: 'bottling' });
+    expect((await post(svc, '/save')).body.error).toMatch(/not finished/);
+    let r;
+    for (let i = 0; i < 12; i += 1) r = await post(svc, '/approve');
+    expect(r.body.session.finished).toBe(true);
+    r = await post(svc, '/save');
+    expect(r.body.saved).toEqual({ id: 'bottlingRehearsal', version: 1, folder: 'bottling-rehearsal' });
+    expect(existsSync(join(root, 'lines', 'bottlingRehearsal', 'versions', 'v0001.json'))).toBe(true);
+    expect(existsSync(join(root, 'generated', 'bottling-rehearsal', 'line.js'))).toBe(true);
+    expect(JSON.parse(readFileSync(join(root, 'lines', 'bottlingRehearsal', 'versions', 'v0001.json'), 'utf8')).message).toBe('built by the Builder: 4 stations (rehearsal)');
+    expect((await post(svc, '/save')).body.error).toMatch(/already a line/);
+    expect((await post(svc, '/save', { id: 'juiceCopy' })).body.saved.id).toBe('juiceCopy');
+  }, 180000);
 });

@@ -1,0 +1,52 @@
+{
+  "key": "ef173ab08fc6d282e5c2c9487659ccf597dbd0859b60b7ea9717bb1524d36547",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:18:58.291Z",
+  "usage": {
+    "inputTokens": 7810,
+    "cachedInputTokens": 7552,
+    "outputTokens": 263
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "fill",
+        "machine": "filler",
+        "item": "product",
+        "units": "Bottles",
+        "liquid": "body lotion",
+        "timing": {
+          "inPosition": null,
+          "descend": null,
+          "engage": null,
+          "valveOpen": null,
+          "dispense": 5,
+          "valveClose": null,
+          "drip": null,
+          "retract": null,
+          "after": null
+        },
+        "supply": {
+          "machine": "filler",
+          "motion": null,
+          "draw": 1,
+          "refillBelow": 0.2,
+          "refillTo": 1
+        },
+        "label": "Fill 250 mL",
+        "state": "FILL",
+        "status": [
+          {
+            "key": "fillLevel",
+            "value": "100%"
+          }
+        ]
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

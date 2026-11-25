@@ -1,0 +1,139 @@
+{
+  "key": "86163d4f7dca3d0c8be07118818a7f92319ffd74417311a4ffb2fe646c55982b",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-25T02:26:16.848Z",
+  "usage": {
+    "inputTokens": 5134,
+    "cachedInputTokens": 3840,
+    "outputTokens": 1433
+  },
+  "output": {
+    "transport": "beltConveyor",
+    "stations": [
+      {
+        "id": "loadFlatShirt",
+        "code": "ST1",
+        "title": "Manual shirt load",
+        "does": "An operator places one laid-flat printed T-shirt onto the folding machine input.",
+        "steps": [
+          "Operator removes one folded-free, laid-flat T-shirt from the input stack",
+          "Aligns T-shirt on the folding machine infeed footprint (centered, wrinkles flattened)",
+          "Places the T-shirt onto the folding machine input stop",
+          "Confirms the unit is ready (start signal for the fold cycle)"
+        ],
+        "seconds": 4,
+        "covers": [
+          "LoadFlatShirt"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "foldTo250x300",
+        "code": "ST2",
+        "title": "Fold to 250×300 mm",
+        "does": "The machine folds the T-shirt to approximately 250 × 300 mm.",
+        "steps": [
+          "Folding machine clamps the shirt edges at the designed reference points",
+          "First fold applied to reach the 300 mm dimension",
+          "Second fold applied to reach the 250 mm dimension",
+          "Machine releases clamps and moves folded shirt onto the next position on the conveyor"
+        ],
+        "seconds": 8,
+        "covers": [
+          "FoldTo250x300"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "insertIntoPolyBag",
+        "code": "ST3",
+        "title": "Insert into poly bag",
+        "does": "The folded shirt is slipped into a poly bag.",
+        "steps": [
+          "Bag presentation area feeds one open poly bag over the unit position",
+          "Operator (or pick mechanism) holds bag mouth open",
+          "Conveyor indexes the folded shirt to the bag opening center",
+          "Bag mouth is lowered over the folded shirt until fully inserted",
+          "Bag mouth is left upright for sealing"
+        ],
+        "seconds": 5,
+        "covers": [
+          "InsertIntoPolyBag"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "sealPolyBag",
+        "code": "ST4",
+        "title": "Seal poly bag",
+        "does": "The poly bag is sealed.",
+        "steps": [
+          "Bag neck/top area is positioned under the sealing jaws",
+          "Heat-seal jaws close and apply seal for a fixed dwell time",
+          "Jaws open and the sealed bag is released onto the conveyor lane",
+          "Seal integrity is checked via built-in seal status (pass/fail) before downstream"
+        ],
+        "seconds": 6,
+        "covers": [
+          "SealPolyBag"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "printAndApplyAddressLabel",
+        "code": "ST5",
+        "title": "Print & apply address label",
+        "does": "An address label is printed and stuck onto the sealed bag.",
+        "steps": [
+          "System retrieves address for the current unit from the label queue",
+          "Label printer prints one address label",
+          "Tamp head picks and presses the label onto the designated bag panel",
+          "Label applicator performs brief dwell for adhesion",
+          "Unit advances with label surface facing the vision/verification zone at ST6"
+        ],
+        "seconds": 9,
+        "covers": [
+          "PrintAndApplyAddressLabel"
+        ],
+        "machines": [
+          "labelApplicator",
+          "visionScanner"
+        ]
+      },
+      {
+        "id": "placeBagIntoTote",
+        "code": "ST6",
+        "title": "QC + place into tote",
+        "does": "The labeled sealed bag is placed into a tote for the shipping area.",
+        "steps": [
+          "QC operator inspects the unit: bag sealed (no open seam), label present, and label readable",
+          "If any QC check fails, operator removes the bad unit from the line (reject path) and clears the position",
+          "If QC passes, operator places the labeled bag into the correct tote cavity/position",
+          "Operator triggers release/confirm for the tote slot so the tote continues to fill"
+        ],
+        "seconds": 9,
+        "covers": [
+          "PlaceBagIntoTote"
+        ],
+        "machines": [
+          "tote"
+        ]
+      }
+    ],
+    "notes": [
+      "Takt is 9 s/unit (400/h). Label print/apply (ST5) and QC/place (ST6) are budgeted at the takt limit; the builder should ensure the label printhead/transfer and QC method (manual vs vision-assisted) reliably complete within 9 s.",
+      "This line assumes the folding machine, bag insertion, and sealing are synchronized with single-unit indexing so ST3–ST6 never receive a backlog.",
+      "Rejection is implemented inside the ST6 operation (as part of PlaceBagIntoTote) to match the provided brief step list."
+    ]
+  }
+}

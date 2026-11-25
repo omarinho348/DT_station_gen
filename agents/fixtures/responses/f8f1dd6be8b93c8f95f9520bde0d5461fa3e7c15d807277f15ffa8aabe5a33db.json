@@ -1,0 +1,30 @@
+{
+  "key": "f8f1dd6be8b93c8f95f9520bde0d5461fa3e7c15d807277f15ffa8aabe5a33db",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:07:59.541Z",
+  "usage": {
+    "inputTokens": 5744,
+    "cachedInputTokens": 4864,
+    "outputTokens": 102
+  },
+  "output": {
+    "params": {
+      "supplyTank": {
+        "radius": 0.45,
+        "height": 1.3,
+        "legHeight": 0.55,
+        "pumpOffset": 0.975,
+        "tag": "T-101",
+        "contents": "Mineral water · 800L"
+      },
+      "filler": {
+        "heads": 4,
+        "pitch": 0.4,
+        "tipHeight": 0.353,
+        "stroke": 0.25
+      }
+    }
+  }
+}

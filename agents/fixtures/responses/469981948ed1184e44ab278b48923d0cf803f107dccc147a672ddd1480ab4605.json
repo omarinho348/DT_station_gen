@@ -1,0 +1,55 @@
+{
+  "key": "469981948ed1184e44ab278b48923d0cf803f107dccc147a672ddd1480ab4605",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:01:49.069Z",
+  "usage": {
+    "inputTokens": 7196,
+    "cachedInputTokens": 0,
+    "outputTokens": 246
+  },
+  "output": {
+    "params": {
+      "st1Conveyor": {
+        "length": 4,
+        "beltWidth": 0.34,
+        "guides": true,
+        "guideGap": 0.22,
+        "drive": true,
+        "carries": "unit"
+      },
+      "regulatorCradle": {
+        "length": 0.6,
+        "width": 0.5,
+        "height": 0.75,
+        "lanes": [
+          -0.17,
+          -0.08,
+          0,
+          0.06,
+          0.15
+        ],
+        "laneWidth": 0.06,
+        "saddleSpacing": 0.3
+      },
+      "carrierGuideRails": {
+        "length": 1.6,
+        "span": 0.58,
+        "gap": 0.2
+      },
+      "st1Robot": {
+        "padLength": 0.5,
+        "padWidth": 0.34
+      },
+      "st1Gripper": {
+        "fingerLength": 0.12,
+        "maxGap": 0.2
+      },
+      "screwdriver4Pack": {
+        "fingerLength": 0.12,
+        "offsetX": 0.13
+      }
+    }
+  }
+}

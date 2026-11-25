@@ -126,6 +126,18 @@ describe('live mode (fake client)', () => {
     expect(client.requests.map((r) => r.model)).toEqual(['small-model', 'big-model']);
   });
 
+  it('LLM_STRONG_AGENTS: those agents always on the strong model (priced as it), the others not; its prices are required', async () => {
+    const client = fakeClient();
+    const llm = createLlm({ env: { ...LIVE, LLM_STRONG_AGENTS: 'builder' }, root, client });
+    await ask(llm); // agent builder
+    await ask(llm, { agent: 'spec', model: 'strong' }); // strong asked, but not enabled and not listed
+    expect(client.requests.map((r) => r.model)).toEqual(['big-model', 'small-model']);
+    const ledger = JSON.parse(readFileSync(join(root, '.agent-cache/usage.json'), 'utf8'));
+    expect(ledger.calls[0]).toMatchObject({ model: 'big-model', cost: (600 * 0.75 + 400 * 0.075 + 200 * 4.5) / 1e6 });
+    expect(llm.status().models.strongAgents).toEqual(['builder']);
+    expect(() => llmConfig({ ...LIVE, LLM_STRONG_AGENTS: 'builder', LLM_PRICE_STRONG_OUTPUT: '' })).toThrow(/LLM_PRICE_STRONG_OUTPUT/);
+  });
+
   it('a cut-off answer is an error, but what it cost is still in the ledger; a bad schema name is refused', async () => {
     const llm = createLlm({ env: LIVE, root, client: fakeClient({ status: 'incomplete' }) });
     const e = await ask(llm).catch((x) => x);
@@ -133,6 +145,26 @@ describe('live mode (fake client)', () => {
     expect(llm.status().spent.total).toBeGreaterThan(0);
     expect(existsSync(join(root, '.agent-cache/responses'))).toBe(false); // not cached
     await expect(ask(llm, { schemaName: 'has space' })).rejects.toThrow(/schemaName "has space" must be/);
+  });
+
+  it('cut off once: asked again with twice the output limit, both paid calls in the ledger; mock mode replays the longer answer', async () => {
+    let n = 0;
+    const requests = [];
+    const client = { responses: { create: async (req) => {
+      requests.push(req);
+      n += 1;
+      return { status: n === 1 ? 'incomplete' : 'completed', incomplete_details: n === 1 ? { reason: 'max_output_tokens' } : null, output_text: JSON.stringify({ stations: 4 }), usage: { input_tokens: 1000, output_tokens: n === 1 ? 4000 : 5000 } };
+    } } };
+    const llm = createLlm({ env: LIVE, root, client });
+    const r = await ask(llm);
+    expect(r.output).toEqual({ stations: 4 });
+    expect(requests.map((q) => q.max_output_tokens)).toEqual([4000, 8000]);
+    const ledger = JSON.parse(readFileSync(join(root, '.agent-cache/usage.json'), 'utf8'));
+    expect(ledger.calls.map((c) => c.outputTokens)).toEqual([4000, 5000]);
+    // Recorded, then replayed in mock mode from the normal request (the longer answer stands in).
+    llm.record(r.key);
+    const mock = createLlm({ env: { LLM_MODE: 'mock' , LLM_MODEL_DEFAULT: 'small-model' }, root });
+    expect((await ask(mock)).output).toEqual({ stations: 4 });
   });
 
   it('the key never leaves: not in errors, the ledger, the cache or the status', async () => {

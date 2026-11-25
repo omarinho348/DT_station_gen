@@ -1,0 +1,53 @@
+{
+  "key": "4c37e9eb89e5397fc68259d8705b17aff985079089fa5be51050114b47948942",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:18:06.776Z",
+  "usage": {
+    "inputTokens": 5520,
+    "cachedInputTokens": 0,
+    "outputTokens": 466
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Fill 0.5 L still water",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Fill 0.5 L",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "supplyTank1",
+        "type": "supplyTank",
+        "why": "Provides still water to the filler heads",
+        "place": "besideLine",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "filler1",
+        "type": "filler",
+        "why": "Volumetrically fills each 0.5 L PET bottle to target volume",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "st1Conveyor",
+    "ports": null,
+    "ops": [
+      "fill",
+      "operate"
+    ]
+  }
+}

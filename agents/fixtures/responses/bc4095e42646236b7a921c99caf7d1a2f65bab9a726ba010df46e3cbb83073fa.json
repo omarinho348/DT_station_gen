@@ -1,0 +1,99 @@
+{
+  "key": "bc4095e42646236b7a921c99caf7d1a2f65bab9a726ba010df46e3cbb83073fa",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-25T02:22:14.894Z",
+  "usage": {
+    "inputTokens": 6304,
+    "cachedInputTokens": 0,
+    "outputTokens": 913
+  },
+  "output": {
+    "id": "slicedBreadPacking",
+    "title": "Sliced bread loaf packing (cool, slice, bag, label, crate)",
+    "product": {
+      "name": "Bagged sliced sandwich loaf",
+      "description": "A baked sandwich loaf is sliced, placed into a plastic bag, closed with a clip, and date-labelled. Unit size about 280 × 110 × 120 mm (0.28 × 0.11 × 0.12 m).",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "box",
+          "length": 0.28,
+          "width": 0.11,
+          "height": 0.12,
+          "finish": "cardboard",
+          "color": "#b5651d",
+          "processedColor": null,
+          "liquid": null,
+          "fillLevel": null,
+          "capColor": null,
+          "labelText": "Date",
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 1200,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "CoolLoaves",
+        "does": "Loaves cool after coming from the oven while moving through the line before slicing."
+      },
+      {
+        "name": "SliceLoaves",
+        "does": "Slice each loaf into sandwich slices."
+      },
+      {
+        "name": "BagLoaves",
+        "does": "Place the sliced loaf into a plastic bag."
+      },
+      {
+        "name": "ClipBag",
+        "does": "Close the plastic bag using a clip."
+      },
+      {
+        "name": "ApplyDateLabel",
+        "does": "Apply a date label onto the closed bag."
+      },
+      {
+        "name": "WeighCheck",
+        "does": "Weigh each bag using a check weigher and decide PASS/REJECT based on minimum weight."
+      },
+      {
+        "name": "CratePackedLoaves",
+        "does": "Place accepted (packed) loaves into crates for shipment."
+      }
+    ],
+    "quality": "Lightweight loaves are rejected by the check weigher (typically diverted to a reject chute/bin for later handling/repaste or disposal).",
+    "constraints": [
+      "Food-grade, high hygiene throughout (sanitation and hygienic machine design).",
+      "Line must hit ~1200 finished loaves/hour (takt-based).",
+      "Loaves are cooled between oven exit and slicing."
+    ],
+    "assumptions": [
+      "Owner’s stated 1200 loaves/hour is the finished unit rate (one date-labelled, bagged loaf per unit).",
+      "A simulated run uses 8 units (default).",
+      "If no shift length was provided, the line rate is interpreted for an 8-hour shift (takt computed from per-hour rate).",
+      "Reject handling for light loaves is a diversion to a dedicated reject bin/chute; no rework is specified.",
+      "Cooling is accomplished by controlled transport time/accumulation on the line (not a separate long blast tunnel)."
+    ],
+    "questions": [
+      {
+        "topic": "product",
+        "question": "Confirm what counts as the finished unit: one bagged + clipped + date-labelled sliced loaf, or the entire crate? (I assumed per loaf bag.)",
+        "why": "This determines the unit definition for throughput and station takt."
+      },
+      {
+        "topic": "layout",
+        "question": "How are loaves presented between steps: individual loaves in single file, or in small batches/throughput carriers from the oven/slicer?",
+        "why": "It decides conveyor type (belt vs indexed carriers) and how to stage cooling/slicing without bottlenecks."
+      },
+      {
+        "topic": "throughput",
+        "question": "What are the target rejection/accept criteria and flow style for the check weigher (e.g., divert method, reject pocket size, acceptable weight band)?",
+        "why": "It affects the weigher decision timing and whether the reject divert station fits within the takt at 1200/hr."
+      }
+    ]
+  }
+}

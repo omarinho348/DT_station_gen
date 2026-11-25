@@ -1,0 +1,93 @@
+{
+  "key": "68b8062e90337ae9a5d10c1789b4f7b7a1fa6e72d24ed7c3ea45407111e40616",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:01:46.808Z",
+  "usage": {
+    "inputTokens": 6237,
+    "cachedInputTokens": 4864,
+    "outputTokens": 798
+  },
+  "output": {
+    "id": "placeRegulator",
+    "code": "ST1",
+    "title": "Mount window regulator",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "st1Conveyor",
+        "type": "beltConveyor",
+        "why": "Index and carry the carrier through the screw-mount work area",
+        "place": "line",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "regulatorCradle",
+        "type": "partCradle",
+        "why": "Hold/present window regulator for assisted pick",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "carrierGuideRails",
+        "type": "guideRails",
+        "why": "Align carrier at the regulator mounting location",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "st1Robot",
+        "type": "abbIrb6760",
+        "why": "Pick and position the window regulator onto the carrier",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "st1Gripper",
+        "type": "fingerGripper",
+        "why": "Grasp the window regulator during placement",
+        "place": "onTop",
+        "at": "work",
+        "on": "st1Robot",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "screwdriver4Pack",
+        "type": "screwdriver",
+        "why": "Drive 4 screws in a cross pattern into the regulator",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "st1Conveyor",
+    "ports": null,
+    "ops": [
+      "stopConveyors",
+      "move",
+      "pickPlace",
+      "installPart",
+      "driveScrew",
+      "operate",
+      "decide",
+      "wait",
+      "transfer"
+    ]
+  }
+}

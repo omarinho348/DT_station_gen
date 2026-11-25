@@ -1,0 +1,27 @@
+{
+  "key": "57c0d8de4111272a84c2585e4deae572a20d7644560c649f8462b975978d81b8",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:23:25.410Z",
+  "usage": {
+    "inputTokens": 7465,
+    "cachedInputTokens": 6912,
+    "outputTokens": 181
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "operate",
+        "machine": "thermoformer",
+        "seconds": 1,
+        "label": "Heat-thermoform PVC and index web forward by one strip position",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

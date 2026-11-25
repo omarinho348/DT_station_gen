@@ -1,0 +1,98 @@
+{
+  "key": "65691d9dc0ecdfce4ee113115c808ad81796b80924862491adda9169c424a4a3",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-25T02:26:43.542Z",
+  "usage": {
+    "inputTokens": 6299,
+    "cachedInputTokens": 5888,
+    "outputTokens": 1187
+  },
+  "output": {
+    "id": "coffeeCapsuleFilling",
+    "title": "Coffee capsule filling (37 mm x 28 mm)",
+    "product": {
+      "name": "Aluminium coffee capsules",
+      "description": "Small aluminium coffee capsules (37 mm diameter, 28 mm tall) filled with weighed ground coffee, tamped, sealed with a foil lid, inspected, and packed into boxes.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "cylinder",
+          "length": 0.037,
+          "width": 0.037,
+          "height": 0.028,
+          "finish": "metal",
+          "color": "#c0c0c0",
+          "processedColor": "#c0c0c0",
+          "liquid": "#5a3a1f",
+          "fillLevel": null,
+          "capColor": "#d9d9d9",
+          "labelText": null,
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 3600,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "LoadCapsuleBodies",
+        "does": "Place empty aluminium capsule bodies into the filling/tamping positions."
+      },
+      {
+        "name": "WeighFillGroundCoffee",
+        "does": "Dispense ground coffee by weight into capsules, filled in groups of 6."
+      },
+      {
+        "name": "TampCoffee",
+        "does": "Tamp the filled coffee to the required compaction before sealing."
+      },
+      {
+        "name": "SealFoilLid",
+        "does": "Seal a foil lid onto each capsule using a sealing head."
+      },
+      {
+        "name": "CameraCheckLidSeal",
+        "does": "Use a camera to check every sealed lid for seal correctness."
+      },
+      {
+        "name": "RejectBadSeal",
+        "does": "Divert capsules with a bad seal to a reject path instead of sending them to packing."
+      },
+      {
+        "name": "PackToBoxOfTen",
+        "does": "Pack passing capsules into boxes containing 10 capsules each."
+      }
+    ],
+    "quality": "Bad seal verdicts detected by the camera are rejected (diverted away from packing).",
+    "constraints": [
+      "Food-grade process (hygienic design, surfaces and materials suitable for food contact).",
+      "Capsules are filled in groups of 6 (the filling/tamping/sealing flow must support 6-at-a-time indexing)."
+    ],
+    "assumptions": [
+      "Assume an 8-hour shift because the owner only gave a per-hour target (takt = 3600 caps/hour => 1.0 s per finished capsule).",
+      "Assume foil lids are pre-kitted/pre-fed to the sealing station (no foil web forming included).",
+      "Assume camera inspection is performed after sealing and before packing, with single-capsule diversion on rejection.",
+      "Assume packing is done with individual passing capsules arriving one-by-one from inspection (accumulated/count-to-10 then boxed).",
+      "Assume only one product variant (no labeling or case-level labeling requested)."
+    ],
+    "questions": [
+      {
+        "topic": "product",
+        "question": "For 'packed ten to a box': what box format do you want (just an internal divider/not, any outer carton), and are boxes reused or single-use?",
+        "why": "Determines the packaging station (case/box forming, tray vs carton insert, and whether a carton closer is needed)."
+      },
+      {
+        "topic": "throughput",
+        "question": "Is the 3600 capsules/hour achievable with the 6-at-a-time filling scheme on your current machine concept (i.e., do you already have an indexing rate for the 6-pack positions)?",
+        "why": "We must ensure each station can fit within the 1.0 s takt; the 6-at-a-time indexing affects station timing."
+      },
+      {
+        "topic": "quality",
+        "question": "When a bad seal is detected, where do rejected capsules go (bin for disposal, rework possibility, and do you want it immediately diverted or staged at the end)?",
+        "why": "Determines reject transport and buffer handling so rejects never contaminate packed product."
+      }
+    ]
+  }
+}

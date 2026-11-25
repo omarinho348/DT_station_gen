@@ -1,0 +1,71 @@
+{
+  "key": "6916d1e34aee2af84b94dced2fa3b5612bfa43a8bf1583df9850f4fef369001e",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:18:30.239Z",
+  "usage": {
+    "inputTokens": 8852,
+    "cachedInputTokens": 0,
+    "outputTokens": 531
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "fill",
+        "machine": "filler",
+        "item": "product",
+        "units": "Bottles",
+        "liquid": "still mineral water",
+        "timing": {
+          "inPosition": 0.4,
+          "descend": 1.5,
+          "engage": 0.3,
+          "valveOpen": 0.35,
+          "dispense": 5,
+          "valveClose": 0.35,
+          "drip": 0.3,
+          "retract": 1.4,
+          "after": 0.3
+        },
+        "supply": {
+          "machine": "filler",
+          "motion": "headTravel",
+          "draw": 1,
+          "refillBelow": 0.2,
+          "refillTo": 1
+        },
+        "label": "Fill 0.5 L bottles",
+        "state": "FILLING",
+        "status": [
+          {
+            "key": "volume",
+            "value": "0.5 L"
+          }
+        ]
+      },
+      {
+        "op": "transfer",
+        "conveyor": "line",
+        "to": "output",
+        "from": "work",
+        "item": "product",
+        "also": [],
+        "passes": null,
+        "speed": 1,
+        "ramp": 0.5,
+        "label": "Index bottles forward",
+        "state": "INDEXING",
+        "status": [
+          {
+            "key": "stage",
+            "value": "filled"
+          }
+        ]
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

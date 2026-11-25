@@ -1,0 +1,27 @@
+{
+  "key": "64e894355261f160c5276c8938afed5a9363940f4f1b6b0881eab8360a569725",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:24:17.706Z",
+  "usage": {
+    "inputTokens": 7160,
+    "cachedInputTokens": 0,
+    "outputTokens": 109
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "operate",
+        "machine": "panelCutSaw",
+        "seconds": 40,
+        "label": "Saw chipboard panels to finished size",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

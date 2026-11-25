@@ -1,0 +1,72 @@
+{
+  "key": "c9e115cee0ec687182a273b4b797ddec7d865fc311307db32558a05da3640cec",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:20:45.997Z",
+  "usage": {
+    "inputTokens": 5573,
+    "cachedInputTokens": 4864,
+    "outputTokens": 972
+  },
+  "output": {
+    "id": "placeRegulator",
+    "code": "ST1",
+    "title": "Mount window regulator",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Mount window regulator",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "regulatorCradle",
+        "type": "partCradle",
+        "why": "Presents window regulator mounting parts for pick",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "carrierGuideRails",
+        "type": "guideRails",
+        "why": "Locates/clamps the trim carrier to present regulator holes",
+        "place": "rear",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "autoScrewdriver",
+        "type": "screwdriver",
+        "why": "Drives the 4 regulator screws to set torque/length",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "carDoorInnerModuleConveyor",
+    "ports": null,
+    "ops": [
+      "indexBatches",
+      "stopConveyors",
+      "pickPlace",
+      "grip",
+      "release",
+      "toolOn",
+      "operate",
+      "pickPlace",
+      "connectLead",
+      "decide",
+      "wait"
+    ]
+  }
+}

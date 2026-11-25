@@ -1,5 +1,6 @@
 // The first live Builder run (step 8.6), replayed in mock mode from its recorded answers
-// (agents/fixtures/responses/, recorded by scripts/builder-live.mjs on gpt-5.4-nano). The real LLM
+// (agents/fixtures/responses/, recorded by scripts/builder-live.mjs on gpt-5.4-nano; re-recorded in step
+// 12.2 after the Builder's schemas changed). The real LLM
 // layer, Builder, placer, reviewer and play: only the model's answers come from the recording.
 // If the catalog, the Builder's prompt or its schemas change, the cache keys change and this fails with
 // a mock-mode error: re-record with `node scripts/builder-live.mjs` (a live call, about $0.005).
@@ -17,7 +18,7 @@ const spec = JSON.parse(readFileSync('agents/fixtures/jobs/juice-fill.json', 'ut
 const env = { LLM_MODE: 'mock', LLM_MODEL_DEFAULT: 'gpt-5.4-nano', LLM_REASONING_EFFORT: 'low', LLM_MAX_OUTPUT_TOKENS: '4000' };
 
 describe('the recorded live run (juice line, filling)', () => {
-  it('replays through the three gates for $0: two layout refusals fixed by the model, a catalog filler over a belt, the run played', async () => {
+  it('replays through the three gates for $0: right first time, a catalog filler with its supply tank, the run played', async () => {
     const llm = createLlm({ env, root: process.cwd(), session: 'test' });
     const builder = createBuilder({ registry, llm });
     const s = createBuildSession({ builder, job: { line: spec.line, product: spec.product }, plan: spec.plan });
@@ -29,11 +30,10 @@ describe('the recorded live run (juice line, filling)', () => {
       s.approve();
     }
     expect(gates).toEqual([['layout', true], ['machines', true], ['process', true]]);
-    expect(llm.status().calls).toEqual({ live: 0, cached: 0, mock: 5, refused: 0 });
+    expect(llm.status().calls).toEqual({ live: 0, cached: 0, mock: 3, refused: 0 });
     const station = s.factory().stations[0];
-    expect(station.equipment.map((e) => e.type)).toEqual(['beltConveyor', 'filler']);
+    expect(station.equipment.map((e) => e.type)).toEqual(['supplyTank', 'filler', 'dispenseNozzle']);
     expect(station.process.map((o) => o.op)).toEqual(['fill']);
-    const log = s.view().log;
-    expect(log[0]).toMatchObject({ action: 'draft', phase: 'layout', retries: 2 });
+    expect(s.view().log.filter((l) => l.action === 'draft').every((l) => l.retries === 0)).toBe(true);
   }, 60000);
 });

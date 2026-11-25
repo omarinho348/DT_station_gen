@@ -1,0 +1,54 @@
+{
+  "key": "c7571d2b44ee0eef1ce9326a8ba0b4bc699c0391599883de0afca3a5bf5a870d",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:18:49.036Z",
+  "usage": {
+    "inputTokens": 7564,
+    "cachedInputTokens": 0,
+    "outputTokens": 430
+  },
+  "output": {
+    "params": {
+      "pumpHeadFeeder": {
+        "bowlDiameter": 0.26,
+        "hoseLength": 1.2
+      },
+      "pumpHeadPlacer": {
+        "link1": 0.6,
+        "link2": 0.5,
+        "armHeight": 1.5,
+        "stroke": 0.4,
+        "maxGap": 0.2,
+        "fingerLength": 0.12,
+        "screwdriver": false
+      },
+      "pumpHeadPickTool": {
+        "fingerLength": 0.12,
+        "maxGap": 0.2
+      },
+      "lotionFiller": {
+        "heads": 4,
+        "pitch": 0.4,
+        "tipHeight": 0.353,
+        "stroke": 0.25
+      },
+      "weighInspect": {
+        "width": 0.5,
+        "height": 0.9,
+        "depth": 0.4
+      },
+      "frontLabelApplicator": {
+        "applyHeight": 1.25,
+        "stroke": 0.3,
+        "padWidth": 0.06
+      },
+      "labelTampTool": {
+        "stroke": 0.1,
+        "labelWidth": 0.08,
+        "labelLength": 0.1
+      }
+    }
+  }
+}

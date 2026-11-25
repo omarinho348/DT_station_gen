@@ -1,0 +1,87 @@
+{
+  "key": "f91a763979d3abc189dd9d93123c75fd55173919732618db37dab751531428dd",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-24T22:01:12.833Z",
+  "usage": {
+    "inputTokens": 6336,
+    "cachedInputTokens": 5888,
+    "outputTokens": 950
+  },
+  "output": {
+    "id": "carDoorInnerModule",
+    "title": "Car door inner module pre-assembly",
+    "product": {
+      "name": "Car door inner module (trim carrier + subcomponents)",
+      "description": "Pre-assembled door inner module built on a trim carrier about 1.0 × 0.8 m. The carrier holds a window regulator, speaker, and a wiring harness; modules are assembled and then function-tested.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "box",
+          "length": 1,
+          "width": 0.8,
+          "height": 0.2,
+          "finish": "metal",
+          "color": null,
+          "processedColor": null,
+          "liquid": null,
+          "fillLevel": null,
+          "capColor": null,
+          "labelText": null,
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 40,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "PlaceRegulator",
+        "does": "Place the window regulator onto the carrier and fasten it with 4 screws."
+      },
+      {
+        "name": "FitSpeaker",
+        "does": "Fit the speaker and fasten it with 3 screws."
+      },
+      {
+        "name": "LayHarness",
+        "does": "Lay the wiring harness and plug it into the regulator and speaker."
+      },
+      {
+        "name": "FunctionTest",
+        "does": "Switch on and check the window motor and speaker function."
+      }
+    ],
+    "quality": "Function test identifies PASS/REJECT; rejected modules are separated for troubleshooting or rework (exact handling not specified).",
+    "constraints": [
+      "Modules ride on fixtures that move with a pallet conveyor.",
+      "Target throughput: one module every 90 seconds (takt).",
+      "One operator per station; screwdrivers are on balancers; rest of the work is automatic where possible.",
+      "Assembly is performed as discrete stations on a single flow line (not a continuous process plant)."
+    ],
+    "assumptions": [
+      "Shift length is not provided; takt is taken directly from 90 seconds per module, so target is 40 modules/hour.",
+      "Carrier/module approximate size is 1.0 × 0.8 m; height is assumed 0.2 m for the digital-twin model because no height was given.",
+      "Each of the 4+3 screws is driven by an automatic/assisted screwdriver action at the station with the operator tending/confirming.",
+      "Function test time includes switching on and verifying motor and speaker behavior within the station takt budget."
+    ],
+    "questions": [
+      {
+        "topic": "product",
+        "question": "What is the approximate module height (or overall Z dimension) on the fixture so the twin model matches the real carrier stack-up?",
+        "why": "Station clearances and fixture/vacuum/test hardware sizing depend on the module height."
+      },
+      {
+        "topic": "throughput",
+        "question": "Is the 90 seconds/module a hard takt for finished, pass-test modules leaving the last station (i.e., no buffering/rework flow), or does it allow rejects to be handled off-takt?",
+        "why": "Determines whether test station time must fit strictly into the takt and how buffer/reject handling should be modeled."
+      },
+      {
+        "topic": "quality",
+        "question": "How do you decide PASS vs REJECT in the function test (e.g., required motor speed/current thresholds, speaker sound/volume check), and what is the disposition of REJECT modules (rework in-line, stand-by, or scrap)?",
+        "why": "Sets the function test station logic and the downstream routing for bad units."
+      }
+    ]
+  }
+}

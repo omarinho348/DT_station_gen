@@ -8,6 +8,7 @@
 //   POST /api/builder/reject       { comment } → back to that phase with the comment, rebuilt
 //   POST /api/builder/next         build the next draft (after an error, or a restart)
 //   POST /api/builder/reset        forget the session
+//   POST /api/builder/save         { id? } a finished build → lines/<id>/ (version 1), compiled to generated/
 //
 // Answers { session } (200). 409 when the step can't be done now (no draft, a draft waiting, the plan
 // done) or the LLM layer refused (budget, mock mode without a recording: { error, code }); 400 for a bad
@@ -16,6 +17,15 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { serverLlm } from './llmApi.js';
+import { projectLineStore } from './lineStore.js';
+
+/** The project's line store, with the compiler from the dev server's SSR graph (also used by /api/lines). */
+export async function serverLineStore(server, registry) {
+  const { parseFactory } = await server.ssrLoadModule('/spec/factory.schema.js');
+  const { compileFactory } = await server.ssrLoadModule('/compiler/emit.js');
+  const { writeCompiled } = await server.ssrLoadModule('/compiler/write.js');
+  return projectLineStore({ root: server.config.root, registry, parseFactory, compileFactory, writeCompiled });
+}
 
 const MAX_BODY = 1024 * 1024;
 const KEEP_REVS = 6;
@@ -23,7 +33,7 @@ const KEEP_REVS = 6;
 /**
  * @param {object} env
  * @param {string} env.root
- * @param {() => Promise<{ registry, createBuilder, createBuildSession, loadRehearsal, REHEARSALS, SessionError, LlmError, RehearsalError }>} env.load
+ * @param {() => Promise<{ registry, createBuilder, createBuildSession, loadRehearsal, REHEARSALS, SessionError, LlmError, RehearsalError, lineStore? }>} env.load
  * @param {() => object} env.llm   the dev server's LLM layer
  */
 export function createBuilderService({ root, load, llm }) {
@@ -124,6 +134,14 @@ export function createBuilderService({ root, load, llm }) {
           await session.next();
           return ok();
         }
+        if (path === '/save') {
+          const v = session.view();
+          if (!v.finished) return { status: 409, body: { error: 'the build is not finished: approve every station first', session: v } };
+          if (!m.lineStore) return { status: 500, body: { error: 'no line store' } };
+          const id = body?.id ?? v.line.id;
+          const saved = m.lineStore.create(id, session.factory(), { by: 'builder', message: `built by the Builder: ${v.plan.length} station${v.plan.length === 1 ? '' : 's'}${v.source?.kind === 'rehearsal' ? ' (rehearsal)' : ''}` });
+          return { status: 200, body: { session: v, saved: { id, version: saved.version, folder: saved.compiled?.folder ?? null } } };
+        }
         if (path === '/reset') {
           session = null;
           meta = null;
@@ -132,7 +150,7 @@ export function createBuilderService({ root, load, llm }) {
         }
         return { status: 404, body: { error: `no route /api/builder${path}` } };
       } catch (error) {
-        if (error instanceof m.SessionError || error instanceof m.RehearsalError) return { status: 409, body: { error: error.message, session: session?.view() ?? null } };
+        if (error instanceof m.SessionError || error instanceof m.RehearsalError || error?.constructor?.name === 'LineStoreError') return { status: 409, body: { error: error.message, session: session?.view() ?? null } };
         // By name: the LLM layer is loaded natively (server/llmApi.js), not through the SSR graph.
         if (error instanceof m.LlmError || error?.constructor?.name === 'LlmError') return { status: 409, body: { error: error.message, code: error.code, session: session?.view() ?? null } };
         return { status: 500, body: { error: `the builder failed: ${error.message}`, session: session?.view() ?? null } };
@@ -184,7 +202,8 @@ export function builderApi() {
           const { createBuildSession, SessionError } = await server.ssrLoadModule('/agents/builder/session.js');
           const { loadRehearsal, REHEARSALS, RehearsalError } = await server.ssrLoadModule('/agents/builder/rehearsal.js');
           const { LlmError } = await server.ssrLoadModule('/agents/llm.js');
-          return { registry, createBuilder, createBuildSession, SessionError, loadRehearsal, REHEARSALS, RehearsalError, LlmError };
+          const lineStore = await serverLineStore(server, registry);
+          return { registry, createBuilder, createBuildSession, SessionError, loadRehearsal, REHEARSALS, RehearsalError, LlmError, lineStore };
         })();
       const service = createBuilderService({ root, load, llm: () => serverLlm(root, server.config.mode) });
       server.middlewares.use('/api/builder', async (req, res) => {

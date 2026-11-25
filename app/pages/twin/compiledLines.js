@@ -31,6 +31,16 @@ export async function loadDraftLine(url, { speed = 1, onStatus = null } = {}) {
   return startModule(mod, url.split('/').slice(3, -1).join('/'), { speed, onStatus });
 }
 
+/**
+ * Loads and starts a stored line's compiled files (generated/<folder>/line.js, written by /api/lines):
+ * from the glob when it was there at page load, else by a plain dynamic import (a line saved since).
+ */
+export async function loadStoredLine(folder, { speed = 1, onStatus = null } = {}) {
+  if (!/^[\w-]+$/.test(folder)) throw new Error(`not a line folder: ${folder}`);
+  const mod = MODULES[folder] ? await MODULES[folder]() : await import(/* @vite-ignore */ `/generated/${folder}/line.js`);
+  return startModule(mod, folder, { speed, onStatus });
+}
+
 async function startModule(mod, name, { speed, onStatus }) {
   // A line may use a component built from a model, and its product may be the owner's GLB model.
   await preloadComponentAssets(catalog, null, [mod.product]);

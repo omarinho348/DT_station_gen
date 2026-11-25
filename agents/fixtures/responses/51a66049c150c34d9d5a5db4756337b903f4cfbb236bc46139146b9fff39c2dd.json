@@ -1,0 +1,39 @@
+{
+  "key": "51a66049c150c34d9d5a5db4756337b903f4cfbb236bc46139146b9fff39c2dd",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:08:14.153Z",
+  "usage": {
+    "inputTokens": 7312,
+    "cachedInputTokens": 0,
+    "outputTokens": 257
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "cap",
+        "machine": "capper",
+        "item": "product",
+        "units": "Bottles in position",
+        "turns": 3,
+        "engageAt": 0.95,
+        "timing": {
+          "inPosition": 0.4,
+          "descend": 1.3,
+          "engage": 0.15,
+          "tighten": 1.2,
+          "torque": 0.25,
+          "retract": 1.3,
+          "feed": 0.7
+        },
+        "label": "Cap",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "filled"
+  }
+}

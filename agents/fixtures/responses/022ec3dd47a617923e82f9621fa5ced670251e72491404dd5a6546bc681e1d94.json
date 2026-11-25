@@ -1,0 +1,35 @@
+{
+  "key": "022ec3dd47a617923e82f9621fa5ced670251e72491404dd5a6546bc681e1d94",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:18:38.996Z",
+  "usage": {
+    "inputTokens": 5726,
+    "cachedInputTokens": 5376,
+    "outputTokens": 186
+  },
+  "output": {
+    "id": "capping",
+    "code": "ST2",
+    "title": "Screw cap",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "capper",
+        "type": "capper",
+        "why": "Screws the cap onto each filled bottle",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "cap"
+    ]
+  }
+}

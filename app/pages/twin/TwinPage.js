@@ -155,6 +155,13 @@ export function TwinPage(outlet, route) {
       });
   }
   if (!route?.query?.demo && route?.query?.line) {
+    // The KPI overlay (Phase 11) unless this is a golden screenshot; a compiled example line runs its
+    // SimPy model as that example.
+    if (route.query.golden !== '1' && !route.query.t) {
+      import('./KpiOverlay.js').then(({ KpiOverlay }) => {
+        if (alive) kpis = KpiOverlay(root, { getLine: () => demo?.line ?? null, folder: route.query.line, target: { example: route.query.line } });
+      });
+    }
     import('./compiledLines.js')
       .then(({ loadCompiledLine }) => loadCompiledLine(route.query.line, lineOptions))
       .then(showLine)
@@ -167,22 +174,24 @@ export function TwinPage(outlet, route) {
   // The app's own twin page (no demo, no compiled line asked for): the Builder's approval panel, its
   // drafts loaded into the 3D view as they come (step 8.5).
   let panel = null;
+  let kpis = null;
   if (!route?.query?.demo && !route?.query?.line && route?.query?.golden !== '1') {
     root.classList.add('has-panel');
     let loading = Promise.resolve();
     let stationCount = -1;
     let unhook = null;
-    const loadDraft = (url) => {
+    // A Builder draft (by its URL) or, in edit mode, a stored line's compiled files (by folder).
+    const loadDraft = (url, folder = null) => {
       loading = loading.then(async () => {
         if (!alive) return;
         unhook?.();
         unhook = null;
         demo?.dispose();
         demo = null;
-        if (!url) { hint.textContent = 'Drag to orbit · Right-drag to pan · Scroll to zoom'; return; }
+        if (!url && !folder) { hint.textContent = 'Drag to orbit · Right-drag to pan · Scroll to zoom'; return; }
         try {
-          const { loadDraftLine } = await import('./compiledLines.js');
-          const player = await loadDraftLine(url, lineOptions);
+          const { loadDraftLine, loadStoredLine } = await import('./compiledLines.js');
+          const player = folder ? await loadStoredLine(folder, lineOptions) : await loadDraftLine(url, lineOptions);
           if (!alive) { player.dispose(); return; }
           demo = player;
           viewer.content.add(player.root);
@@ -200,13 +209,30 @@ export function TwinPage(outlet, route) {
       });
       return loading;
     };
-    import('./BuilderPanel.js').then(({ BuilderPanel }) => {
-      if (!alive) return;
-      panel = BuilderPanel(root, {
-        onDraft: (url) => loadDraft(url),
-        onReady: () => requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true))),
+    const ready = () => requestAnimationFrame(() => requestAnimationFrame(() => (window.__appReady = true)));
+    if (route?.query?.edit) {
+      // Edit mode (step 10.4): the stored line lines/<id>/ in the 3D view, the Editor beside it.
+      const id = route.query.edit;
+      import('./EditorPanel.js').then(({ EditorPanel }) => {
+        if (!alive) return;
+        panel = EditorPanel(root, { id, onReady: () => {} });
+        fetch(`/api/lines/${encodeURIComponent(id)}`).then((r) => r.json())
+          .then((d) => {
+            if (!d.line) { hint.textContent = d.error ?? 'no such line'; return null; }
+            import('./KpiOverlay.js').then(({ KpiOverlay }) => {
+              if (alive) kpis = KpiOverlay(root, { getLine: () => demo?.line ?? null, folder: d.line.folder, target: { line: id } });
+            });
+            return loadDraft(null, d.line.folder);
+          })
+          .catch((e) => { hint.textContent = e.message; })
+          .then(ready);
       });
-    });
+    } else {
+      import('./BuilderPanel.js').then(({ BuilderPanel }) => {
+        if (!alive) return;
+        panel = BuilderPanel(root, { onDraft: (url) => loadDraft(url), onReady: ready });
+      });
+    }
   }
 
   if (route?.query?.demo === 'core') {
@@ -226,6 +252,7 @@ export function TwinPage(outlet, route) {
     unmount() {
       alive = false;
       panel?.dispose();
+      kpis?.dispose();
       demo?.dispose();
       viewer.dispose();
       delete window.__screenshotPrepare;

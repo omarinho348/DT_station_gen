@@ -1,0 +1,58 @@
+{
+  "key": "7f4dbb5e0dde70fd2c0750102d03ad3bc3140943b872094dbccfc6e47e6f0245",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:22:38.261Z",
+  "usage": {
+    "inputTokens": 7777,
+    "cachedInputTokens": 0,
+    "outputTokens": 694
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "accumulate",
+        "items": [
+          {
+            "item": "product",
+            "conveyor": "coolTable",
+            "to": {
+              "machine": "coolTable",
+              "port": "output",
+              "offset": null
+            }
+          }
+        ],
+        "speed": null,
+        "ramp": null,
+        "blend": 0.06,
+        "alongside": null,
+        "stopping": {
+          "label": "Loaves dwell stop",
+          "state": null,
+          "status": null
+        },
+        "unitTo": null,
+        "label": "Register loaf on cooling dwell table",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "wait",
+        "seconds": 2.5,
+        "label": "Cooling dwell",
+        "state": null,
+        "status": [
+          {
+            "key": "stationCode",
+            "value": "ST1"
+          }
+        ]
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

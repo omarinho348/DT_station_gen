@@ -1,0 +1,23 @@
+{
+  "key": "bce383479bca0460299297f7f42aaf02b3b2d7279ed6e9f00a1d89ccd7bce21f",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:23:46.123Z",
+  "usage": {
+    "inputTokens": 4958,
+    "cachedInputTokens": 0,
+    "outputTokens": 111
+  },
+  "output": {
+    "params": {
+      "visionInspectScanner": {
+        "length": 2.7,
+        "width": 1.44,
+        "railHeight": 2.05,
+        "archWidth": 1,
+        "archBottom": 1
+      }
+    }
+  }
+}

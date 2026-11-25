@@ -1,0 +1,33 @@
+{
+  "key": "8a932e271d4c9b7f69ad1ae5ce7b88b6484b504916a53e0eb3f1c6c914f75319",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:27:37.909Z",
+  "usage": {
+    "inputTokens": 5792,
+    "cachedInputTokens": 0,
+    "outputTokens": 281
+  },
+  "output": {
+    "params": {
+      "dispensePasteNozzle": {
+        "jetLength": 0.12,
+        "liquid": "glue"
+      },
+      "pastePresenceCamera": {
+        "workingDistance": 0.3,
+        "ringRadius": 0.05
+      },
+      "pasteDispenseControl": {
+        "name": "Solder paste dispense cycle",
+        "note": "Timed multi-pass dispense with nozzle dwell/clearance",
+        "length": null,
+        "depth": null,
+        "height": null,
+        "passThrough": null,
+        "carries": null
+      }
+    }
+  }
+}

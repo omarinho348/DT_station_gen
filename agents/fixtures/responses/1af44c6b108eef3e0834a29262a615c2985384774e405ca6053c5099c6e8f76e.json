@@ -1,0 +1,111 @@
+{
+  "key": "1af44c6b108eef3e0834a29262a615c2985384774e405ca6053c5099c6e8f76e",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:28:01.022Z",
+  "usage": {
+    "inputTokens": 11281,
+    "cachedInputTokens": 9984,
+    "outputTokens": 621
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "stopConveyors",
+        "conveyors": [
+          "line"
+        ],
+        "speed": null,
+        "ramp": null,
+        "label": "Stop pallet carrier at ST1 index position",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "regulatorPickRobot",
+        "item": "product",
+        "from": {
+          "item": "product",
+          "ref": "grasp",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "item": "product",
+          "ref": "base",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Place window regulator onto carrier",
+        "gap": 0.01,
+        "openGap": 0.03,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Place window regulator onto carrier",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "operate",
+        "machine": "screwdriveCycle",
+        "seconds": 40,
+        "label": "Drive 4 screws and run screwdriving completion cycle",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "decide",
+        "on": "quality",
+        "cases": [
+          {
+            "key": "pass",
+            "value": [
+              {
+                "op": "wait",
+                "seconds": 0.2,
+                "label": "Confirm regulator sits flush / torque OK",
+                "state": null,
+                "status": null
+              }
+            ]
+          },
+          {
+            "key": "reject",
+            "value": [
+              {
+                "op": "wait",
+                "seconds": 0.2,
+                "label": "Regulator verification failed (hold for downstream handling)",
+                "state": null,
+                "status": null
+              }
+            ]
+          }
+        ],
+        "otherwise": null,
+        "planAs": null,
+        "label": "Verify screw drive completion and flush seating",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

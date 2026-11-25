@@ -1,0 +1,34 @@
+{
+  "key": "e47efbb07bc85b66e4a2d18dcd9fd3b332f41dff6e4ca5c22ab9e0d01da47551",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:13:46.469Z",
+  "usage": {
+    "inputTokens": 5941,
+    "cachedInputTokens": 0,
+    "outputTokens": 178
+  },
+  "output": {
+    "params": {
+      "busbarPlacerRobot": {
+        "padLength": 0.5,
+        "padWidth": 0.34
+      },
+      "busbarVision": {
+        "length": null,
+        "width": null,
+        "railHeight": null,
+        "archWidth": null,
+        "archBottom": null
+      },
+      "busbarPickToLight": {
+        "color": "green"
+      },
+      "busbarGripper": {
+        "fingerLength": null,
+        "maxGap": null
+      }
+    }
+  }
+}

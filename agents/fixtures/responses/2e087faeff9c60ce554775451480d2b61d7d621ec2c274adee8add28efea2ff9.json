@@ -1,0 +1,67 @@
+{
+  "key": "2e087faeff9c60ce554775451480d2b61d7d621ec2c274adee8add28efea2ff9",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:20:08.932Z",
+  "usage": {
+    "inputTokens": 5785,
+    "cachedInputTokens": 5632,
+    "outputTokens": 287
+  },
+  "output": {
+    "id": "placeRegulator",
+    "code": "ST1",
+    "title": "Mount window regulator",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Mount window regulator",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "partCradle",
+        "type": "partCradle",
+        "why": "Present the regulator to the operator",
+        "place": "besideLine",
+        "at": "input",
+        "on": null,
+        "side": "equipment",
+        "turned": false
+      },
+      {
+        "id": "guideRails",
+        "type": "guideRails",
+        "why": "Locate the trim carrier for hole alignment",
+        "place": "upstream",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "screwdriver",
+        "type": "screwdriver",
+        "why": "Fasten the regulator with four screws",
+        "place": "front",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "stopConveyors",
+      "grip",
+      "move",
+      "release",
+      "decide",
+      "transfer"
+    ]
+  }
+}

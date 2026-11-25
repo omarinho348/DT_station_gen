@@ -1,0 +1,34 @@
+{
+  "key": "82efc07a8a4972c9888bce51d4cbf0973473732edab2ae5f385a12dabe13e19d",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:19:25.211Z",
+  "usage": {
+    "inputTokens": 5894,
+    "cachedInputTokens": 0,
+    "outputTokens": 131
+  },
+  "output": {
+    "params": {
+      "vibratoryFeeder": {
+        "bowlDiameter": 0.26,
+        "hoseLength": 1.2
+      },
+      "workTable": {
+        "length": 1.2,
+        "width": 0.7,
+        "height": 0.9,
+        "top": "stainless"
+      },
+      "robot": {
+        "padLength": 0.5,
+        "padWidth": 0.34
+      },
+      "gripper": {
+        "fingerLength": 0.12,
+        "maxGap": 0.2
+      }
+    }
+  }
+}

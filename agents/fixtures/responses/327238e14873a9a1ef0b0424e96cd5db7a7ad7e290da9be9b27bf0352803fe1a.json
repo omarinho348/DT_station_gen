@@ -1,0 +1,38 @@
+{
+  "key": "327238e14873a9a1ef0b0424e96cd5db7a7ad7e290da9be9b27bf0352803fe1a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:22:43.995Z",
+  "usage": {
+    "inputTokens": 6052,
+    "cachedInputTokens": 0,
+    "outputTokens": 216
+  },
+  "output": {
+    "params": {
+      "slicingConveyor": {
+        "length": 4,
+        "beltWidth": 0.34,
+        "guides": true,
+        "guideGap": 0.22,
+        "drive": true,
+        "carries": "unit"
+      },
+      "slicerClampsAndHead": {
+        "name": null,
+        "note": null,
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "safetyGuardFence": {
+        "length": 4.1,
+        "height": 2,
+        "panelWidth": 1.6
+      }
+    }
+  }
+}

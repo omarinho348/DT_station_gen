@@ -1,0 +1,86 @@
+{
+  "key": "db28883b8beed3be1f0636783689930c7facd476d14ae48aaffe9e88c1c9286c",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:20:17.120Z",
+  "usage": {
+    "inputTokens": 11808,
+    "cachedInputTokens": 0,
+    "outputTokens": 1238
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "stopConveyors",
+        "conveyors": [
+          "line"
+        ],
+        "speed": null,
+        "ramp": null,
+        "label": "Stop carrier at station",
+        "state": "ST1",
+        "status": null
+      },
+      {
+        "op": "grip",
+        "machine": "screwdriver",
+        "item": "product",
+        "motion": "driver",
+        "to": 1,
+        "anchor": "bit",
+        "alongside": null,
+        "also": null,
+        "indicator": "holding",
+        "seconds": 0.3,
+        "label": "Engage screwdriver",
+        "state": "ST1",
+        "status": null
+      },
+      {
+        "op": "move",
+        "machine": "screwdriver",
+        "to": [
+          {
+            "key": "driver",
+            "value": 1
+          },
+          {
+            "key": "driverSpin",
+            "value": 1
+          }
+        ],
+        "by": null,
+        "seconds": 30,
+        "speed": null,
+        "ramp": null,
+        "profile": "smooth",
+        "switches": null,
+        "before": null,
+        "after": null,
+        "routine": null,
+        "label": "Drive 4 screws",
+        "state": "ST1",
+        "status": null
+      },
+      {
+        "op": "release",
+        "machine": "screwdriver",
+        "item": "product",
+        "motion": "driver",
+        "to": 0,
+        "onto": null,
+        "alongside": null,
+        "also": null,
+        "indicator": "holding",
+        "seconds": 0.3,
+        "label": "Release product",
+        "state": "ST1",
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

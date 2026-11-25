@@ -1,0 +1,62 @@
+{
+  "key": "d66c2c7e1ac0eddaea67b3c919fa188bc3471e2b44fdc5091ebe6681317ddb87",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:29:08.965Z",
+  "usage": {
+    "inputTokens": 5514,
+    "cachedInputTokens": 4864,
+    "outputTokens": 922
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Bottle filling",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Filling",
+        "color": "#d9a21b"
+      }
+    },
+    "equipment": [
+      {
+        "id": "juiceTank",
+        "type": "supplyTank",
+        "why": "Provides apple juice to the filling heads",
+        "place": "besideLine",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "fillerUnit",
+        "type": "filler",
+        "why": "Lowers filling head and dispenses apple juice into bottle necks",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "fillNozzle",
+        "type": "dispenseNozzle",
+        "why": "Dispensing nozzle for the filling head",
+        "place": "onTop",
+        "at": "whole",
+        "on": "fillerUnit",
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "fill"
+    ]
+  }
+}

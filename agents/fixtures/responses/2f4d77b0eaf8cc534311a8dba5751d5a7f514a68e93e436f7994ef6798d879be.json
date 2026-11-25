@@ -1,0 +1,76 @@
+{
+  "key": "2f4d77b0eaf8cc534311a8dba5751d5a7f514a68e93e436f7994ef6798d879be",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:20:25.566Z",
+  "usage": {
+    "inputTokens": 5596,
+    "cachedInputTokens": 4864,
+    "outputTokens": 641
+  },
+  "output": {
+    "id": "placeBusbars",
+    "code": "ST2",
+    "title": "Place copper busbars",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Place copper busbars",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "abbIrb6760",
+        "type": "abbIrb6760",
+        "why": "Robot places each copper busbar onto the correct cell-top position",
+        "place": "rear",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "fingerGripper",
+        "type": "fingerGripper",
+        "why": "Grips busbar pieces picked from the kit",
+        "place": "onTop",
+        "at": "whole",
+        "on": "abbIrb6760",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "pickToLight",
+        "type": "pickToLight",
+        "why": "Operator/handler aids to select the correct busbar orientation-specific set and position",
+        "place": "front",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "visionScanner",
+        "type": "visionScanner",
+        "why": "Checks presence/position of busbars on each cell-top location",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "replenish",
+      "pickPlace",
+      "operate",
+      "decide",
+      "release"
+    ]
+  }
+}

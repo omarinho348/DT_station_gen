@@ -1,0 +1,53 @@
+{
+  "key": "a2ca0adb6e2cb0533c3ad3c2906687a15ab1220daff3ed7fae4de38a54454753",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:23:11.484Z",
+  "usage": {
+    "inputTokens": 5518,
+    "cachedInputTokens": 4864,
+    "outputTokens": 486
+  },
+  "output": {
+    "id": "formBlisterCavities",
+    "code": "ST1",
+    "title": "Form PVC blister cavities",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Form PVC blister cavities",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "formingEnclosure",
+        "type": "shutterEnclosure",
+        "why": "Enclose the thermoforming heat zone for safety and repeatability",
+        "place": "overLine",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "thermoformer",
+        "type": "genericMachine",
+        "why": "Heat-form PVC film web into blister cavities for a 10-cavity strip",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "operate",
+      "indexBatches"
+    ]
+  }
+}

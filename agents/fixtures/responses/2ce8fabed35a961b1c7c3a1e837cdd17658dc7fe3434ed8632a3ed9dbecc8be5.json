@@ -1,0 +1,33 @@
+{
+  "key": "2ce8fabed35a961b1c7c3a1e837cdd17658dc7fe3434ed8632a3ed9dbecc8be5",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:14:07.514Z",
+  "usage": {
+    "inputTokens": 5914,
+    "cachedInputTokens": 0,
+    "outputTokens": 186
+  },
+  "output": {
+    "params": {
+      "carrierGuideRails": {
+        "length": null,
+        "span": null,
+        "gap": null
+      },
+      "regulatorCradle": {
+        "length": null,
+        "width": null,
+        "height": null,
+        "lanes": null,
+        "laneWidth": null,
+        "saddleSpacing": null
+      },
+      "autoScrewdriver": {
+        "fingerLength": null,
+        "offsetX": null
+      }
+    }
+  }
+}

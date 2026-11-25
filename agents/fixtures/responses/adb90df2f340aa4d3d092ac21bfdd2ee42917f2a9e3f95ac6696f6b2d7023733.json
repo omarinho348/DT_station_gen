@@ -1,0 +1,28 @@
+{
+  "key": "adb90df2f340aa4d3d092ac21bfdd2ee42917f2a9e3f95ac6696f6b2d7023733",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:23:32.617Z",
+  "usage": {
+    "inputTokens": 5407,
+    "cachedInputTokens": 0,
+    "outputTokens": 102
+  },
+  "output": {
+    "params": {
+      "tabletDoseUnit": {
+        "name": null,
+        "note": null,
+        "length": null,
+        "depth": null,
+        "height": null,
+        "passThrough": null,
+        "carries": null
+      },
+      "cavityIndexingPhotoEye": {
+        "span": null
+      }
+    }
+  }
+}

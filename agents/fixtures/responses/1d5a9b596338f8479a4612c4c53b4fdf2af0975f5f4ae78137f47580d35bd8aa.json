@@ -1,0 +1,23 @@
+{
+  "key": "1d5a9b596338f8479a4612c4c53b4fdf2af0975f5f4ae78137f47580d35bd8aa",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:19:12.478Z",
+  "usage": {
+    "inputTokens": 5052,
+    "cachedInputTokens": 0,
+    "outputTokens": 83
+  },
+  "output": {
+    "params": {
+      "dispensePasteNozzle": {
+        "jetLength": 0.18,
+        "liquid": "glue"
+      },
+      "pastePresencePhotoEye": {
+        "span": 0.4
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "key": "12bd1bbc6f5f00e3ceee34acfc907eb3a146bb005c70f990a2c2613f8d123274",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T21:59:16.011Z",
+  "usage": {
+    "inputTokens": 5737,
+    "cachedInputTokens": 4864,
+    "outputTokens": 524
+  },
+  "output": {
+    "id": "pasteSolderPaste",
+    "code": "ST1",
+    "title": "Solder paste dispense (PCB pads)",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Solder paste dispense",
+        "color": "#00A000",
+        "minZ": null,
+        "maxZ": null,
+        "walkwayZ": null,
+        "panelX": null,
+        "conveyorLength": null,
+        "carrierLength": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "pasteVisionCheck",
+        "type": "visionScanner",
+        "why": "Scan/verify correct PCB presence and alignment before dispensing",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "pcbPresencePhotoEye",
+        "type": "photoEye",
+        "why": "Detect carrier/board arrival for the start condition",
+        "place": "besideLine",
+        "at": "input",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "solderPasteDispense",
+        "type": "dispenseNozzle",
+        "why": "Dispense solder paste stencil pattern onto PCB pads",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "st1Conveyor",
+    "ports": null,
+    "ops": [
+      "decide",
+      "operate",
+      "indexBatches",
+      "move",
+      "wait"
+    ]
+  }
+}

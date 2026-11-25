@@ -1,0 +1,39 @@
+{
+  "key": "ba4bc0c015798ac5b443fe963ad026e0c92b8291fcc0e1cf237e3944d41e9cb0",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:20:06.419Z",
+  "usage": {
+    "inputTokens": 5897,
+    "cachedInputTokens": 0,
+    "outputTokens": 145
+  },
+  "output": {
+    "params": {
+      "partCradle": {
+        "length": 0.6,
+        "width": 0.5,
+        "height": 0.75,
+        "lanes": [
+          -0.17,
+          -0.08,
+          0,
+          0.06,
+          0.15
+        ],
+        "laneWidth": 0.06,
+        "saddleSpacing": 0.3
+      },
+      "guideRails": {
+        "length": 1.6,
+        "span": 0.58,
+        "gap": 0.2
+      },
+      "screwdriver": {
+        "fingerLength": 0.12,
+        "offsetX": 0.13
+      }
+    }
+  }
+}

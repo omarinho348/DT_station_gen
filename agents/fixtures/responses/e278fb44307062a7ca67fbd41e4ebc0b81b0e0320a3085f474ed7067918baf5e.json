@@ -1,0 +1,74 @@
+{
+  "key": "e278fb44307062a7ca67fbd41e4ebc0b81b0e0320a3085f474ed7067918baf5e",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:27:24.294Z",
+  "usage": {
+    "inputTokens": 9112,
+    "cachedInputTokens": 7936,
+    "outputTokens": 445
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "fill",
+        "machine": "filler",
+        "item": "product",
+        "units": "Cans in position",
+        "liquid": "body lotion",
+        "timing": null,
+        "supply": null,
+        "label": "Fill 250 mL",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "decide",
+        "on": "quality",
+        "cases": [
+          {
+            "key": "pass",
+            "value": [
+              {
+                "op": "transform",
+                "item": "product",
+                "stage": "filled",
+                "set": null,
+                "at": "end",
+                "seconds": null,
+                "label": "Mark as filled (pass)",
+                "state": null,
+                "status": null
+              }
+            ]
+          },
+          {
+            "key": "reject",
+            "value": [
+              {
+                "op": "transform",
+                "item": "product",
+                "stage": "processed",
+                "set": null,
+                "at": "end",
+                "seconds": null,
+                "label": "Mark as processed (reject)",
+                "state": null,
+                "status": null
+              }
+            ]
+          }
+        ],
+        "otherwise": null,
+        "planAs": "otherwise",
+        "label": "Quality verdict",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "processed"
+  }
+}

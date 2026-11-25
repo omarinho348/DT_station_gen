@@ -1,0 +1,42 @@
+{
+  "key": "f82dc9a095e26fae2147229e95a77c6cc32348427c900f98bcd474f0e2217042",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:08:09.584Z",
+  "usage": {
+    "inputTokens": 5543,
+    "cachedInputTokens": 4864,
+    "outputTokens": 380
+  },
+  "output": {
+    "id": "capping",
+    "code": "ST2",
+    "title": "Screw cap",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Screw cap",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "capper",
+        "type": "capper",
+        "why": "Screw a blue cap onto each filled PET bottle.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "st2Conveyor",
+    "ports": null,
+    "ops": [
+      "cap"
+    ]
+  }
+}

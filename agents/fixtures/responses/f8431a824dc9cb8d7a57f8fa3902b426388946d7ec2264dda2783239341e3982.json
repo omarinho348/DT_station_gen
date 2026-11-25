@@ -1,0 +1,89 @@
+{
+  "key": "f8431a824dc9cb8d7a57f8fa3902b426388946d7ec2264dda2783239341e3982",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-25T02:24:00.357Z",
+  "usage": {
+    "inputTokens": 6308,
+    "cachedInputTokens": 5888,
+    "outputTokens": 831
+  },
+  "output": {
+    "id": "panelCutting",
+    "title": "Chipboard panel cutting & preparation",
+    "product": {
+      "name": "Chipboard furniture panel",
+      "description": "Rectangular chipboard furniture panel cut from raw sheets (up to 2.0 × 0.8 m), finished to 18 mm thickness. Edges are edge-banded, hinge/dowel holes are drilled, and panels are pallet-stacked for assembly.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "box",
+          "length": 0.8,
+          "width": 0.2,
+          "height": 0.018,
+          "finish": "cardboard",
+          "color": "#D5B28A",
+          "processedColor": "#D5B28A",
+          "liquid": null,
+          "fillLevel": null,
+          "capColor": null,
+          "labelText": null,
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 90,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "CutToSize",
+        "does": "Saw the chipboard panel to the required finished dimensions."
+      },
+      {
+        "name": "ApplyEdgeBand",
+        "does": "Glue edge banding onto the visible edges of the cut panel."
+      },
+      {
+        "name": "DrillHingeAndDowelHoles",
+        "does": "Drill hinge and dowel holes in the finished panel."
+      },
+      {
+        "name": "InspectDimensions",
+        "does": "Operator checks panel dimensions periodically and identifies any out-of-tolerance parts."
+      },
+      {
+        "name": "StackOnPallet",
+        "does": "Stack finished panels onto a pallet for downstream assembly."
+      }
+    ],
+    "quality": "Operator dimension checks (periodic) find out-of-tolerance panels; those panels are set aside for rework or scrap (tolerance method and disposition not specified).",
+    "constraints": [
+      "Dust extraction is required at the saw and drill operations."
+    ],
+    "assumptions": [
+      "“About 90 panels per hour” is the required finished throughput (including cutting, edge banding, drilling, inspection, and pallet stacking).",
+      "Finished panels are rectangles with thickness 18 mm; plan dimensions are approximated to fit within the stated raw maximum size (2.0 × 0.8 m).",
+      "Edge banding includes gluing and pressing/holding long enough to bond, but exact press/curing time is not specified.",
+      "Inspection is periodic (not 100%) as stated; the actual sampling frequency and tolerance criteria are not specified.",
+      "Palletizing is handled manually or with a simple stacking assist; pallet size/count not specified."
+    ],
+    "questions": [
+      {
+        "topic": "throughput",
+        "question": "Does “90 panels per hour” mean finished, pallet-stacked panels leaving the line (after inspection), or cutting-only throughput?",
+        "why": "This sets whether the takt must accommodate all steps or only sawing, which can change the station time budgets."
+      },
+      {
+        "topic": "layout",
+        "question": "How are pallets handled at the end: manual placement, a pallet conveyor/feeder, or palletizing robot? What pallet dimensions and target stack height (or panels per pallet)?",
+        "why": "Determines the pallet stack station design and transport method."
+      },
+      {
+        "topic": "quality",
+        "question": "When a panel fails the dimension check, is it reworked (e.g., re-saw/edge re-trim), scrapped, or both? Also, what tolerance basis is used (e.g., gauge/vision, sampling rate)?",
+        "why": "Determines the reject path and whether an automated check station is needed or operator handling is sufficient."
+      }
+    ]
+  }
+}

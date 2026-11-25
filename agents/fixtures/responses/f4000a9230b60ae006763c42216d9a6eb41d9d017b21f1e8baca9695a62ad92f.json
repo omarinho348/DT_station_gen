@@ -1,0 +1,95 @@
+{
+  "key": "f4000a9230b60ae006763c42216d9a6eb41d9d017b21f1e8baca9695a62ad92f",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:19:28.839Z",
+  "usage": {
+    "inputTokens": 5564,
+    "cachedInputTokens": 4864,
+    "outputTokens": 807
+  },
+  "output": {
+    "id": "loadCells",
+    "code": "ST1",
+    "title": "Load 12 cells",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Load 12 cells",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "vibratoryFeederCells",
+        "type": "vibratoryFeeder",
+        "why": "Provide a steady singulated feed of cylindrical cells for pickup",
+        "place": "besideLine",
+        "at": "input",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "cellSeatWorkTable",
+        "type": "workTable",
+        "why": "Provide a stable placement/reference area for cell pickup positioning and datum alignment cues",
+        "place": "rear",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "robotPickPlace",
+        "type": "abbIrb6760",
+        "why": "Pick and place 12 cylindrical cells into the module frame seats on the carrier",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "gripperFinger",
+        "type": "fingerGripper",
+        "why": "Grasp cylindrical cells during robot pick-and-place",
+        "place": "onTop",
+        "at": "work",
+        "on": "robotPickPlace",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "seatPresenceCheck",
+        "type": "photoEye",
+        "why": "Verify seat-stop contact confirmation per cell using vision/beam interruption as a pass/fail check",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "stationControlHmi",
+        "type": "hmi",
+        "why": "Operator interaction for carrier ID confirmation and run status",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "decide",
+      "pickPlace",
+      "release",
+      "wait"
+    ]
+  }
+}

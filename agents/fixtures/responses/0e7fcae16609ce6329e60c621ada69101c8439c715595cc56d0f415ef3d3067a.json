@@ -1,0 +1,125 @@
+{
+  "key": "0e7fcae16609ce6329e60c621ada69101c8439c715595cc56d0f415ef3d3067a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:09:05.034Z",
+  "usage": {
+    "inputTokens": 8312,
+    "cachedInputTokens": 0,
+    "outputTokens": 1011
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "operate",
+        "machine": "visionScanner",
+        "seconds": 5,
+        "label": "Photo-eye/vision verify carrier & board present",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "decide",
+        "on": "quality",
+        "cases": [
+          {
+            "key": "pass",
+            "value": [
+              {
+                "op": "toolOn",
+                "machine": "dispenseNozzle",
+                "motion": "flow",
+                "value": "1",
+                "then": "flow=0",
+                "seconds": 2,
+                "label": "Dispense solder paste pattern pass 1",
+                "state": null,
+                "status": null
+              },
+              {
+                "op": "wait",
+                "seconds": 0.5,
+                "label": "Stencil/plate settle between passes",
+                "state": null,
+                "status": null
+              },
+              {
+                "op": "toolOn",
+                "machine": "dispenseNozzle",
+                "motion": "flow",
+                "value": "1",
+                "then": "flow=0",
+                "seconds": 2,
+                "label": "Dispense solder paste pattern pass 2",
+                "state": null,
+                "status": null
+              },
+              {
+                "op": "wait",
+                "seconds": 0.5,
+                "label": "Stencil/plate settle between passes",
+                "state": null,
+                "status": null
+              },
+              {
+                "op": "toolOn",
+                "machine": "dispenseNozzle",
+                "motion": "flow",
+                "value": "1",
+                "then": "flow=0",
+                "seconds": 2,
+                "label": "Dispense solder paste pattern pass 3",
+                "state": null,
+                "status": null
+              },
+              {
+                "op": "wait",
+                "seconds": 1,
+                "label": "Dwell/retract dwell to clear strings",
+                "state": null,
+                "status": null
+              },
+              {
+                "op": "indexBatches",
+                "seconds": 7,
+                "conveyors": [
+                  "line"
+                ],
+                "label": "Index carrier to next component placement station",
+                "state": null,
+                "status": null
+              }
+            ]
+          }
+        ],
+        "otherwise": [
+          {
+            "op": "wait",
+            "seconds": 1,
+            "label": "Skip dispense (quality!=pass)",
+            "state": null,
+            "status": null
+          },
+          {
+            "op": "indexBatches",
+            "seconds": 7,
+            "conveyors": [
+              "line"
+            ],
+            "label": "Index carrier onwards",
+            "state": null,
+            "status": null
+          }
+        ],
+        "planAs": "otherwise",
+        "label": "Quality gate before paste dispense",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "processed"
+  }
+}

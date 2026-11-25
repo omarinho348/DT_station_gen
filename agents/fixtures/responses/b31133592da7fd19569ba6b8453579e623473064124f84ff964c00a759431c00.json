@@ -1,0 +1,106 @@
+{
+  "key": "b31133592da7fd19569ba6b8453579e623473064124f84ff964c00a759431c00",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:01:29.298Z",
+  "usage": {
+    "inputTokens": 5753,
+    "cachedInputTokens": 4864,
+    "outputTokens": 1088
+  },
+  "output": {
+    "id": "placeRegulator",
+    "code": "ST1",
+    "title": "Mount window regulator",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Mount window regulator",
+        "color": null,
+        "minZ": -0.8,
+        "maxZ": 1.2,
+        "walkwayZ": 0.9,
+        "panelX": 0.6,
+        "conveyorLength": 3.6,
+        "carrierLength": 1.2
+      }
+    },
+    "equipment": [
+      {
+        "id": "st1Robot",
+        "type": "abbIrb6760",
+        "why": "Pick and position the window regulator onto the carrier",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "st1Gripper",
+        "type": "fingerGripper",
+        "why": "Grasp the window regulator during placement",
+        "place": "onTop",
+        "at": "work",
+        "on": "st1Robot",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "regulatorCradle",
+        "type": "partCradle",
+        "why": "Hold/present window regulator for assisted pick",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "carrierGuideRails",
+        "type": "guideRails",
+        "why": "Align carrier at the regulator mounting location",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "screwdriver4Pack",
+        "type": "screwdriver",
+        "why": "Drive 4 screws in a cross pattern into the regulator",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "screwStop",
+        "type": "beltEndStop",
+        "why": "Provide an index/stop reference for the carrier at ST1",
+        "place": "upstream",
+        "at": "input",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "st1Conveyor",
+    "ports": null,
+    "ops": [
+      "stopConveyors",
+      "move",
+      "pickPlace",
+      "installPart",
+      "driveScrew",
+      "operate",
+      "decide",
+      "wait",
+      "transfer"
+    ]
+  }
+}

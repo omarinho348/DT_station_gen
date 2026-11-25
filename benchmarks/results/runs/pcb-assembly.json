@@ -1,0 +1,64 @@
+{
+  "name": "pcb-assembly",
+  "stage": "builder",
+  "ok": false,
+  "cost": {
+    "spec": 0,
+    "builder": 0.0198525,
+    "editor": 0,
+    "reviewer": 0
+  },
+  "seconds": 19.849,
+  "brief": {
+    "status": "draft",
+    "retries": 0,
+    "questions": 3,
+    "warnings": [
+      "The brief says bad units are rejected, but product.model.params.rejectEvery is unset: no unit will ever fail, so the reject path never runs in the twin. Reject the brief with how often one should fail (e.g. \"every 10th fails\")."
+    ],
+    "problems": []
+  },
+  "target": {
+    "perHour": 80,
+    "title": "Control board assembly on pallet carriers",
+    "steps": 6
+  },
+  "plan": {
+    "status": "draft",
+    "retries": 1,
+    "problems": []
+  },
+  "planned": 6,
+  "stations": [
+    {
+      "id": "pasteSolderPaste",
+      "title": "Solder paste dispense",
+      "ok": false,
+      "refusals": 5,
+      "phases": [
+        "machines",
+        "machines",
+        "machines",
+        "machines",
+        "machines"
+      ],
+      "kind": "composite",
+      "types": [
+        "composite",
+        "visionScanner"
+      ],
+      "problems": [
+        "equipment[0].params (dispenseRig): Invalid params for \"composite\": parts: mount point \"base\" is offered twice (rename a part or an alias)"
+      ]
+    }
+  ],
+  "reason": "station \"pasteSolderPaste\" still failing after the retries: equipment[0].params (dispenseRig): Invalid params for \"composite\": parts: mount point \"base\" is offered twice (rename a part or an alias)",
+  "totalCost": 0.0198525,
+  "mode": "live",
+  "models": {
+    "builder": "gpt-5.4-mini",
+    "others": "gpt-5.4-nano"
+  },
+  "retries": 4,
+  "time": "2026-11-25T02:19:18.205Z"
+}

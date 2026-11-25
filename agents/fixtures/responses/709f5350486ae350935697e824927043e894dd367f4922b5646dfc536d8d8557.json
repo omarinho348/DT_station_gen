@@ -1,0 +1,67 @@
+{
+  "key": "709f5350486ae350935697e824927043e894dd367f4922b5646dfc536d8d8557",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:14:05.515Z",
+  "usage": {
+    "inputTokens": 5583,
+    "cachedInputTokens": 4864,
+    "outputTokens": 802
+  },
+  "output": {
+    "id": "placeRegulator",
+    "code": "ST1",
+    "title": "Mount window regulator",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Mount window regulator",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "carrierGuideRails",
+        "type": "guideRails",
+        "why": "Locate and guide the trim carrier in the ST1 index position",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "regulatorCradle",
+        "type": "partCradle",
+        "why": "Present window regulator for pickup at the work area",
+        "place": "rear",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "autoScrewdriver",
+        "type": "screwdriver",
+        "why": "Drive the four regulator mounting screws to preset torque/length",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "stopConveyors",
+      "pickPlace",
+      "move",
+      "driveScrew",
+      "decide",
+      "operate"
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "key": "a20567577f65665e910fc108e018b10f0de403af7ac9190ac69e36cc5735480c",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:18:21.960Z",
+  "usage": {
+    "inputTokens": 5722,
+    "cachedInputTokens": 4864,
+    "outputTokens": 278
+  },
+  "output": {
+    "id": "capping",
+    "code": "ST2",
+    "title": "Screw cap",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Screw cap",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "capper",
+        "type": "capper",
+        "why": "Screws blue caps onto each filled bottle",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "cap",
+      "decide"
+    ]
+  }
+}

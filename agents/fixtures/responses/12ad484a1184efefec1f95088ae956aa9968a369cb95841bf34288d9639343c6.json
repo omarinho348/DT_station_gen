@@ -1,0 +1,111 @@
+{
+  "key": "12ad484a1184efefec1f95088ae956aa9968a369cb95841bf34288d9639343c6",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-24T22:01:21.535Z",
+  "usage": {
+    "inputTokens": 5069,
+    "cachedInputTokens": 3840,
+    "outputTokens": 1110
+  },
+  "output": {
+    "transport": "palletConveyor",
+    "stations": [
+      {
+        "id": "placeRegulator",
+        "code": "ST1",
+        "title": "Mount window regulator",
+        "does": "Places the window regulator onto the carrier and fastens it with 4 screws.",
+        "steps": [
+          "Stop pallet carrier at ST1 index position.",
+          "Clamp/locate the trim carrier fixture to present regulator mounting holes.",
+          "Pick the window regulator from a nearby presented location (operator-assisted/assisted pick).",
+          "Move regulator over the carrier and lower to align mounting holes.",
+          "Drive 4 screws in a cross pattern using the automatic/assisted screwdriver at pre-set torque/length.",
+          "Verify screw drive completion (sensor/torque confirmation) and that regulator sits flush."
+        ],
+        "seconds": 40,
+        "covers": [
+          "PlaceRegulator"
+        ],
+        "machines": [
+          "screwdriver",
+          "partCradle",
+          "guideRails"
+        ]
+      },
+      {
+        "id": "fitSpeaker",
+        "code": "ST2",
+        "title": "Install speaker",
+        "does": "Fits the speaker and fastens it with 3 screws.",
+        "steps": [
+          "Index the pallet carrier to ST2.",
+          "Locate/locate-align the speaker to the defined mounting features on the carrier.",
+          "Move speaker into position and seat it against the locating surfaces.",
+          "Drive 3 screws (operator initiates, automatic/assisted screwdriver drives) in a stable pattern.",
+          "Confirm screw-driving status (torque/success signal) and speaker flush seating."
+        ],
+        "seconds": 25,
+        "covers": [
+          "FitSpeaker"
+        ],
+        "machines": [
+          "screwdriver",
+          "partNest"
+        ]
+      },
+      {
+        "id": "layHarness",
+        "code": "ST3",
+        "title": "Connect wiring harness",
+        "does": "Lays the wiring harness and plugs it into the regulator and speaker.",
+        "steps": [
+          "Index the pallet carrier to ST3.",
+          "Route/lift wiring harness onto the carrier in the defined harness path (guided by clips/edge guides).",
+          "Plug the harness regulator connector into the regulator port until audible/visual latch confirmation.",
+          "Plug the harness speaker connector into the speaker port until latch confirmation.",
+          "Tuck/clip slack so it clears moving parts and does not obstruct fastener points.",
+          "Check harness continuity visually (connector seated, no pinched sections) within station budget."
+        ],
+        "seconds": 25,
+        "covers": [
+          "LayHarness"
+        ],
+        "machines": [
+          "dockingUnit"
+        ]
+      },
+      {
+        "id": "functionTest",
+        "code": "ST4",
+        "title": "Window motor + speaker test",
+        "does": "Switch on and check the window motor and speaker function.",
+        "steps": [
+          "Index the pallet carrier to ST4 and engage electrical test interface (pogo pins/connector interface).",
+          "Power on the DUT for test mode.",
+          "Command window motor up/down cycle (within regulator capabilities) and monitor motor run/response current/time thresholds.",
+          "Trigger speaker output test (command tone/level) and confirm expected signal response (pass/fail criterion).",
+          "Record PASS/REJECT verdict to station system.",
+          "If REJECT: signal downstream operator for separated handling (exact movement/rework routing not specified).",
+          "Power down and release electrical interface; allow pallet to proceed."
+        ],
+        "seconds": 80,
+        "covers": [
+          "FunctionTest"
+        ],
+        "machines": [
+          "testCabinet",
+          "statusMonitor",
+          "hmi"
+        ]
+      }
+    ],
+    "notes": [
+      "Quality handling for REJECT is not specified beyond separation; the plan assumes ST4 records PASS/REJECT and provides an operator action to divert/rework outside this line or to a defined buffer (to be detailed).",
+      "All station takt budgets are set ≤ 90 s (takt from 40/h); ST4 is the current line bottleneck at 80 s. If actual test cycle is slower, the line takt will need retiming or test method optimization.",
+      "The product size/fixture behavior is assumed to fit on a single pallet conveyor carrier; if the carrier/pallet geometry differs, fixture indexing and alignment details must be updated."
+    ]
+  }
+}

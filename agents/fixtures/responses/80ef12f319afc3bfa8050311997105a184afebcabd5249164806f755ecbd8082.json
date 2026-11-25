@@ -1,0 +1,101 @@
+{
+  "key": "80ef12f319afc3bfa8050311997105a184afebcabd5249164806f755ecbd8082",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-24T21:58:19.139Z",
+  "usage": {
+    "inputTokens": 6329,
+    "cachedInputTokens": 5888,
+    "outputTokens": 842
+  },
+  "output": {
+    "id": "bodyLotionFilling",
+    "title": "Body lotion: fill 250 mL, pump head, label, weigh",
+    "product": {
+      "name": "250 mL body lotion bottle with pump head",
+      "description": "White oval plastic bottles filled with thick body lotion (250 mL) and closed with a pump head, then front-labeled. Bottles are approximately 60×40 mm footprint and 170 mm tall.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "bottle",
+          "length": 0.06,
+          "width": 0.04,
+          "height": 0.17,
+          "finish": "plastic",
+          "color": "#ffffff",
+          "processedColor": null,
+          "liquid": "#f5c9a8",
+          "fillLevel": 1,
+          "capColor": "#000000",
+          "labelText": "front label",
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 300,
+    "runSize": null,
+    "steps": [
+      {
+        "name": "Fill",
+        "does": "Fill one 250 mL bottle with thick body lotion using a timed/volumetric fill (about 5 seconds per bottle)."
+      },
+      {
+        "name": "PlacePumpHead",
+        "does": "Place the pump head onto the bottle opening/neck position."
+      },
+      {
+        "name": "ScrewDownPump",
+        "does": "Screw the pump head down to secure it (screw-down operation)."
+      },
+      {
+        "name": "FrontLabel",
+        "does": "Apply a front label to the bottle."
+      },
+      {
+        "name": "WeighAndCameraCheck",
+        "does": "Weigh the filled-and-labeled bottle and perform camera inspection; compare against acceptance limits."
+      },
+      {
+        "name": "RemoveRejects",
+        "does": "Remove any rejected bottles from the line."
+      },
+      {
+        "name": "PackTwelvePerCase",
+        "does": "Pack finished, accepted bottles into cases with 12 bottles per case."
+      }
+    ],
+    "quality": "Weighing + camera inspection finds out-of-spec units; rejected bottles are removed from the line (no further packing).",
+    "constraints": [
+      "Clean room environment.",
+      "Operators only at the end of the line (earlier steps should be fully automated or enclosed).",
+      "Line produces 2400 bottles per 8-hour shift (owner-provided).",
+      "Bottles are packed twelve to a case (case packing rate must match the line takt)."
+    ],
+    "assumptions": [
+      "Shift length is 8 hours as stated; target rate therefore 2400/8 = 300 finished bottles per hour.",
+      "Pump head screw-down time is consistent with line takt (exact seconds not provided).",
+      "Label application is fully automated (no operator intervention mid-line).",
+      "Weighing and camera inspection occur in-line without stopping accepted product.",
+      "Reject removal is automated (ejector) because operators are only at the end of the line.",
+      "Case dimensions/material and whether cases are erected inline are not specified; a standard slotted carton is assumed for packing twelve bottles."
+    ],
+    "questions": [
+      {
+        "topic": "throughput",
+        "question": "What is the exact pump head screw-down time per bottle (or max allowed takt at each station)? The owner only gave ~5 s for filling.",
+        "why": "This determines the line bottleneck station time so every station can fit within the takt."
+      },
+      {
+        "topic": "quality",
+        "question": "What are the acceptance limits and logic for the weigh + camera check (e.g., target fill weight/tolerance, label placement rules, pump seating visual criteria)?",
+        "why": "This decides how strict the inspection must be and whether rejects are deterministic at the twin level."
+      },
+      {
+        "topic": "layout",
+        "question": "What case/carton size and type do you use for “12 bottles per case” (and are cases pre-erected or erected on the line)?",
+        "why": "This sets the packaging stations (case erector/closer vs. simple pack) and carrier/conveyor handling."
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "key": "3fb14706e44ed6f900ee99f257124b0dca95bff2138a7c5f47ee30c1b2067eb9",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:18:20.676Z",
+  "usage": {
+    "inputTokens": 5520,
+    "cachedInputTokens": 0,
+    "outputTokens": 271
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Fill 0.5 L",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Fill 0.5 L",
+        "color": "#1E5BFF"
+      }
+    },
+    "equipment": [
+      {
+        "id": "filler",
+        "type": "filler",
+        "why": "Fills each bottle to target volume",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "supplyTank",
+        "type": "supplyTank",
+        "why": "Supplies still mineral water to the filler",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "conveyor",
+    "ports": null,
+    "ops": [
+      "fill",
+      "transfer",
+      "wait"
+    ]
+  }
+}

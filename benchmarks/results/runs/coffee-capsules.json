@@ -1,0 +1,66 @@
+{
+  "name": "coffee-capsules",
+  "stage": "builder",
+  "ok": false,
+  "cost": {
+    "spec": 0.0050368900000000005,
+    "builder": 0.012758660000000002,
+    "editor": 0,
+    "reviewer": 0
+  },
+  "seconds": 70.355,
+  "brief": {
+    "status": "draft",
+    "retries": 0,
+    "questions": 3,
+    "warnings": [
+      "The brief says bad units are rejected, but product.model.params.rejectEvery is unset: no unit will ever fail, so the reject path never runs in the twin. Reject the brief with how often one should fail (e.g. \"every 10th fails\")."
+    ],
+    "problems": []
+  },
+  "target": {
+    "perHour": 3600,
+    "title": "Coffee capsule filling (37 mm x 28 mm)",
+    "steps": 7
+  },
+  "plan": {
+    "status": "draft",
+    "retries": 1,
+    "problems": []
+  },
+  "planned": 7,
+  "stations": [
+    {
+      "id": "capsuleLoading",
+      "title": "Load capsule bodies",
+      "ok": false,
+      "refusals": 5,
+      "phases": [
+        "layout",
+        "process",
+        "process",
+        "process",
+        "process"
+      ],
+      "kind": "named",
+      "types": [
+        "vibratoryFeeder",
+        "bufferLane",
+        "scara",
+        "fingerGripper"
+      ],
+      "problems": [
+        "stations[0].process[0]: station \"capsuleLoading\": process › op #1 (pickPlace): to: the product has no ref \"capsuleBuffer\" (refs: grasp, top, base, neckTop, capSeat, liquidSurface, labelSpot)"
+      ]
+    }
+  ],
+  "reason": "station \"capsuleLoading\" still failing after the retries: stations[0].process[0]: station \"capsuleLoading\": process › op #1 (pickPlace): to: the product has no ref \"capsuleBuffer\" (refs: grasp, top, base, neckTop, capSeat, liquidSurface, labelSpot)",
+  "totalCost": 0.01779555,
+  "mode": "live",
+  "models": {
+    "builder": "gpt-5.4-nano",
+    "others": "gpt-5.4-nano"
+  },
+  "retries": 4,
+  "time": "2026-11-25T02:27:45.386Z"
+}

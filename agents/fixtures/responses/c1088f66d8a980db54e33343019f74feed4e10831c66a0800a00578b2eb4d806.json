@@ -1,0 +1,99 @@
+{
+  "key": "c1088f66d8a980db54e33343019f74feed4e10831c66a0800a00578b2eb4d806",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:28:33.396Z",
+  "usage": {
+    "inputTokens": 6486,
+    "cachedInputTokens": 4864,
+    "outputTokens": 1001
+  },
+  "output": {
+    "id": "fitSpeaker",
+    "code": "ST2",
+    "title": "Install speaker",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Install speaker",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "placeRobot",
+        "type": "abbIrb6760",
+        "why": "Picks the speaker from its nest and places it onto the pallet carrier at the mounting position.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "speakerNest",
+        "type": "partNest",
+        "why": "Provides the speaker parts location(s) for pickup and placement.",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "screwdriver3x",
+        "type": "screwdriver",
+        "why": "Drives the 3 fastening screws to secure the seated speaker.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "fingerGripper",
+        "type": "fingerGripper",
+        "why": "End effector used to grip and release the speaker during placement.",
+        "place": "onTop",
+        "at": "whole",
+        "on": "placeRobot",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "stackLight",
+        "type": "stackLight",
+        "why": "Signals station status for placement and screw-driving completion.",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "indexBatches",
+      "replenish",
+      "decide",
+      "pickPlace",
+      "grip",
+      "release",
+      "pickPlace",
+      "toolOn",
+      "runRoutine",
+      "connectLead",
+      "move",
+      "wait",
+      "operate",
+      "grip",
+      "release",
+      "decide",
+      "dispatch",
+      "stopConveyors"
+    ]
+  }
+}

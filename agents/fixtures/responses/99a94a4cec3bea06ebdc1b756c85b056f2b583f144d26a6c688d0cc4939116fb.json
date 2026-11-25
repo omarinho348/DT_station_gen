@@ -1,0 +1,114 @@
+{
+  "key": "99a94a4cec3bea06ebdc1b756c85b056f2b583f144d26a6c688d0cc4939116fb",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-24T20:19:19.105Z",
+  "usage": {
+    "inputTokens": 5071,
+    "cachedInputTokens": 0,
+    "outputTokens": 903
+  },
+  "output": {
+    "transport": "beltConveyor",
+    "stations": [
+      {
+        "id": "filling",
+        "code": "ST1",
+        "title": "Fill 1L cloudy juice",
+        "does": "Fill each 1L bottle with cloudy apple juice through a nozzle (about 6 seconds per bottle filling).",
+        "steps": [
+          "bring bottle to nozzle position",
+          "verify bottle presence with sensor",
+          "lower nozzle into bottle mouth",
+          "open fill valve and dispense cloudy apple juice",
+          "close fill valve",
+          "raise nozzle",
+          "confirm fill completed (no overrun)"
+        ],
+        "seconds": 6,
+        "covers": [
+          "Fill"
+        ],
+        "machines": [
+          "filler",
+          "supplyTank",
+          "photoEye"
+        ]
+      },
+      {
+        "id": "capping",
+        "code": "ST2",
+        "title": "Screw red cap",
+        "does": "Screw on the red cap to the filled bottle.",
+        "steps": [
+          "index bottle to capping head",
+          "confirm bottle is filled and positioned",
+          "feed a red cap to the capper spindle",
+          "lower cap onto bottle threads",
+          "drive screw cap (torque-controlled)",
+          "withdraw capper head",
+          "confirm cap presence/torque OK for next step"
+        ],
+        "seconds": 6,
+        "covers": [
+          "Cap"
+        ],
+        "machines": [
+          "capper"
+        ]
+      },
+      {
+        "id": "labeling",
+        "code": "ST3",
+        "title": "Apply paper label",
+        "does": "Apply the paper label to the capped bottle.",
+        "steps": [
+          "index bottle to label applicator",
+          "verify cap present/position for label alignment (via vision trigger gate)",
+          "dispense label from web/stack into tamp pad",
+          "tamp label onto bottle body (front side aligned)",
+          "hold for set time to ensure adhesion",
+          "retract pad and release bottle to next station"
+        ],
+        "seconds": 4,
+        "covers": [
+          "Label"
+        ],
+        "machines": [
+          "labelApplicator",
+          "labelHead"
+        ]
+      },
+      {
+        "id": "inspectionAndReject",
+        "code": "ST4",
+        "title": "Vision inspection + reject",
+        "does": "Use a camera to check fill level, cap presence/quality, and label presence/placement; reject bad bottles off the line.",
+        "steps": [
+          "index bottle under vision scanner",
+          "capture image(s) of fill level",
+          "capture image(s) of cap presence/seat quality",
+          "capture image(s) of label presence/placement",
+          "compare results to accept thresholds",
+          "if FAIL: actuate side pusher/diverter to move bottle to discard position",
+          "if PASS: keep bottle on main belt to exit"
+        ],
+        "seconds": 8,
+        "covers": [
+          "Inspect"
+        ],
+        "machines": [
+          "visionScanner",
+          "sidePusher",
+          "photoEye"
+        ]
+      }
+    ],
+    "notes": [
+      "Takt is 15 s per unit (240/h). Fill is explicitly budgeted at ~6 s; Cap/Label/Inspect are budgeted to remain ≤15 s each, so the overall line runs on the slowest station. If the owner’s real capping, labeling dwell, or vision cycle time exceeds 15 s, the line rate must be reduced or operations parallelized.",
+      "Reject is implemented as a diversion off the main flow; no rework is included (matches the discard-only requirement).",
+      "Food-grade handling and stainless frames are assumed for the equipment cell; builder should ensure wetted parts and guarding meet food regulations."
+    ]
+  }
+}

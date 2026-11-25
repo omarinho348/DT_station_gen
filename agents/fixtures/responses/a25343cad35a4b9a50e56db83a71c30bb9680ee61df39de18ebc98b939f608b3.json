@@ -1,0 +1,37 @@
+{
+  "key": "a25343cad35a4b9a50e56db83a71c30bb9680ee61df39de18ebc98b939f608b3",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:23:23.042Z",
+  "usage": {
+    "inputTokens": 7319,
+    "cachedInputTokens": 0,
+    "outputTokens": 277
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "operate",
+        "machine": "thermoformer",
+        "seconds": 1,
+        "label": "Heat-thermoform PVC to form blister cavities",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "indexBatches",
+        "seconds": 1,
+        "conveyors": [
+          "line"
+        ],
+        "label": "Index web forward by one strip length position",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

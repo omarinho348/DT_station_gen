@@ -1,0 +1,57 @@
+{
+  "key": "08e037f326c55bc23b11d8bcbb7fc749bc90324f75c1e1ccd9f74203a1e8a5cc",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:18:55.249Z",
+  "usage": {
+    "inputTokens": 11857,
+    "cachedInputTokens": 0,
+    "outputTokens": 778
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "pickPlace",
+        "machine": "pumpHeadPlacer",
+        "item": "product",
+        "from": {
+          "machine": "pumpHeadFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "pumpHeadPlacer",
+          "port": "tool",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "PlacePumpHead",
+        "gap": 0.06,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": null,
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Place pump head",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "operate",
+        "machine": "pumpHeadPlacer",
+        "seconds": 3,
+        "label": "Place pump head",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

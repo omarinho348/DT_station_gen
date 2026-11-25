@@ -3,6 +3,7 @@ import './styles/base.css';
 import './styles/setup.css';
 import './styles/twin.css';
 import './styles/builder.css';
+import './styles/spec.css';
 import './styles/gallery.css';
 import { startRouter } from './router.js';
 import { SetupPage } from './pages/setup/SetupPage.js';

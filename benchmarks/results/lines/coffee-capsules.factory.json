@@ -1,0 +1,231 @@
+{
+  "version": 1,
+  "line": {
+    "id": "coffeeCapsuleFilling",
+    "title": "Coffee capsule filling (37 mm x 28 mm)",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "cylinder",
+      "length": 0.037,
+      "width": 0.037,
+      "height": 0.028,
+      "finish": "metal",
+      "color": "#c0c0c0",
+      "processedColor": "#c0c0c0",
+      "liquid": "#5a3a1f",
+      "capColor": "#d9d9d9"
+    }
+  },
+  "stations": [
+    {
+      "id": "capsuleLoading",
+      "code": "ST1",
+      "title": "Load capsule bodies",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Load capsule bodies"
+        }
+      },
+      "equipment": [
+        {
+          "id": "capsuleFeeder",
+          "type": "vibratoryFeeder",
+          "params": {
+            "bowlDiameter": 0.26,
+            "hoseLength": 1.2
+          },
+          "position": [
+            -1.72,
+            0,
+            -0.08
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "capsuleBuffer",
+          "type": "bufferLane",
+          "params": {
+            "slots": 4,
+            "pitch": 0.5,
+            "width": 0.5,
+            "color": "machineGrey"
+          },
+          "position": [
+            0,
+            0,
+            -0.685
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "capsulePickRobot",
+          "type": "scara",
+          "params": {
+            "link1": 0.55,
+            "link2": 0.5,
+            "armHeight": 1.45,
+            "stroke": 0.4,
+            "maxGap": 0.26,
+            "fingerLength": 0.1,
+            "screwdriver": false
+          },
+          "position": [
+            0,
+            0,
+            -1.9279
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "capsuleGripper",
+          "type": "fingerGripper",
+          "params": {
+            "fingerLength": 0.12,
+            "maxGap": 0.2
+          },
+          "position": [
+            0,
+            2.15,
+            -1.9279
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "process": [
+        {
+          "op": "pickPlace",
+          "machine": "capsulePickRobot",
+          "item": "product",
+          "from": {
+            "item": "product",
+            "ref": "grasp"
+          },
+          "to": {
+            "item": "product",
+            "ref": "capsuleBuffer"
+          },
+          "name": "Seat capsule into buffer slot1",
+          "gap": 0.06,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12
+        },
+        {
+          "op": "pickPlace",
+          "machine": "capsulePickRobot",
+          "item": "product",
+          "from": {
+            "item": "product",
+            "ref": "grasp"
+          },
+          "to": {
+            "item": "product",
+            "ref": "capsuleBuffer"
+          },
+          "name": "Seat capsule into buffer slot2",
+          "gap": 0.06,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12
+        },
+        {
+          "op": "pickPlace",
+          "machine": "capsulePickRobot",
+          "item": "product",
+          "from": {
+            "item": "product",
+            "ref": "grasp"
+          },
+          "to": {
+            "item": "product",
+            "ref": "capsuleBuffer"
+          },
+          "name": "Seat capsule into buffer slot3",
+          "gap": 0.06,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12
+        },
+        {
+          "op": "pickPlace",
+          "machine": "capsulePickRobot",
+          "item": "product",
+          "from": {
+            "item": "product",
+            "ref": "grasp"
+          },
+          "to": {
+            "item": "product",
+            "ref": "capsuleBuffer"
+          },
+          "name": "Seat capsule into buffer slot4",
+          "gap": 0.06,
+          "openGap": 0.18,
+          "gripMotion": "grip",
+          "anchor": "tool",
+          "indicator": "holding",
+          "timing": {
+            "approach": 0.6,
+            "descend": 0.35,
+            "grip": 0.2,
+            "lift": 0.35,
+            "transfer": 0.8,
+            "place": 0.5,
+            "release": 0.2
+          },
+          "clearance": 0.12
+        },
+        {
+          "op": "wait",
+          "seconds": 1,
+          "label": "Settle/seat capsules"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    }
+  ],
+  "graph": {
+    "edges": []
+  }
+}

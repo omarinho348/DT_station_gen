@@ -1,0 +1,142 @@
+{
+  "key": "a10e064674cbfc2172ca212b473caa60209f11526a79536ee47106c05ad606d8",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-25T02:23:07.319Z",
+  "usage": {
+    "inputTokens": 5212,
+    "cachedInputTokens": 3840,
+    "outputTokens": 1043
+  },
+  "output": {
+    "transport": "beltConveyor",
+    "stations": [
+      {
+        "id": "formBlisterCavities",
+        "code": "ST1",
+        "title": "Form PVC blister cavities",
+        "does": "Heat-form PVC film to create blister cavities for one 10-cavity strip.",
+        "steps": [
+          "Load PVC film web into the forming zone",
+          "Heat and thermoform PVC to form 10 cavities in the blister footprint",
+          "Index the web forward by one strip length position"
+        ],
+        "seconds": 1,
+        "covers": [
+          "FormBlisterCavities"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "doseTablets",
+        "code": "ST2",
+        "title": "Dose tablets into cavities",
+        "does": "Drop/dose tablets into each blister cavity.",
+        "steps": [
+          "Present the thermoformed cavities under the dosing head",
+          "For each cavity: lower dispenser/nozzle to cavity mouth",
+          "Dispense tablets into the cavity (one-dose event per cavity)",
+          "Retract dispenser and hold until web indexes"
+        ],
+        "seconds": 1,
+        "covers": [
+          "DoseTablets"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "inspectCavities",
+        "code": "ST3",
+        "title": "Camera-inspect filled cavities",
+        "does": "Use a camera to check every cavity is filled; identify strips containing any empty cavity.",
+        "steps": [
+          "Trigger vision system at a fixed position on the indexed web",
+          "Capture image set across all 10 cavities",
+          "Evaluate cavity fill presence/absence vs acceptance criteria",
+          "If any cavity appears empty: mark this strip as REJECT for downstream diversion",
+          "If acceptable: clear strip for normal sealing"
+        ],
+        "seconds": 1,
+        "covers": [
+          "InspectCavities"
+        ],
+        "machines": [
+          "visionScanner"
+        ]
+      },
+      {
+        "id": "sealLidFoil",
+        "code": "ST4",
+        "title": "Seal aluminium lid foil",
+        "does": "Heat-seal aluminium lid foil over the blister cavities.",
+        "steps": [
+          "Feed lid-foil web above the indexed blister web",
+          "Lower sealing tool and/or bring heated platen to contact foil over cavities",
+          "Apply heat/pressure to form a continuous seal around cavity rims",
+          "Release platen and advance web to the next cut position"
+        ],
+        "seconds": 1,
+        "covers": [
+          "SealLidFoil"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "cutBlisterStrips",
+        "code": "ST5",
+        "title": "Cut/trim into individual strips",
+        "does": "Cut/trim the sealed web into individual strips (separate the strips apart).",
+        "steps": [
+          "Advance sealed web to the cutter position for strip boundaries",
+          "Execute cut/trim to separate individual 95×45 mm strips",
+          "Eject/transfer each strip onto the outfeed of the conveyor at one-strip pitch",
+          "For strips marked REJECT: divert to reject bin/chute at the same location"
+        ],
+        "seconds": 1,
+        "covers": [
+          "CutBlisterStrips"
+        ],
+        "machines": [
+          "genericMachine",
+          "gravityChute"
+        ]
+      },
+      {
+        "id": "packIntoCartons",
+        "code": "ST6",
+        "title": "Pack 2 strips + leaflet",
+        "does": "Place two finished strips into a folding carton and add the leaflet.",
+        "steps": [
+          "Accumulate or buffer finished strips to form cartons of exactly two strips",
+          "For each carton: open a blank carton and stage it on the pack position",
+          "Pick/place first blister strip into carton interior",
+          "Pick/place second blister strip into carton interior",
+          "Pick/place leaflet into the carton",
+          "Close the folding carton flaps (manual or assisted closure per machine choice)",
+          "Complete carton handoff to outfeed"
+        ],
+        "seconds": 1,
+        "covers": [
+          "PackIntoCartons"
+        ],
+        "machines": [
+          "packingGantry",
+          "fingerGripper",
+          "genericMachine"
+        ]
+      }
+    ],
+    "notes": [
+      "Assumed takt is 1.0 s per finished blister strip (3600/h); each station is budgeted at 1 s to stay within takt. Real forming/sealing/cutting may require slower mechanical indexing; if so, the line rate must be reduced or the stations redesigned for higher parallel throughput.",
+      "Blister height was not provided; the model uses ~10 mm (per brief assumptions) but the twin may not need this for throughput unless cavity depth affects forming/sealing pressure.",
+      "Reject handling is implemented as a downstream diversion immediately after cutting; no rework is modeled (per your constraint)."
+    ]
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "key": "29e648bcead0916e5e16cc6ee4e7aeddcd909f01cc550aeb1e91545fe087c21c",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-24T21:59:46.477Z",
+  "usage": {
+    "inputTokens": 6337,
+    "cachedInputTokens": 5888,
+    "outputTokens": 921
+  },
+  "output": {
+    "id": "batteryModuleAssembly",
+    "title": "Battery module assembly (12-cell frame)",
+    "product": {
+      "name": "Battery module (12-cell)",
+      "description": "A plastic battery module frame (300 × 120 × 70 mm) that holds 12 cylindrical cells on a pallet-carrier conveyor. Cell tops get copper busbars, which are laser-welded to the terminals, then the finished module is tested and labeled as pass/reject.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "box",
+          "length": 0.3,
+          "width": 0.12,
+          "height": 0.07,
+          "finish": "plastic",
+          "color": null,
+          "processedColor": null,
+          "liquid": null,
+          "fillLevel": null,
+          "capColor": null,
+          "labelText": null,
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 20,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "LoadCells",
+        "does": "Load 12 cylindrical cells from a tray into the plastic module frame on the carrier."
+      },
+      {
+        "name": "PlaceBusbars",
+        "does": "Lay the copper busbars onto the tops of the installed cells."
+      },
+      {
+        "name": "LaserWeldBusbars",
+        "does": "Laser-weld each busbar to the corresponding cell terminals."
+      },
+      {
+        "name": "TestAndSort",
+        "does": "Perform voltage and insulation testing; route failed modules to a reject lane and let passed modules proceed."
+      }
+    ],
+    "quality": "End-of-line test measures voltage and insulation. Modules that fail go to a reject lane; pass modules continue to the end of the line.",
+    "constraints": [
+      "Product is built on carriers on a pallet conveyor.",
+      "No people inside the guarded cells; all operations occur within guarded machine enclosures.",
+      "Tight handling required for cylindrical cells and welded busbars."
+    ],
+    "assumptions": [
+      "Shift length is 8 hours, but takt is still derived from the given target rate of 20 modules/hour (takt = 3600/20 = 180 s).",
+      "One finished unit corresponds to one module frame carrying 12 cells and welded busbars.",
+      "Busbars are correctly oriented/positioned by the equipment after placement; exact number of busbars and orientation details are handled by the station tooling.",
+      "Reject lane physically separates failed carriers/pallet positions from the main flow after the test."
+    ],
+    "questions": [
+      {
+        "topic": "product",
+        "question": "What are the cylindrical cell dimensions (length/diameter) and how are they oriented inside the 300×120×70 mm frame?",
+        "why": "Cell geometry and orientation drive gripper/tooling design for the gantry pick, busbar placement alignment, and welding fixturing."
+      },
+      {
+        "topic": "steps",
+        "question": "Does the laser welding happen to one busbar at a time or all busbars in sequence per module (and how many busbar weld joints per module)?",
+        "why": "Determines whether the welding station is single-joint, multi-head, or multi-fixture, which impacts station cycle time and takt feasibility."
+      },
+      {
+        "topic": "throughput",
+        "question": "Is the 20 modules/hour an average sustained rate (allowing buffering), or must every station complete within the same takt with minimal pauses?",
+        "why": "Sets the required cycle-time strictness for each guarded station and buffer sizing on the pallet conveyor."
+      }
+    ]
+  }
+}

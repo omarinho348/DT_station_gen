@@ -1,0 +1,110 @@
+{
+  "key": "423e5c16414015b41922ea60be102073c8503b326976d4636fadde2c8f9a6a81",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-24T21:59:55.485Z",
+  "usage": {
+    "inputTokens": 5065,
+    "cachedInputTokens": 3840,
+    "outputTokens": 1215
+  },
+  "output": {
+    "transport": "palletConveyor",
+    "stations": [
+      {
+        "id": "loadCells",
+        "code": "ST1",
+        "title": "Load 12 cells",
+        "does": "Load 12 cylindrical cells from a tray into the module frame on the carrier.",
+        "steps": [
+          "Detect incoming carrier ID and confirm correct module frame orientation.",
+          "Pick and place 12 cylindrical cells into the 12 cell seats of the plastic module frame (top/end aligned to tooling datum).",
+          "Verify each cell is seated to depth using seat-stop contact sensors (pass/fail per seat).",
+          "Wait for all seat confirmations; then release the carrier to the next station."
+        ],
+        "seconds": 60,
+        "covers": [
+          "LoadCells"
+        ],
+        "machines": [
+          "vibratoryFeeder",
+          "workTable",
+          "robot",
+          "fingerGripper"
+        ]
+      },
+      {
+        "id": "placeBusbars",
+        "code": "ST2",
+        "title": "Place copper busbars",
+        "does": "Lay copper busbars onto the tops of the installed cells.",
+        "steps": [
+          "Detect carrier and busbar kit availability (busbars staged for orientation-specific positions).",
+          "Pick the required busbar set and place each busbar onto the designated cell-top position.",
+          "Use a guided fixture or push-in datum to seat busbar edges flush on the cell tops (no sliding).",
+          "Run a brief presence check for each busbar location (photo-eye/contact sensor).",
+          "Release the carrier to the next station when all busbars are confirmed present."
+        ],
+        "seconds": 45,
+        "covers": [
+          "PlaceBusbars"
+        ],
+        "machines": [
+          "robot",
+          "visionScanner",
+          "pickToLight",
+          "fingerGripper"
+        ]
+      },
+      {
+        "id": "laserWeldBusbars",
+        "code": "ST3",
+        "title": "Laser-weld busbars",
+        "does": "Laser-weld each busbar to the corresponding cell terminals.",
+        "steps": [
+          "Clamp/locate the carrier within the laser-weld enclosure tooling datum.",
+          "For each weld point: focus laser, fire pulse sequence, and confirm weld cycle complete (cycle time / interlock OK).",
+          "Do not release the carrier until all planned weld points for the 12-cell module are finished.",
+          "Open tooling and release carrier to the test station."
+        ],
+        "seconds": 75,
+        "covers": [
+          "LaserWeldBusbars"
+        ],
+        "machines": [
+          "genericMachine",
+          "laserHead",
+          "shutterEnclosure"
+        ]
+      },
+      {
+        "id": "testAndSort",
+        "code": "ST4",
+        "title": "Test & pass/reject",
+        "does": "Perform voltage and insulation testing; route failed modules to a reject lane and let passed modules proceed.",
+        "steps": [
+          "Clamp/position the carrier contacts for test across all relevant cell terminals/busbar nodes.",
+          "Apply voltage/insulation test routine and collect results (voltage OK, insulation OK thresholds).",
+          "Decide result: if any fail -> mark FAIL; else mark PASS.",
+          "If PASS: apply pass label/mark on the carrier and send to main exit conveyor position.",
+          "If FAIL: apply reject label/mark and divert carrier to the physical reject lane position."
+        ],
+        "seconds": 90,
+        "covers": [
+          "TestAndSort"
+        ],
+        "machines": [
+          "testCabinet",
+          "labelApplicator",
+          "decide(on, cases, otherwise?, planAs?)"
+        ]
+      }
+    ],
+    "notes": [
+      "Each station is budgeted ≤ 180 s takt (180 s = 3600/20). If your real laser weld cycle or end-of-line test time is longer than assumed, the bottleneck station seconds should be increased only up to takt and may require parallelization.",
+      "Reject lane implementation is assumed to be a built-in diversion at ST4 (still modeled as a single flow line). If the reject path requires a second downstream station, confirm the physical layout and diversion method.",
+      "Busbar count and exact weld-point mapping are assumed to be handled entirely by ST2/ST3 tooling; confirm if the cycle must vary busbar variants per module."
+    ]
+  }
+}

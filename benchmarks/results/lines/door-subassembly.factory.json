@@ -1,0 +1,235 @@
+{
+  "version": 1,
+  "line": {
+    "id": "carDoorInnerModule",
+    "title": "Car door inner module pre-assembly",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "box",
+      "length": 1,
+      "width": 0.8,
+      "height": 0.2,
+      "finish": "metal"
+    }
+  },
+  "stations": [
+    {
+      "id": "placeRegulator",
+      "code": "ST1",
+      "title": "Mount window regulator",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Mount window regulator"
+        }
+      },
+      "equipment": [
+        {
+          "id": "partCradle",
+          "type": "partCradle",
+          "params": {
+            "length": 0.9,
+            "width": 0.45,
+            "height": 0.75,
+            "lanes": [
+              -0.17,
+              -0.08,
+              0,
+              0.06,
+              0.15
+            ],
+            "laneWidth": 0.06,
+            "saddleSpacing": 0.3
+          },
+          "position": [
+            -1.6,
+            0,
+            -0.635
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "guideRails",
+          "type": "guideRails",
+          "params": {
+            "length": 1.6,
+            "span": 0.58,
+            "gap": 0.2
+          },
+          "position": [
+            -3,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "screwdriver",
+          "type": "screwdriver",
+          "params": {
+            "fingerLength": 0.12,
+            "offsetX": 0.13
+          },
+          "position": [
+            0.0425,
+            0,
+            0.625
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "stopConveyors",
+          "conveyors": [
+            "line"
+          ],
+          "label": "Stop carrier at station",
+          "state": "ST1"
+        },
+        {
+          "op": "grip",
+          "machine": "screwdriver",
+          "item": "product",
+          "motion": "driver",
+          "to": 1,
+          "anchor": "bit",
+          "indicator": "holding",
+          "seconds": 0.3,
+          "label": "Engage screwdriver",
+          "state": "ST1"
+        },
+        {
+          "op": "move",
+          "machine": "screwdriver",
+          "to": {
+            "driver": 1,
+            "driverSpin": 1
+          },
+          "seconds": 30,
+          "profile": "smooth",
+          "label": "Drive 4 screws",
+          "state": "ST1"
+        },
+        {
+          "op": "release",
+          "machine": "screwdriver",
+          "item": "product",
+          "motion": "driver",
+          "to": 0,
+          "indicator": "holding",
+          "seconds": 0.3,
+          "label": "Release product",
+          "state": "ST1"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "fitSpeaker",
+      "code": "ST2",
+      "title": "Install speaker",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST2",
+          "title": "Install speaker"
+        }
+      },
+      "equipment": [
+        {
+          "id": "partNest",
+          "type": "partNest",
+          "params": {
+            "length": 0.34,
+            "width": 0.34,
+            "height": 0.72,
+            "guides": "locators",
+            "guideX": 0.13,
+            "guideZ": 0.13,
+            "postHeight": 0.2
+          },
+          "position": [
+            -1.6,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "pickRobot",
+          "type": "abbIrb6760",
+          "params": {
+            "padLength": 0.5,
+            "padWidth": 0.34
+          },
+          "position": [
+            0,
+            0,
+            -4.31
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "processUnit",
+          "type": "genericMachine",
+          "params": {
+            "name": "SPEAKER CHECK",
+            "note": "timed assembly confirmation",
+            "length": 1.6,
+            "depth": 1.2,
+            "height": 1.9,
+            "passThrough": false,
+            "carries": "unit"
+          },
+          "position": [
+            0,
+            0,
+            1.2
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "screwdriver",
+          "type": "screwdriver",
+          "params": {
+            "fingerLength": 0.12,
+            "offsetX": 0.13
+          },
+          "position": [
+            0.0425,
+            0,
+            -0.435
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "process": [],
+      "feed": {
+        "fromLift": true
+      }
+    }
+  ],
+  "graph": {
+    "edges": [
+      {
+        "from": "placeRegulator.output",
+        "to": "fitSpeaker.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "palletConveyor",
+          "params": {}
+        }
+      }
+    ]
+  }
+}

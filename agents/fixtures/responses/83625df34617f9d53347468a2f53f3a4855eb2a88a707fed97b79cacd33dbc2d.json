@@ -1,0 +1,168 @@
+{
+  "key": "83625df34617f9d53347468a2f53f3a4855eb2a88a707fed97b79cacd33dbc2d",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-25T02:22:26.600Z",
+  "usage": {
+    "inputTokens": 5156,
+    "cachedInputTokens": 0,
+    "outputTokens": 1533
+  },
+  "output": {
+    "transport": "beltConveyor",
+    "stations": [
+      {
+        "id": "coolingBuffer",
+        "code": "ST1",
+        "title": "Cool loaves by dwell",
+        "does": "Loaves cool after coming from the oven while moving through the line before slicing.",
+        "steps": [
+          "Receive hot loaves from upstream and register each loaf on the line reference",
+          "Index loaves onto an accumulation/dwell segment sized to hold the required cooling time within the takt",
+          "Maintain hygienic airflow/drape coverage over the loaves during the dwell segment",
+          "Release each loaf when its cooling dwell time is met and advance to the slicer"
+        ],
+        "seconds": 2.5,
+        "covers": [
+          "CoolLoaves"
+        ],
+        "machines": [
+          "accumulationTable",
+          "guardFence",
+          "stationSign"
+        ]
+      },
+      {
+        "id": "slicingStation",
+        "code": "ST2",
+        "title": "Slice loaves to sandwiches",
+        "does": "Slice each loaf into sandwich slices.",
+        "steps": [
+          "Clamp loaf at the slicer in-feed position using hygienic food-grade clamps",
+          "Execute slicing cycle at the preset slice thickness/count",
+          "Release clamps and allow slices to drop onto the downstream bagging-ready conveyor surface",
+          "Position the next loaf and repeat"
+        ],
+        "seconds": 2.8,
+        "covers": [
+          "SliceLoaves"
+        ],
+        "machines": [
+          "genericMachine",
+          "guardFence"
+        ]
+      },
+      {
+        "id": "baggingStation",
+        "code": "ST3",
+        "title": "Bag sliced loaf",
+        "does": "Place the sliced loaf into a plastic bag.",
+        "steps": [
+          "Pick/place bag open (bag mouth presented above the receiving zone)",
+          "Guide sliced loaf into the opened plastic bag without manual contact",
+          "Tamp/settle loaf inside the bag to achieve consistent packing height",
+          "Index the bagged loaf to the bag closing station"
+        ],
+        "seconds": 2.5,
+        "covers": [
+          "BagLoaves"
+        ],
+        "machines": [
+          "genericMachine",
+          "beltEndStop",
+          "guardFence"
+        ]
+      },
+      {
+        "id": "clipClosingStation",
+        "code": "ST4",
+        "title": "Clip close bag",
+        "does": "Close the plastic bag using a clip.",
+        "steps": [
+          "Bring bag mouth to a fixed clip position using a guide sleeve/air assist",
+          "Form the bag mouth gathering position (mouth aligned and tensioned)",
+          "Drive the clip onto the bag mouth until fully seated",
+          "Verify clip seated position with a simple presence/position sensor",
+          "Advance to labeling"
+        ],
+        "seconds": 1.5,
+        "covers": [
+          "ClipBag"
+        ],
+        "machines": [
+          "genericMachine",
+          "photoEye"
+        ]
+      },
+      {
+        "id": "dateLabelStation",
+        "code": "ST5",
+        "title": "Apply date label",
+        "does": "Apply a date label onto the closed bag.",
+        "steps": [
+          "Orient the bag on the belt so the label target zone faces up",
+          "Print/dispense date label text for the current production date",
+          "Tamp the label onto the bag surface with a fixed dwell to ensure adhesion",
+          "Hold for the configured label set time (within the station budget) then release bag"
+        ],
+        "seconds": 1.2,
+        "covers": [
+          "ApplyDateLabel"
+        ],
+        "machines": [
+          "labelApplicator"
+        ]
+      },
+      {
+        "id": "checkWeigher",
+        "code": "ST6",
+        "title": "Weigh check and accept/reject",
+        "does": "Weigh each bag using a check weigher and decide PASS/REJECT based on minimum weight.",
+        "steps": [
+          "Place each labeled bag onto the check weigher platform",
+          "Record weight while the bag is held in a stable position",
+          "If weight >= minimum threshold: mark/route as ACCEPT",
+          "If weight < minimum threshold: mark/route as REJECT",
+          "Actuate a divert gate to send rejects to the reject bin/chute"
+        ],
+        "seconds": 2,
+        "covers": [
+          "WeighCheck"
+        ],
+        "machines": [
+          "visionScanner",
+          "photoEye",
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "cratePacking",
+        "code": "ST7",
+        "title": "Pack accepted bags into crates",
+        "does": "Place accepted (packed) loaves into crates for shipment.",
+        "steps": [
+          "Receive only ACCEPT bags (rejects have already been diverted)",
+          "Accumulate a crate at the packing position and keep crate orientation fixed",
+          "Pick accepted bag and place into crate at the next free location",
+          "If crate is full: move to discharge/queue for downstream shipping (no rework specified)"
+        ],
+        "seconds": 2.5,
+        "covers": [
+          "CratePackedLoaves"
+        ],
+        "machines": [
+          "workTable",
+          "genericMachine",
+          "guardFence"
+        ]
+      }
+    ],
+    "notes": [
+      "Takt is 3.0 s/unit (1200 units/hour). Stations are budgeted to stay within 3.0 s, but the slicing and bagging operations typically require careful mechanical design to truly sustain 1200/h.",
+      "Cooling is implemented as a dwell/accumulation segment sized to meet the required cooling time without exceeding the 3 s takt; if real cooling needs longer residence time than 2.5 s, ST1 must be lengthened or the line rate must be reduced.",
+      "Reject handling is modeled as a pure diversion to a dedicated reject bin/chute with no rework, consistent with the brief.",
+      "Crates are treated as 'cases' for packaging flow; exact crate size and max per crate are not specified and will affect ST7 capacity and timing."
+    ]
+  }
+}

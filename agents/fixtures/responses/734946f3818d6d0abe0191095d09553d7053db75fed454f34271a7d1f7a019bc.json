@@ -1,0 +1,87 @@
+{
+  "key": "734946f3818d6d0abe0191095d09553d7053db75fed454f34271a7d1f7a019bc",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "factoryBrief",
+  "recordedAt": "2026-11-24T21:58:00.432Z",
+  "usage": {
+    "inputTokens": 7038,
+    "cachedInputTokens": 5888,
+    "outputTokens": 887
+  },
+  "output": {
+    "id": "stillWaterBottling",
+    "title": "Still water 0.5 L PET bottling",
+    "product": {
+      "name": "0.5 L still mineral water bottle",
+      "description": "Food-grade still mineral water in a 0.5 L PET bottle with a blue screw cap and a wrap-around label. Bottle is 65 mm across and 210 mm tall.",
+      "model": {
+        "kind": "parametric",
+        "params": {
+          "shape": "bottle",
+          "length": 0.065,
+          "width": 0.065,
+          "height": 0.21,
+          "finish": "plastic",
+          "color": "#ffffff",
+          "processedColor": null,
+          "liquid": "#00A3FF",
+          "fillLevel": null,
+          "capColor": "#1E5BFF",
+          "labelText": "wrap label",
+          "rejectEvery": null
+        }
+      }
+    },
+    "targetPerHour": 720,
+    "runSize": 8,
+    "steps": [
+      {
+        "name": "Fill",
+        "does": "Fill one 0.5 L PET bottle with still mineral water (about 3 seconds fill time)."
+      },
+      {
+        "name": "Cap",
+        "does": "Screw on the blue cap to the filled bottle."
+      },
+      {
+        "name": "Label",
+        "does": "Apply the wrap-around label to the capped bottle."
+      },
+      {
+        "name": "InspectAndReject",
+        "does": "Use a camera to check fill level and cap; if the bottle fails (about 1 in 20), push it off the line so only good bottles continue."
+      }
+    ],
+    "quality": "Camera inspection finds fill-level/cap issues; about 1 in 20 bottles are rejected and diverted off the line.",
+    "constraints": [
+      "Still water, food grade (hygienic contact surfaces and clean operation).",
+      "Units flow one-at-a-time on a belt (no batch handling).",
+      "After this line, good bottles are shrink-packed into six-packs (this shrink-packing is done elsewhere).",
+      "One bottle is rejected by diverting/pushing it off the line after camera inspection."
+    ],
+    "assumptions": [
+      "Shift length not provided; assumed 8 hours per shift to interpret rate as 720 bottles/hour consistently.",
+      "0.5 L corresponds to nominal fill ≈ full bottle volume; exact target fill volume (e.g., 0.5 L at a specified headspace) not provided.",
+      "Wrap-around label is applied to the outside of the bottle; label type (paper/plastic) and whether heat is used are not specified.",
+      "Reject diversion is immediate after inspection, and rejected bottles do not proceed to shrink-packing elsewhere."
+    ],
+    "questions": [
+      {
+        "topic": "quality",
+        "question": "After the camera check, where should rejected bottles go (e.g., chute to a bin, return to upstream, or a separate conveyor), and do you want them marked with a reject code?",
+        "why": "Determines the reject station/diverter and any downstream handling for scrap/rework."
+      },
+      {
+        "topic": "steps",
+        "question": "Is the camera inspection performed after capping (before labeling) or after labeling (as written in your step order, after label application)?",
+        "why": "Sets the station placement for inspection optics and what parts (cap vs label) must be visible."
+      },
+      {
+        "topic": "steps",
+        "question": "For the wrap-around label: is it a printed film/paper sleeve applied with heat/shrink, or a glue-applied label with no shrink?",
+        "why": "Determines the label applicator type and additional curing/heat steps and their cycle time."
+      }
+    ]
+  }
+}

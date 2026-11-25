@@ -1,0 +1,103 @@
+{
+  "key": "cfc9dcf56a36680d8b377daccca397921b326c9474d95644249bdc64b549de39",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:20:55.904Z",
+  "usage": {
+    "inputTokens": 12710,
+    "cachedInputTokens": 0,
+    "outputTokens": 1199
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "stopConveyors",
+        "conveyors": [
+          "line"
+        ],
+        "speed": null,
+        "ramp": null,
+        "label": "Stop pallet carrier at ST1 position",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "regulatorCradle",
+        "item": "product",
+        "from": {
+          "machine": "regulatorCradle",
+          "port": "lane3",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "carrierGuideRails",
+          "port": "slot",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Place window regulator onto carrier",
+        "gap": 0.01,
+        "openGap": 0.02,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": null,
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "operate",
+        "machine": "autoScrewdriver",
+        "seconds": 20,
+        "label": "Drive 4 screws cross pattern",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "decide",
+        "on": "quality",
+        "cases": [
+          {
+            "key": "pass",
+            "value": [
+              {
+                "op": "wait",
+                "seconds": 2,
+                "label": "Verify screw completion and flush fit (PASS)",
+                "state": null,
+                "status": null
+              }
+            ]
+          },
+          {
+            "key": "reject",
+            "value": [
+              {
+                "op": "wait",
+                "seconds": 2,
+                "label": "Verify screw completion and flush fit (REJECT)",
+                "state": null,
+                "status": null
+              }
+            ]
+          }
+        ],
+        "otherwise": null,
+        "planAs": null,
+        "label": "Quality verification",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

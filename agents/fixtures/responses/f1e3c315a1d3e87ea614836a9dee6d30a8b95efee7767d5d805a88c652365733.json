@@ -1,0 +1,27 @@
+{
+  "key": "f1e3c315a1d3e87ea614836a9dee6d30a8b95efee7767d5d805a88c652365733",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:23:35.534Z",
+  "usage": {
+    "inputTokens": 7700,
+    "cachedInputTokens": 0,
+    "outputTokens": 293
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "operate",
+        "machine": "tabletDoseUnit",
+        "seconds": 1,
+        "label": "Dose tablets into each blister cavity",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

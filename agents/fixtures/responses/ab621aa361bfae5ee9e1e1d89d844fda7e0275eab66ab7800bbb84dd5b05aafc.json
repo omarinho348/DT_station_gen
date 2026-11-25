@@ -1,0 +1,57 @@
+{
+  "key": "ab621aa361bfae5ee9e1e1d89d844fda7e0275eab66ab7800bbb84dd5b05aafc",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:22:49.838Z",
+  "usage": {
+    "inputTokens": 8469,
+    "cachedInputTokens": 7936,
+    "outputTokens": 253
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "grip",
+        "machine": "slicerClampsAndHead",
+        "item": "product",
+        "motion": "grip",
+        "to": 1,
+        "anchor": null,
+        "alongside": null,
+        "also": null,
+        "indicator": "holding",
+        "seconds": 0.3,
+        "label": "Clamp loaf",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "operate",
+        "machine": "slicerClampsAndHead",
+        "seconds": 2.8,
+        "label": "Slice loaves",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "release",
+        "machine": "slicerClampsAndHead",
+        "item": "product",
+        "motion": "grip",
+        "to": 0,
+        "onto": null,
+        "alongside": null,
+        "also": null,
+        "indicator": "holding",
+        "seconds": 0.3,
+        "label": "Release slices to conveyor",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

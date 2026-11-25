@@ -1,0 +1,62 @@
+{
+  "key": "4d5108e6f819dc85efa2aec7e999049e8c8188595e5d01278a0482d95241f80a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:24:13.782Z",
+  "usage": {
+    "inputTokens": 5537,
+    "cachedInputTokens": 4864,
+    "outputTokens": 715
+  },
+  "output": {
+    "id": "cutToSize",
+    "code": "ST1",
+    "title": "Saw: cut to finished size",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Saw: cut to finished size",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "panelCutSaw",
+        "type": "genericMachine",
+        "why": "Cuts incoming chipboard panels to required finished dimensions.",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "cutFenceStop",
+        "type": "beltEndStop",
+        "why": "Positions the panel for repeatable cutting along the controlled path.",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "cutWorkTable",
+        "type": "workTable",
+        "why": "Provides a clamping/cutting support surface for the panel during the saw run.",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "operate"
+    ]
+  }
+}

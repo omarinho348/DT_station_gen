@@ -1,0 +1,57 @@
+{
+  "key": "285fbb25d32edb0ef838927ee97be293dd2b0cbbd306d1fb3f1f5a520e3f918e",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T02:26:34.984Z",
+  "usage": {
+    "inputTokens": 8755,
+    "cachedInputTokens": 7936,
+    "outputTokens": 307
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "grip",
+        "machine": "foldInputStopMachine",
+        "item": "product",
+        "motion": "grip",
+        "to": 1,
+        "anchor": null,
+        "alongside": null,
+        "also": null,
+        "indicator": "holding",
+        "seconds": 0.3,
+        "label": "Load T-shirt onto folding infeed stop",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "operate",
+        "machine": "foldInputStopMachine",
+        "seconds": 4,
+        "label": "Fold cycle",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "release",
+        "machine": "foldInputStopMachine",
+        "item": "product",
+        "motion": "grip",
+        "to": 0,
+        "onto": null,
+        "alongside": null,
+        "also": null,
+        "indicator": "holding",
+        "seconds": 0.3,
+        "label": "Release folded T-shirt to conveyor",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

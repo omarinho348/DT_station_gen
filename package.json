@@ -19,9 +19,15 @@
     "visual": "node scripts/visual-compare.mjs",
     "review": "node scripts/review.mjs",
     "catalog": "node scripts/catalog.mjs",
-    "builder:live": "node scripts/builder-live.mjs"
+    "builder:live": "node scripts/builder-live.mjs",
+    "spec:live": "node scripts/spec-live.mjs",
+    "editor:live": "node scripts/editor-live.mjs",
+    "simpy": "node scripts/simpy.mjs",
+    "coverage": "node scripts/coverage.mjs",
+    "benchmark": "node scripts/benchmark.mjs"
   },
   "dependencies": {
+    "fflate": "^0.8.3",
     "lucide": "^1.73.0",
     "openai": "^7.63.0",
     "three": "^0.186.1",

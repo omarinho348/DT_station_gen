@@ -1,0 +1,73 @@
+{
+  "key": "91c49e75e341031fda0a7ec3c91c0eac9760e10e30209fd03ea6cc19186c065b",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:07:04.680Z",
+  "usage": {
+    "inputTokens": 5820,
+    "cachedInputTokens": 4864,
+    "outputTokens": 486
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Fill empty glass bottles",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Fill bottles",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "fillerUnit",
+        "type": "filler",
+        "why": "Fills each bottle by lowering/dispensing through the fill heads",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "appleJuiceTank",
+        "type": "supplyTank",
+        "why": "Supplies apple juice to the filler heads",
+        "place": "besideLine",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "fillerGuards",
+        "type": "guardFence",
+        "why": "Provides a safety guard around the filling zone",
+        "place": "rear",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "tankStatus",
+        "type": "statusMonitor",
+        "why": "Monitors filler/tank state for this filling cell",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "fill",
+      "decide"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "key": "febf247298b32515f101eb19c3f3899d66a0d2d77144cdf841e6a8afac65f805",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-24T22:08:11.670Z",
+  "usage": {
+    "inputTokens": 5226,
+    "cachedInputTokens": 0,
+    "outputTokens": 151
+  },
+  "output": {
+    "params": {
+      "capper": {
+        "heads": 4,
+        "pitch": 0.4,
+        "seatHeight": 0.388,
+        "stroke": 0.26,
+        "capRadius": 0.027,
+        "capHeight": 0.032,
+        "capColor": "blue"
+      }
+    }
+  }
+}

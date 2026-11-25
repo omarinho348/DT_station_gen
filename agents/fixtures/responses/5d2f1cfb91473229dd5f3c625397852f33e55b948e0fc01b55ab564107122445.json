@@ -1,0 +1,25 @@
+{
+  "key": "5d2f1cfb91473229dd5f3c625397852f33e55b948e0fc01b55ab564107122445",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:26:26.871Z",
+  "usage": {
+    "inputTokens": 5148,
+    "cachedInputTokens": 3840,
+    "outputTokens": 163
+  },
+  "output": {
+    "params": {
+      "foldInputStopMachine": {
+        "name": "Fold Input Stop",
+        "note": "Operator placement",
+        "length": 1.2,
+        "depth": 1,
+        "height": 2,
+        "passThrough": true,
+        "carries": "unit"
+      }
+    }
+  }
+}

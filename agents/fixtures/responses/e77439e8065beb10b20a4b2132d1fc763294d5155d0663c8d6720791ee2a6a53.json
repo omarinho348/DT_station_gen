@@ -1,0 +1,56 @@
+{
+  "key": "e77439e8065beb10b20a4b2132d1fc763294d5155d0663c8d6720791ee2a6a53",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:19:03.028Z",
+  "usage": {
+    "inputTokens": 5557,
+    "cachedInputTokens": 4864,
+    "outputTokens": 540
+  },
+  "output": {
+    "id": "pasteSolderPaste",
+    "code": "ST1",
+    "title": "Solder paste dispense",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Solder paste dispense",
+        "color": "#00A000"
+      }
+    },
+    "equipment": [
+      {
+        "id": "dispensePasteNozzle",
+        "type": "dispenseNozzle",
+        "why": "Dispense solder paste onto PCB pads on the carrier board",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "pastePresenceScanner",
+        "type": "visionScanner",
+        "why": "Confirm carrier/board presence and pad alignment readiness",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "toolOn",
+      "operate",
+      "decide",
+      "indexBatches",
+      "wait"
+    ]
+  }
+}

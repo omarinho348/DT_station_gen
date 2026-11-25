@@ -1,0 +1,58 @@
+{
+  "key": "a7ac3da5e49e98e32a1aafee81bc547b1c87f3f0dbcfaaeb18bdb08287873159",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T02:22:30.679Z",
+  "usage": {
+    "inputTokens": 5578,
+    "cachedInputTokens": 0,
+    "outputTokens": 523
+  },
+  "output": {
+    "id": "coolingBuffer",
+    "code": "ST1",
+    "title": "Cool loaves by dwell",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "coolTable",
+        "type": "accumulationTable",
+        "why": "Dwell/accumulate hot loaves for required cooling time",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "safetyFence",
+        "type": "guardFence",
+        "why": "Enclose the dwell/accumulation area for operator safety",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "stationSign",
+        "type": "stationSign",
+        "why": "Identify and label the cooling buffer station on the line",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": "walkway",
+        "turned": null
+      }
+    ],
+    "conveyor": "coolTable",
+    "ports": null,
+    "ops": [
+      "accumulate",
+      "wait",
+      "transfer",
+      "indexBatches"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "key": "e06c63c02c1f8e740f8cb19181f55da6ebfb50796ebd55aeb38bb0220632f999",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:23:13.852Z",
+  "usage": {
+    "inputTokens": 5576,
+    "cachedInputTokens": 0,
+    "outputTokens": 175
+  },
+  "output": {
+    "params": {
+      "formingEnclosure": {
+        "length": 1.64,
+        "width": 1.12,
+        "height": 2.05,
+        "shutterRise": 0.82,
+        "extraction": true
+      },
+      "thermoformer": {
+        "name": null,
+        "note": null,
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      }
+    }
+  }
+}

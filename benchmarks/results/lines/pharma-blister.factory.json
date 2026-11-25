@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "line": {
+    "id": "tabletBlisterPacking",
+    "title": "Tablet blister packing into 10-up strips",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "tray",
+      "length": 0.095,
+      "width": 0.045,
+      "height": 0.01,
+      "finish": "plastic",
+      "rejectEvery": 0
+    }
+  },
+  "stations": [
+    {
+      "id": "formBlisterCavities",
+      "code": "ST1",
+      "title": "Form PVC blister cavities",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Form PVC blister cavities"
+        }
+      },
+      "equipment": [
+        {
+          "id": "formingEnclosure",
+          "type": "shutterEnclosure",
+          "params": {
+            "length": 1.64,
+            "width": 1.12,
+            "height": 2.05,
+            "shutterRise": 0.82,
+            "extraction": true
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "thermoformer",
+          "type": "genericMachine",
+          "params": {
+            "name": "THERMOFORMER",
+            "note": "PVC thermoforming (10-up)",
+            "length": 1.6,
+            "depth": 1.2,
+            "height": 1.9,
+            "passThrough": true,
+            "carries": "unit"
+          },
+          "position": [
+            -2.4,
+            0,
+            0
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "operate",
+          "machine": "thermoformer",
+          "seconds": 1,
+          "label": "Heat-thermoform PVC and index web forward by one strip position"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "doseTablets",
+      "code": "ST2",
+      "title": "Dose tablets into cavities",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST2",
+          "title": "Dose tablets into cavities"
+        }
+      },
+      "equipment": [
+        {
+          "id": "tabletDoseUnit",
+          "type": "genericMachine",
+          "params": {},
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "cavityIndexingPhotoEye",
+          "type": "photoEye",
+          "params": {},
+          "position": [
+            0,
+            0,
+            -0.65
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "operate",
+          "machine": "tabletDoseUnit",
+          "seconds": 1,
+          "label": "Dose tablets into each blister cavity"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "inspectCavities",
+      "code": "ST3",
+      "title": "Camera-inspect filled cavities",
+      "equipment": [
+        {
+          "id": "visionInspectScanner",
+          "type": "visionScanner",
+          "params": {
+            "length": 2.7,
+            "width": 1.44,
+            "railHeight": 2.05,
+            "archWidth": 1,
+            "archBottom": 1
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "palletLine",
+      "process": [],
+      "feed": {
+        "fromLift": false
+      }
+    }
+  ],
+  "graph": {
+    "edges": [
+      {
+        "from": "formBlisterCavities.output",
+        "to": "doseTablets.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      },
+      {
+        "from": "doseTablets.output",
+        "to": "inspectCavities.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      }
+    ]
+  }
+}

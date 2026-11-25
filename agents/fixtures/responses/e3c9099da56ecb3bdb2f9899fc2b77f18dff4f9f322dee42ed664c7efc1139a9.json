@@ -1,0 +1,165 @@
+{
+  "key": "e3c9099da56ecb3bdb2f9899fc2b77f18dff4f9f322dee42ed664c7efc1139a9",
+  "model": "gpt-5.4-mini",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T02:19:06.515Z",
+  "usage": {
+    "inputTokens": 5899,
+    "cachedInputTokens": 0,
+    "outputTokens": 485
+  },
+  "output": {
+    "params": {
+      "dispenseRig": {
+        "parts": [
+          {
+            "id": "frame",
+            "type": "portalFrame",
+            "params": [
+              {
+                "key": "span",
+                "value": 0.8
+              },
+              {
+                "key": "height",
+                "value": 1.5
+              }
+            ],
+            "on": null,
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "cross",
+            "type": "linearAxis",
+            "params": [
+              {
+                "key": "stroke",
+                "value": 0.5
+              },
+              {
+                "key": "hang",
+                "value": true
+              }
+            ],
+            "on": "frame.beam",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 1.5707963267948966
+          },
+          {
+            "id": "lift",
+            "type": "verticalAxis",
+            "params": [
+              {
+                "key": "stroke",
+                "value": 0.25
+              },
+              {
+                "key": "bodyLength",
+                "value": 0.35
+              }
+            ],
+            "on": "cross.carriage",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          },
+          {
+            "id": "nozzle",
+            "type": "dispenseNozzle",
+            "params": [
+              {
+                "key": "jetLength",
+                "value": 0.15
+              }
+            ],
+            "on": "lift.ram",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationY": 0
+          }
+        ],
+        "motions": [
+          {
+            "key": "crossTravel",
+            "value": "cross.travel"
+          },
+          {
+            "key": "liftExtend",
+            "value": "lift.extend"
+          },
+          {
+            "key": "nozzleFlow",
+            "value": "nozzle.flow"
+          }
+        ],
+        "ports": [
+          {
+            "key": "input",
+            "value": "frame.input"
+          },
+          {
+            "key": "output",
+            "value": "frame.output"
+          }
+        ],
+        "anchors": [
+          {
+            "key": "frame",
+            "value": "frame"
+          },
+          {
+            "key": "frameBeam",
+            "value": "frame.beam"
+          },
+          {
+            "key": "frameBeamTop",
+            "value": "frame.beamTop"
+          },
+          {
+            "key": "cross",
+            "value": "cross"
+          },
+          {
+            "key": "crossCarriage",
+            "value": "cross.carriage"
+          },
+          {
+            "key": "lift",
+            "value": "lift"
+          },
+          {
+            "key": "liftRam",
+            "value": "lift.ram"
+          },
+          {
+            "key": "nozzle",
+            "value": "nozzle"
+          }
+        ]
+      },
+      "visionScanner": {
+        "length": 2.7,
+        "width": 1.44,
+        "railHeight": 2.05,
+        "archWidth": 1,
+        "archBottom": 1
+      }
+    }
+  }
+}

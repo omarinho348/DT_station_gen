@@ -60,6 +60,8 @@ export function llmConfig(env = {}) {
     keyFound: Boolean(env.OPENAI_API_KEY),
     models: { default: model('DEFAULT'), strong: model('STRONG') },
     strongEnabled: String(env.LLM_STRONG_ENABLED).toLowerCase() === 'true',
+    // Agents that always use the strong model (the owner's choice, e.g. "builder"; step 12.2).
+    strongAgents: String(env.LLM_STRONG_AGENTS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
     caps: { session: num(env.LLM_BUDGET_SESSION, 0.5), total: num(env.LLM_BUDGET_TOTAL, 4.5) },
     effort: env.LLM_REASONING_EFFORT || 'low',
     maxOutputTokens: num(env.LLM_MAX_OUTPUT_TOKENS, 4000),
@@ -70,6 +72,11 @@ export function llmConfig(env = {}) {
     const d = config.models.default;
     if (!d.name) missing.push('LLM_MODEL_DEFAULT');
     for (const [k, v] of Object.entries(d.price)) if (v === null) missing.push(`LLM_PRICE_DEFAULT_${k === 'cachedInput' ? 'CACHED_INPUT' : k.toUpperCase()}`);
+    if (config.strongAgents.length || config.strongEnabled) {
+      const s = config.models.strong;
+      if (!s.name) missing.push('LLM_MODEL_STRONG');
+      for (const [k, v] of Object.entries(s.price)) if (v === null) missing.push(`LLM_PRICE_STRONG_${k === 'cachedInput' ? 'CACHED_INPUT' : k.toUpperCase()}`);
+    }
     if (missing.length) throw new LlmError(`live mode needs ${missing.join(', ')} in .env`, { code: 'config' });
   }
   return config;
@@ -151,16 +158,30 @@ export function createLlm({ env, root, session = null, client = null, now = () =
    * @param {object[]} o.messages   [{ role: 'system' | 'user' | 'assistant', content }], stable part first
    * @param {'default'|'strong'} [o.model]  strong only if enabled (else default)
    */
-  async function call({ agent, schemaName, schema, messages, model: kind = 'default' }) {
+  async function call(req) {
+    // An answer cut off at the output limit (reasoning took it) is asked once more with twice the limit
+    // (benchmark tuning set, step 12.2); the budget guard checks the larger worst case.
+    try {
+      return await callWith(req, config.maxOutputTokens);
+    } catch (error) {
+      if (error.code !== 'truncated') throw error;
+      return callWith(req, config.maxOutputTokens * 2);
+    }
+  }
+
+  async function callWith({ agent, schemaName, schema, messages, model: kind = 'default' }, maxOutputTokens) {
     if (!/^[A-Za-z0-9_-]{1,64}$/.test(schemaName ?? '')) throw new LlmError(`schemaName "${schemaName}" must be 1–64 of a-z, A-Z, 0-9, _ or -`, { code: 'config' });
-    const use = kind === 'strong' && config.strongEnabled && config.models.strong.name ? config.models.strong : config.models.default;
-    const request = { model: use.name, effort: config.effort, maxOutputTokens: config.maxOutputTokens, schemaName, schema, messages };
+    const strong = (kind === 'strong' && config.strongEnabled) || config.strongAgents.includes(agent);
+    const use = strong && config.models.strong.name ? config.models.strong : config.models.default;
+    const request = { model: use.name, effort: config.effort, maxOutputTokens, schemaName, schema, messages };
     const key = cacheKey(request);
 
-    const hit = readCached(key);
-    if (hit) {
+    // A cut-off answer is never cached, so a recorded one for twice the limit stands in for it.
+    const longer = maxOutputTokens === config.maxOutputTokens ? cacheKey({ ...request, maxOutputTokens: maxOutputTokens * 2 }) : null;
+    const found = readCached(key) ? { hit: readCached(key), key } : longer && readCached(longer) ? { hit: readCached(longer), key: longer } : null;
+    if (found) {
       counts[config.mode === 'mock' ? 'mock' : 'cached'] += 1;
-      return { output: hit.output, cost: 0, source: config.mode === 'mock' ? 'mock' : 'cache', key };
+      return { output: found.hit.output, cost: 0, source: config.mode === 'mock' ? 'mock' : 'cache', key: found.key };
     }
     if (config.mode === 'mock') {
       counts.refused += 1;
@@ -169,7 +190,7 @@ export function createLlm({ env, root, session = null, client = null, now = () =
 
     // Budget guard: the worst case must fit under both caps.
     const prompt = messages.map((m) => m.content).join('\n') + JSON.stringify(schema);
-    const worst = (estimateTokens(prompt) * use.price.input + config.maxOutputTokens * use.price.output) / 1e6;
+    const worst = (estimateTokens(prompt) * use.price.input + maxOutputTokens * use.price.output) / 1e6;
     const before = spent();
     for (const cap of ['session', 'total']) {
       if (before[cap] + worst > config.caps[cap] + 1e-12) {
@@ -186,7 +207,7 @@ export function createLlm({ env, root, session = null, client = null, now = () =
         input: messages,
         text: { format: { type: 'json_schema', name: schemaName, schema, strict: true } },
         reasoning: { effort: config.effort },
-        max_output_tokens: config.maxOutputTokens,
+        max_output_tokens: maxOutputTokens,
         store: false,
       });
     } catch (error) {
@@ -204,7 +225,8 @@ export function createLlm({ env, root, session = null, client = null, now = () =
     counts.live += 1;
 
     if (response.status && response.status !== 'completed') {
-      throw new LlmError(`the model stopped early (${response.status}${response.incomplete_details?.reason ? `: ${response.incomplete_details.reason}` : ''}); raise LLM_MAX_OUTPUT_TOKENS or shorten the request`, { code: 'model', key });
+      const reason = response.incomplete_details?.reason;
+      throw new LlmError(`the model stopped early (${response.status}${reason ? `: ${reason}` : ''}); raise LLM_MAX_OUTPUT_TOKENS or shorten the request`, { code: reason === 'max_output_tokens' && maxOutputTokens === config.maxOutputTokens ? 'truncated' : 'model', key });
     }
     let output;
     try {
@@ -225,7 +247,7 @@ export function createLlm({ env, root, session = null, client = null, now = () =
       byAgent,
       mode: config.mode,
       keyFound: config.keyFound,
-      models: { default: config.models.default.name, strong: config.models.strong.name, strongEnabled: config.strongEnabled },
+      models: { default: config.models.default.name, strong: config.models.strong.name, strongEnabled: config.strongEnabled, strongAgents: config.strongAgents },
       caps: config.caps,
       spent: { session: round6(s.session), total: round6(s.total) },
       remaining: { session: round6(Math.max(0, config.caps.session - s.session)), total: round6(Math.max(0, config.caps.total - s.total)) },

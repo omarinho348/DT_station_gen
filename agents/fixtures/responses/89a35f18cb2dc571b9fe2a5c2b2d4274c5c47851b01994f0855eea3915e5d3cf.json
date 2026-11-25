@@ -1,0 +1,126 @@
+{
+  "key": "89a35f18cb2dc571b9fe2a5c2b2d4274c5c47851b01994f0855eea3915e5d3cf",
+  "model": "gpt-5.4-nano",
+  "agent": "spec",
+  "schemaName": "linePlan",
+  "recordedAt": "2026-11-25T02:24:08.607Z",
+  "usage": {
+    "inputTokens": 5110,
+    "cachedInputTokens": 3840,
+    "outputTokens": 1151
+  },
+  "output": {
+    "transport": "beltConveyor",
+    "stations": [
+      {
+        "id": "cutToSize",
+        "code": "ST1",
+        "title": "Saw: cut to finished size",
+        "does": "Saw the chipboard panel to the required finished dimensions.",
+        "steps": [
+          "Position panel against the cutting fence/stop",
+          "Clamp panel to the cutting table/fence",
+          "Start dust extraction",
+          "Run saw across marked/controlled cut path to produce finished dimensions",
+          "Release clamp and carry panel to the outfeed position"
+        ],
+        "seconds": 40,
+        "covers": [
+          "CutToSize"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "applyEdgeBand",
+        "code": "ST2",
+        "title": "Edge band gluing & press",
+        "does": "Glue edge banding onto the visible edges of the cut panel.",
+        "steps": [
+          "Bring panel to edge-banding location",
+          "Apply glue/adhesive along panel edges (controlled path around rectangle)",
+          "Place edge band onto the glued edges",
+          "Press/hold edge band using a pressure shoe/rollers until bond is formed (time budget within takt)",
+          "Trim/flush any edge band overhang to panel perimeter",
+          "Release panel to outfeed"
+        ],
+        "seconds": 40,
+        "covers": [
+          "ApplyEdgeBand"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "drillHingeAndDowelHoles",
+        "code": "ST3",
+        "title": "Drill hinge & dowel holes",
+        "does": "Drill hinge and dowel holes in the finished panel.",
+        "steps": [
+          "Place panel in drilling nest/fixture reference points",
+          "Align to programmed hole pattern (via stops/locators)",
+          "Start dust extraction for drill zone",
+          "Drill hinge cup holes and dowel holes to programmed depth",
+          "Clear chips from holes (air blast/brush) without damaging edges",
+          "Release panel to outfeed"
+        ],
+        "seconds": 40,
+        "covers": [
+          "DrillHingeAndDowelHoles"
+        ],
+        "machines": [
+          "genericMachine"
+        ]
+      },
+      {
+        "id": "inspectDimensions",
+        "code": "ST4",
+        "title": "Periodic dimension inspection",
+        "does": "Operator checks panel dimensions periodically and identifies any out-of-tolerance parts.",
+        "steps": [
+          "Operator receives panel at inspection position",
+          "Check dimensions using hand gauge/measuring device according to sampling rule",
+          "Mark status: OK or out-of-tolerance",
+          "If out-of-tolerance: divert panel to rework/scrap outfeed bin (manual diversion signal/actuator)",
+          "If OK: allow panel to proceed to pallet staging"
+        ],
+        "seconds": 40,
+        "covers": [
+          "InspectDimensions"
+        ],
+        "machines": [
+          "photoEye"
+        ]
+      },
+      {
+        "id": "stackOnPallet",
+        "code": "ST5",
+        "title": "Stack panels onto pallet",
+        "does": "Stack finished panels onto a pallet for downstream assembly.",
+        "steps": [
+          "Pick/transfer approved panel from conveyor to pallet stack location",
+          "Orient panel consistently (use pallet corner stops/edge alignment)",
+          "Place panel onto existing stack; ensure stack sits square",
+          "Apply interleaving/spacing if used (optional, depends on downstream requirement)",
+          "Advance pallet stack position when current layer is complete",
+          "Return pallet-ready status and continue receiving next panel"
+        ],
+        "seconds": 40,
+        "covers": [
+          "StackOnPallet"
+        ],
+        "machines": [
+          "bufferLane"
+        ]
+      }
+    ],
+    "notes": [
+      "All stations are budgeted at the full takt (40 s) to guarantee the line can run at 90 finished panels/hour; this implies the builder should design tooling so each operation reliably completes within 40 s or add parallelism (not modeled).",
+      "Dust extraction is required at the saw and drill operations; the builder should allocate separate extraction ducts to ST1 and ST3 and include interlocks (not modeled).",
+      "Periodic sampling inspection is represented as operator checks; since the tolerance criteria and sampling frequency are not specified, the diversion logic is kept manual (out-of-tolerance panels are diverted to rework/scrap).",
+      "Edge band bonding/press/hold time is not specified; ST2 assumes sufficient bond/trim action within 40 s, but if curing requires longer time, ST2 will need an in-line dwell/transfer buffer (not modeled)."
+    ]
+  }
+}

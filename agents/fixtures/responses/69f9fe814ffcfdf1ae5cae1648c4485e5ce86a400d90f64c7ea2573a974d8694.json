@@ -1,0 +1,59 @@
+{
+  "key": "69f9fe814ffcfdf1ae5cae1648c4485e5ce86a400d90f64c7ea2573a974d8694",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T21:58:09.756Z",
+  "usage": {
+    "inputTokens": 5700,
+    "cachedInputTokens": 0,
+    "outputTokens": 509
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Fill 0.5 L",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Fill 0.5 L",
+        "color": null,
+        "minZ": null,
+        "maxZ": null,
+        "walkwayZ": null,
+        "panelX": null,
+        "conveyorLength": null,
+        "carrierLength": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "filler",
+        "type": "filler",
+        "why": "Fill each PET bottle to the target volume",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "supplyTank",
+        "type": "supplyTank",
+        "why": "Provide still water to the filler heads",
+        "place": "besideLine",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "st1Conveyor",
+    "ports": null,
+    "ops": [
+      "fill",
+      "indexBatches"
+    ]
+  }
+}

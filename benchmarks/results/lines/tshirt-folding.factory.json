@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "line": {
+    "id": "tshirtPackingLine",
+    "title": "T-shirt fold, bag, seal, label, tote pack",
+    "runSize": 8
+  },
+  "product": {
+    "kind": "parametric",
+    "params": {
+      "shape": "box",
+      "length": 0.25,
+      "width": 0.3,
+      "height": 0.02,
+      "finish": "cardboard",
+      "color": "#ffffff",
+      "labelText": "address label"
+    }
+  },
+  "stations": [
+    {
+      "id": "loadFlatShirt",
+      "code": "ST1",
+      "title": "Manual shirt load",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST1",
+          "title": "Manual shirt load"
+        }
+      },
+      "equipment": [
+        {
+          "id": "foldInputStopMachine",
+          "type": "genericMachine",
+          "params": {
+            "name": "Fold Input Stop",
+            "note": "Operator placement",
+            "length": 1.2,
+            "depth": 1,
+            "height": 2,
+            "passThrough": true,
+            "carries": "unit"
+          },
+          "position": [
+            -2.2,
+            0,
+            0
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "raw",
+      "process": [
+        {
+          "op": "grip",
+          "machine": "foldInputStopMachine",
+          "item": "product",
+          "motion": "grip",
+          "to": 1,
+          "indicator": "holding",
+          "seconds": 0.3,
+          "label": "Load T-shirt onto folding infeed stop"
+        },
+        {
+          "op": "operate",
+          "machine": "foldInputStopMachine",
+          "seconds": 4,
+          "label": "Fold cycle"
+        },
+        {
+          "op": "release",
+          "machine": "foldInputStopMachine",
+          "item": "product",
+          "motion": "grip",
+          "to": 0,
+          "indicator": "holding",
+          "seconds": 0.3,
+          "label": "Release folded T-shirt to conveyor"
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    }
+  ],
+  "graph": {
+    "edges": []
+  }
+}

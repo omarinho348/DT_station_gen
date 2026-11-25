@@ -1,0 +1,52 @@
+{
+  "key": "4da979efd8b3da1e0f48427c6e6ff1d31812d076e30fc2899a6da7a39244dfde",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:18:32.064Z",
+  "usage": {
+    "inputTokens": 8910,
+    "cachedInputTokens": 0,
+    "outputTokens": 370
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "fill",
+        "machine": "filler",
+        "item": "product",
+        "units": "Bottles in position",
+        "liquid": "Dispensing body lotion",
+        "timing": {
+          "inPosition": 0.4,
+          "descend": 1.5,
+          "engage": 0.3,
+          "valveOpen": 0.35,
+          "dispense": 5,
+          "valveClose": 0.35,
+          "drip": 0.3,
+          "retract": 1.4,
+          "after": 0.3
+        },
+        "supply": null,
+        "label": "Filling 250 mL",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "transform",
+        "item": "product",
+        "stage": "filled",
+        "set": null,
+        "at": "end",
+        "seconds": 0,
+        "label": "Set stage: filled",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "panel-cutting",
+  "stage": "builder",
+  "ok": false,
+  "cost": {
+    "spec": 0.00301006,
+    "builder": 0.01166932,
+    "editor": 0,
+    "reviewer": 0
+  },
+  "seconds": 122.606,
+  "brief": {
+    "status": "draft",
+    "retries": 0,
+    "questions": 3,
+    "warnings": [
+      "The brief says bad units are rejected, but product.model.params.rejectEvery is unset: no unit will ever fail, so the reject path never runs in the twin. Reject the brief with how often one should fail (e.g. \"every 10th fails\")."
+    ],
+    "problems": []
+  },
+  "target": {
+    "perHour": 90,
+    "title": "Chipboard panel cutting & preparation",
+    "steps": 5
+  },
+  "plan": {
+    "status": "draft",
+    "retries": 0,
+    "problems": []
+  },
+  "planned": 5,
+  "stations": [
+    {
+      "id": "cutToSize",
+      "title": "Saw: cut to finished size",
+      "ok": true,
+      "refusals": 0,
+      "phases": [],
+      "kind": "placeholder",
+      "types": [
+        "genericMachine",
+        "beltEndStop",
+        "workTable"
+      ],
+      "problems": []
+    }
+  ],
+  "reason": "LlmError: the model stopped early (incomplete: max_output_tokens); raise LLM_MAX_OUTPUT_TOKENS or shorten the request",
+  "totalCost": 0.01467938,
+  "mode": "live",
+  "models": {
+    "builder": "gpt-5.4-nano",
+    "others": "gpt-5.4-nano"
+  },
+  "retries": 4,
+  "time": "2026-11-25T02:25:57.286Z"
+}

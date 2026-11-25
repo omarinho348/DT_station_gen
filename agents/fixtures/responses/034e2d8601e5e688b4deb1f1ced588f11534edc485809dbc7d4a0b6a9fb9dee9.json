@@ -1,0 +1,573 @@
+{
+  "key": "034e2d8601e5e688b4deb1f1ced588f11534edc485809dbc7d4a0b6a9fb9dee9",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-24T22:00:51.122Z",
+  "usage": {
+    "inputTokens": 10284,
+    "cachedInputTokens": 0,
+    "outputTokens": 3051
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            -0.06,
+            0,
+            0
+          ],
+          "yaw": null
+        },
+        "name": "Seat 1",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 1",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            -0.02,
+            0,
+            0
+          ],
+          "yaw": null
+        },
+        "name": "Seat 2",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 2",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            0.02,
+            0,
+            0
+          ],
+          "yaw": null
+        },
+        "name": "Seat 3",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 3",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            0.06,
+            0,
+            0
+          ],
+          "yaw": null
+        },
+        "name": "Seat 4",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 4",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            -0.06,
+            0,
+            0.02
+          ],
+          "yaw": null
+        },
+        "name": "Seat 5",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 5",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            -0.02,
+            0,
+            0.02
+          ],
+          "yaw": null
+        },
+        "name": "Seat 6",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 6",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            0.02,
+            0,
+            0.02
+          ],
+          "yaw": null
+        },
+        "name": "Seat 7",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 7",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            0.06,
+            0,
+            0.02
+          ],
+          "yaw": null
+        },
+        "name": "Seat 8",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 8",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            -0.06,
+            0,
+            0.04
+          ],
+          "yaw": null
+        },
+        "name": "Seat 9",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 9",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            -0.02,
+            0,
+            0.04
+          ],
+          "yaw": null
+        },
+        "name": "Seat 10",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 10",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            0.02,
+            0,
+            0.04
+          ],
+          "yaw": null
+        },
+        "name": "Seat 11",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 11",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "pickPlace",
+        "machine": "cellPickRobot",
+        "item": "cell",
+        "from": {
+          "machine": "cellsFeeder",
+          "port": "outlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "moduleWorkTable",
+          "port": "top",
+          "offset": [
+            0.06,
+            0,
+            0.04
+          ],
+          "yaw": null
+        },
+        "name": "Seat 12",
+        "gap": 0,
+        "openGap": 0.2,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": "Pick cell and place into seat 12",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "decide",
+        "on": "quality",
+        "cases": [
+          {
+            "key": "pass",
+            "value": [
+              {
+                "op": "wait",
+                "seconds": 5,
+                "label": "Seat depth confirmations (PASS)",
+                "state": null,
+                "status": null
+              }
+            ]
+          },
+          {
+            "key": "reject",
+            "value": [
+              {
+                "op": "wait",
+                "seconds": 5,
+                "label": "Seat depth confirmations (REJECT)",
+                "state": null,
+                "status": null
+              }
+            ]
+          }
+        ],
+        "otherwise": [
+          {
+            "op": "wait",
+            "seconds": 5,
+            "label": "Seat depth confirmations (default)",
+            "state": null,
+            "status": null
+          }
+        ],
+        "planAs": "otherwise",
+        "label": "Verify seated depth using seat stop sensing",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "wait",
+        "seconds": 2,
+        "label": "Release carrier and advance to next station",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

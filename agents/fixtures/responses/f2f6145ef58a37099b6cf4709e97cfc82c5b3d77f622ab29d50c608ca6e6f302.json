@@ -1,0 +1,106 @@
+{
+  "key": "f2f6145ef58a37099b6cf4709e97cfc82c5b3d77f622ab29d50c608ca6e6f302",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:23:18.191Z",
+  "usage": {
+    "inputTokens": 6233,
+    "cachedInputTokens": 4864,
+    "outputTokens": 739
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST2",
+    "title": "Fill 250 mL body lotion: pump head,",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Fill 250 mL body lotion",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "pumpHeadFeeder",
+        "type": "vibratoryFeeder",
+        "why": "Supply pump heads to the placement robot",
+        "place": "besideLine",
+        "at": "input",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "pumpHeadPlacer",
+        "type": "scara",
+        "why": "Place pump head onto the bottle opening/neck",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "pumpHeadPickTool",
+        "type": "fingerGripper",
+        "why": "Grip pump heads from the feeder",
+        "place": "onTop",
+        "at": "whole",
+        "on": "pumpHeadPlacer",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "lotionFiller",
+        "type": "filler",
+        "why": "Fill 250 mL body lotion into bottles",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "weighInspect",
+        "type": "testCabinet",
+        "why": "Weigh and inspect filled bottles; produce quality verdict",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "frontLabelApplicator",
+        "type": "labelApplicator",
+        "why": "Apply the front label",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "walkway",
+        "turned": null
+      },
+      {
+        "id": "labelTampTool",
+        "type": "labelHead",
+        "why": "Tamp front label onto the bottle",
+        "place": "onTop",
+        "at": "whole",
+        "on": "frontLabelApplicator",
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "pickPlace",
+      "fill",
+      "operate",
+      "runRoutine",
+      "decide"
+    ]
+  }
+}

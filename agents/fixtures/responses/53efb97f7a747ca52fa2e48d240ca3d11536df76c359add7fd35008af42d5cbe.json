@@ -1,0 +1,73 @@
+{
+  "key": "53efb97f7a747ca52fa2e48d240ca3d11536df76c359add7fd35008af42d5cbe",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:06:56.739Z",
+  "usage": {
+    "inputTokens": 5524,
+    "cachedInputTokens": 0,
+    "outputTokens": 584
+  },
+  "output": {
+    "id": "filling",
+    "code": null,
+    "title": "Fill empty glass bottles",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Fill bottles",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "fillerUnit",
+        "type": "filler",
+        "why": "Fills each bottle by lowering/dispensing through the fill heads",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "appleJuiceTank",
+        "type": "supplyTank",
+        "why": "Supplies apple juice to the filler heads",
+        "place": "besideLine",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "fillerGuards",
+        "type": "shutterEnclosure",
+        "why": "Encloses the filling zone for safety during filling",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "tankStatus",
+        "type": "statusMonitor",
+        "why": "Monitors filler/tank state for this filling cell",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "fillingConveyor",
+    "ports": null,
+    "ops": [
+      "fill",
+      "decide"
+    ]
+  }
+}

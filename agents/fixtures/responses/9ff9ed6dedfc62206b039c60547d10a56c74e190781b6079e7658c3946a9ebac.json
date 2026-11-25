@@ -1,0 +1,66 @@
+{
+  "key": "9ff9ed6dedfc62206b039c60547d10a56c74e190781b6079e7658c3946a9ebac",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-24T22:27:28.377Z",
+  "usage": {
+    "inputTokens": 5763,
+    "cachedInputTokens": 4864,
+    "outputTokens": 430
+  },
+  "output": {
+    "id": "pasteSolderPaste",
+    "code": "ST1",
+    "title": "Solder paste dispense",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Solder paste dispense",
+        "color": "#00A000"
+      }
+    },
+    "equipment": [
+      {
+        "id": "dispensePasteNozzle",
+        "type": "dispenseNozzle",
+        "why": "Dispense solder paste onto PCB pads on the carrier board",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "pastePresenceScanner",
+        "type": "visionScanner",
+        "why": "Confirm carrier/board presence and pad alignment readiness",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "pasteDispenseControl",
+        "type": "genericMachine",
+        "why": "Controls and runs the timed multi-pass solder paste dispensing cycle",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "toolOn",
+      "operate",
+      "decide",
+      "indexBatches",
+      "wait"
+    ]
+  }
+}
