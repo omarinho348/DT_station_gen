@@ -1,0 +1,79 @@
+{
+  "key": "702dc5d8070d37a9442e0ac598de5ef4cae7142ad48fc7b5e31fa2f9d0dcacca",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:09:14.618Z",
+  "usage": {
+    "inputTokens": 6180,
+    "cachedInputTokens": 4864,
+    "outputTokens": 891
+  },
+  "output": {
+    "id": "placeRegulator",
+    "code": "ST1",
+    "title": "Mount window regulator",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Mount window regulator",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "screwdriverMount",
+        "type": "screwdriver",
+        "why": "Drive 4 cross-pattern screws to fasten the window regulator",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "regulatorCradle",
+        "type": "partCradle",
+        "why": "Hold a presented stock of window regulators for assisted pick",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "carrierGuideRails",
+        "type": "guideRails",
+        "why": "Single-file locating/support rails for the trim carrier while holes are aligned",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "pickRobot",
+        "type": "scara",
+        "why": "Move the window regulator from the cradle to the carrier and lower to mounting holes",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "stopConveyors",
+      "pickPlace",
+      "move",
+      "grip",
+      "release",
+      "toolOn",
+      "pickPlace",
+      "move"
+    ]
+  }
+}

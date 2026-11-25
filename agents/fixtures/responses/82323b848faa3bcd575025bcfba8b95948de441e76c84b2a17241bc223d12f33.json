@@ -1,0 +1,36 @@
+{
+  "key": "82323b848faa3bcd575025bcfba8b95948de441e76c84b2a17241bc223d12f33",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:00:36.966Z",
+  "usage": {
+    "inputTokens": 6508,
+    "cachedInputTokens": 0,
+    "outputTokens": 141
+  },
+  "output": {
+    "params": {
+      "hygienicGuardFence": {
+        "length": 4.1,
+        "height": 2,
+        "panelWidth": 1.6
+      },
+      "slicerUnit": {
+        "name": "MACHINE",
+        "note": null,
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 2.34,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "slicerInfeedWorkTable": {
+        "length": 1.2,
+        "width": 0.7,
+        "height": 0.9,
+        "top": "stainless"
+      }
+    }
+  }
+}

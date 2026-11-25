@@ -1,0 +1,21 @@
+{
+  "key": "090d34f5063c340c83c2c277ab1f18f73f7bbaf1bbcada5b5923df14150efc50",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:01:14.755Z",
+  "usage": {
+    "inputTokens": 5460,
+    "cachedInputTokens": 0,
+    "outputTokens": 100
+  },
+  "output": {
+    "params": {
+      "dateLabelApplicator": {
+        "applyHeight": 1.25,
+        "stroke": 0.3,
+        "padWidth": 0.06
+      }
+    }
+  }
+}

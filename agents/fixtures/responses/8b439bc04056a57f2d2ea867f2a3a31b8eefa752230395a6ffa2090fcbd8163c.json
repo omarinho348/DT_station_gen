@@ -1,0 +1,31 @@
+{
+  "key": "8b439bc04056a57f2d2ea867f2a3a31b8eefa752230395a6ffa2090fcbd8163c",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:03:53.119Z",
+  "usage": {
+    "inputTokens": 6446,
+    "cachedInputTokens": 0,
+    "outputTokens": 113
+  },
+  "output": {
+    "params": {
+      "capsuleFeeder": {
+        "bowlDiameter": 0.3,
+        "hoseLength": 1.2
+      },
+      "capsuleIndexer": {
+        "radius": 0.6,
+        "openingWidth": 0.25,
+        "color": "machineGrey"
+      },
+      "capsuleBuffer": {
+        "slots": 4,
+        "pitch": 0.5,
+        "width": 0.5,
+        "color": "machineGrey"
+      }
+    }
+  }
+}

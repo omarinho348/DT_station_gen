@@ -1,0 +1,29 @@
+{
+  "key": "38595924dc5fe1f74181534a6fda3804d37d93f4e108446973bc580ce4a0a163",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:02:39.341Z",
+  "usage": {
+    "inputTokens": 7771,
+    "cachedInputTokens": 0,
+    "outputTokens": 283
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "cuttingSaw.work",
+        "seconds": 40,
+        "task": "Cut to finished size"
+      },
+      {
+        "use": "cuttingSaw.work",
+        "seconds": 0.5,
+        "task": "Idle / stabilize after cut"
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

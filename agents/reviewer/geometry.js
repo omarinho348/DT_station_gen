@@ -128,6 +128,8 @@ export function geometryFindings(registry, line, paths, { tolerance = TOLERANCE 
         const same = a.station === b.station;
         findings.push({
           check: 'geometry', severity: 'warning', path: b.path,
+          // What clashed, for repairs in code (the Builder deepens a shell whose rear furniture is hit).
+          clash: { stations: [a.station, b.station], ids: [a.id, b.id], depth: clash.depth },
           message: same
             ? `station "${a.station}": ${a.label} and ${b.label} overlap (${clash.parts}, ${mm} mm to clear)`
             : `${where(a)} and ${where(b)} overlap (${clash.parts}, ${mm} mm to clear)`,

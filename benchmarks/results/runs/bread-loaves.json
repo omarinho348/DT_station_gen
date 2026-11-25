@@ -3,12 +3,12 @@
   "stage": "builder",
   "ok": false,
   "cost": {
-    "spec": 0.0053495,
-    "builder": 0.01191829,
+    "spec": 0,
+    "builder": 0,
     "editor": 0,
     "reviewer": 0
   },
-  "seconds": 44.331,
+  "seconds": 96,
   "brief": {
     "status": "draft",
     "retries": 0,
@@ -34,8 +34,10 @@
       "id": "coolingBuffer",
       "title": "Cool loaves by dwell",
       "ok": true,
-      "refusals": 0,
-      "phases": [],
+      "refusals": 1,
+      "phases": [
+        "layout"
+      ],
       "kind": "named",
       "types": [
         "accumulationTable",
@@ -47,33 +49,94 @@
     {
       "id": "slicingStation",
       "title": "Slice loaves to sandwiches",
+      "ok": true,
+      "refusals": 1,
+      "phases": [
+        "layout"
+      ],
+      "kind": "placeholder",
+      "types": [
+        "guardFence",
+        "genericMachine",
+        "workTable"
+      ],
+      "problems": []
+    },
+    {
+      "id": "baggingStation",
+      "title": "Bag sliced loaf",
+      "ok": true,
+      "refusals": 1,
+      "phases": [
+        "machines"
+      ],
+      "kind": "placeholder",
+      "types": [
+        "genericMachine",
+        "beltEndStop",
+        "guardFence"
+      ],
+      "problems": []
+    },
+    {
+      "id": "clipClosingStation",
+      "title": "Clip close bag",
+      "ok": true,
+      "refusals": 2,
+      "phases": [
+        "machines",
+        "layout"
+      ],
+      "kind": "placeholder",
+      "types": [
+        "genericMachine",
+        "photoEye"
+      ],
+      "problems": []
+    },
+    {
+      "id": "dateLabelStation",
+      "title": "Apply date label",
+      "ok": true,
+      "refusals": 0,
+      "phases": [],
+      "kind": "named",
+      "types": [
+        "labelApplicator"
+      ],
+      "problems": []
+    },
+    {
+      "id": "checkWeigher",
+      "title": "Weigh check and accept/reject",
       "ok": false,
       "refusals": 5,
       "phases": [
-        "process",
-        "process",
-        "process",
-        "process",
+        "layout",
+        "layout",
+        "layout",
+        "layout",
         "process"
       ],
       "kind": "placeholder",
       "types": [
-        "beltConveyor",
+        "photoEye",
         "genericMachine",
-        "guardFence"
+        "visionScanner"
       ],
       "problems": [
-        "stations[1].process[0]: station \"slicingStation\": process › op #1 (grip): machine \"slicerClampsAndHead\" has no anchor \"tool\" (anchors: none)"
+        "stations[5]: station \"checkWeigher\": station \"checkWeigher\" port \"reject\": machine \"weighVision\" has no port \"rejectLane\" (ports: none)"
       ]
     }
   ],
-  "reason": "station \"slicingStation\" still failing after the retries: stations[1].process[0]: station \"slicingStation\": process › op #1 (grip): machine \"slicerClampsAndHead\" has no anchor \"tool\" (anchors: none)",
-  "totalCost": 0.017267789999999998,
+  "reason": "station \"checkWeigher\" still failing after the retries: stations[5]: station \"checkWeigher\": station \"checkWeigher\" port \"reject\": machine \"weighVision\" has no port \"rejectLane\" (ports: none)",
+  "totalCost": 0.034,
   "mode": "live",
   "models": {
     "builder": "gpt-5.4-nano",
     "others": "gpt-5.4-nano"
   },
   "retries": 4,
-  "time": "2026-11-25T02:22:52.010Z"
+  "time": "2026-11-25T14:05:01.231Z",
+  "costNote": "cost and time of the live run (step 13.3); the run file was rewritten by a $0 rerun from the cache that recorded the answers"
 }

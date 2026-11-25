@@ -1,0 +1,25 @@
+{
+  "key": "b92ca61deec344e5cae229bf84e37db354254611ac756649cdd1f2933999aff8",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:06:55.336Z",
+  "usage": {
+    "inputTokens": 7691,
+    "cachedInputTokens": 6912,
+    "outputTokens": 1081
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "pumpHeadRobot.moveUnit",
+        "clearance": 0.12,
+        "task": "Transfer pump head from feeder to bottle neck (use station’s reachable neck target)",
+        "to": "pumpHeadFeeder.outlet"
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

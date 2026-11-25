@@ -1,0 +1,50 @@
+{
+  "key": "b55c80669ef5e982ab3508f2b9a9e0c696fd51b21d064a6f97b037700ae4fa4b",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:06:21.757Z",
+  "usage": {
+    "inputTokens": 6145,
+    "cachedInputTokens": 4864,
+    "outputTokens": 335
+  },
+  "output": {
+    "id": "filling",
+    "code": "ST1",
+    "title": "Fill 250 mL body lotion",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Fill 250 mL",
+        "color": "#1E88E5"
+      }
+    },
+    "equipment": [
+      {
+        "id": "filler",
+        "type": "filler",
+        "why": "Volumetric multi-head fill of the lotion bottle",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "supplyTank",
+        "type": "supplyTank",
+        "why": "Provides thick lotion to the filler heads",
+        "place": "besideLine",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "st1Conveyor",
+    "ports": null,
+    "ops": []
+  }
+}

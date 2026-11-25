@@ -35,6 +35,7 @@ import { endpoint } from '../../lib/line/layout.js';
 import { reviewGeometry } from './geometry.js';
 import { reviewPlay } from './play.js';
 import { reviewCompiled } from './compiled.js';
+import { paramFields } from '../../lib/registry.js';
 
 const PHASES = ['prepare', 'intake', 'process', 'output'];
 
@@ -277,6 +278,11 @@ export function edgeFindings(registry, factory, beltHeight) {
       const carried = [...new Set(Object.values(spec.ports ?? {}).map((p) => p.carries))];
       if (carried.length && !carried.includes(from.carries)) {
         error(`${at}.transport.type`, `transport "${e.transport.type}" carries ${carried.join(' / ')}, not ${from.carries}`, 'pick a transport made for it (see the catalog: transport and conveyor components, their ports say what they carry)');
+      } else if (!(spec.ports?.input && spec.ports?.output) || !paramFields(registry.getComponent(e.transport.type).params).some((f) => f.key === 'length')) {
+        // A transfer runs from one station's output to the next one's input and stretches over the gap
+        // between them. A component without input / output ports or a length (a lift) can't: it stood
+        // in the middle of the gap, a void either side (owner report, 2026-11-25).
+        error(`${at}.transport.type`, `transport "${e.transport.type}" can't fill the gap between the stations: a transfer needs input and output ports and a length (it has ports ${Object.keys(spec.ports ?? {}).join(', ') || 'none'}${paramFields(registry.getComponent(e.transport.type).params).some((f) => f.key === 'length') ? '' : ', no length'})`, 'use a conveyor (input → output, with a length), e.g. the one the stations run on');
       }
     }
   });

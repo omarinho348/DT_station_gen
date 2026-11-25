@@ -1,0 +1,53 @@
+{
+  "key": "b9ad80a02e583251be160a29640c259eaf35f947af5c81eda99600a7c213bc56",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:01:28.089Z",
+  "usage": {
+    "inputTokens": 6475,
+    "cachedInputTokens": 5888,
+    "outputTokens": 748
+  },
+  "output": {
+    "id": "checkWeigher",
+    "code": "ST6",
+    "title": "Weigh check and accept/reject",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "inPlacePhotoEye",
+        "type": "photoEye",
+        "why": "Confirms the bag is correctly positioned on the check-weigh platform.",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "weighMachine",
+        "type": "genericMachine",
+        "why": "Measures bag weight and provides a quality verdict used for routing.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "weighVision",
+        "type": "visionScanner",
+        "why": "Scans/inspects at the work place and routes PASS vs REJECT via the reject lane.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "weighConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

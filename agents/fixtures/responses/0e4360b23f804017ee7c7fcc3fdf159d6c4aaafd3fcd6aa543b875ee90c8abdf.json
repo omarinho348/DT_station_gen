@@ -1,0 +1,28 @@
+{
+  "key": "0e4360b23f804017ee7c7fcc3fdf159d6c4aaafd3fcd6aa543b875ee90c8abdf",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:03:39.144Z",
+  "usage": {
+    "inputTokens": 6889,
+    "cachedInputTokens": 0,
+    "outputTokens": 178
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "shirtInPlaceEye.detect",
+        "seconds": 0.3
+      },
+      {
+        "use": "foldingMachine.work",
+        "seconds": 4,
+        "task": "Fold cycle"
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

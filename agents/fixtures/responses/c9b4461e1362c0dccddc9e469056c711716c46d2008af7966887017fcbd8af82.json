@@ -1,0 +1,23 @@
+{
+  "key": "c9b4461e1362c0dccddc9e469056c711716c46d2008af7966887017fcbd8af82",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:01:16.599Z",
+  "usage": {
+    "inputTokens": 7076,
+    "cachedInputTokens": 0,
+    "outputTokens": 108
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "dateLabelApplicator.applyLabel",
+        "seconds": 1.2
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

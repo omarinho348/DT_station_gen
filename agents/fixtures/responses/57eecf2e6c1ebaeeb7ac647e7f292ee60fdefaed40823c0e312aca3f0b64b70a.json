@@ -1,0 +1,28 @@
+{
+  "key": "57eecf2e6c1ebaeeb7ac647e7f292ee60fdefaed40823c0e312aca3f0b64b70a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:01:07.791Z",
+  "usage": {
+    "inputTokens": 6021,
+    "cachedInputTokens": 4864,
+    "outputTokens": 159
+  },
+  "output": {
+    "params": {
+      "bagClipCloser": {
+        "name": "Bag clipper",
+        "note": "Clip onto bag mouth",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "clipPresenceEye": {
+        "span": 0.4
+      }
+    }
+  }
+}

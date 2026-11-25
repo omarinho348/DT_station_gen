@@ -1,6 +1,6 @@
 // The first live Builder run (step 8.6), replayed in mock mode from its recorded answers
 // (agents/fixtures/responses/, recorded by scripts/builder-live.mjs on gpt-5.4-nano; re-recorded in step
-// 12.2 after the Builder's schemas changed). The real LLM
+// 12.2 after the Builder's schemas changed, and in 13.3 after the routines). The real LLM
 // layer, Builder, placer, reviewer and play: only the model's answers come from the recording.
 // If the catalog, the Builder's prompt or its schemas change, the cache keys change and this fails with
 // a mock-mode error: re-record with `node scripts/builder-live.mjs` (a live call, about $0.005).
@@ -32,8 +32,11 @@ describe('the recorded live run (juice line, filling)', () => {
     expect(gates).toEqual([['layout', true], ['machines', true], ['process', true]]);
     expect(llm.status().calls).toEqual({ live: 0, cached: 0, mock: 3, refused: 0 });
     const station = s.factory().stations[0];
-    expect(station.equipment.map((e) => e.type)).toEqual(['supplyTank', 'filler', 'dispenseNozzle']);
+    expect(station.equipment.map((e) => e.type)).toEqual(['beltConveyor', 'supplyTank', 'filler']);
+    // Re-recorded in step 13.3: the model chose the filler's routine (with the supply tank) instead of
+    // writing ops; it expands to the fill op, fitted to the bottle.
     expect(station.process.map((o) => o.op)).toEqual(['fill']);
+    expect(station.process[0].supply).toEqual({ machine: 'juiceSupply' });
     expect(s.view().log.filter((l) => l.action === 'draft').every((l) => l.retries === 0)).toBe(true);
   }, 60000);
 });

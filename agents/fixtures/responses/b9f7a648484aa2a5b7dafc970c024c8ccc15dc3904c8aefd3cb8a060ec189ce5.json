@@ -1,0 +1,100 @@
+{
+  "key": "b9f7a648484aa2a5b7dafc970c024c8ccc15dc3904c8aefd3cb8a060ec189ce5",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:03:08.630Z",
+  "usage": {
+    "inputTokens": 6554,
+    "cachedInputTokens": 5888,
+    "outputTokens": 426
+  },
+  "output": {
+    "id": "inspectDimensions",
+    "code": "ST4",
+    "title": "Periodic dimension inspection",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST4",
+        "title": "Periodic inspection",
+        "color": "#D5B28A"
+      }
+    },
+    "equipment": [
+      {
+        "id": "hmiPanel",
+        "type": "hmi",
+        "why": "Operator input and inspection status display",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": "walkway",
+        "turned": null
+      },
+      {
+        "id": "photoInPlace",
+        "type": "photoEye",
+        "why": "Confirm panel is present at inspection position",
+        "place": "downstream",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "dimensionBench",
+        "type": "genericMachine",
+        "why": "Operator-led dimension check workflow at the inspection station",
+        "place": "downstream",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "rejectSidePusher",
+        "type": "sidePusher",
+        "why": "Divert out-of-tolerance panels to manual rework/scrap outfeed",
+        "place": "besideLine",
+        "at": "output",
+        "on": null,
+        "side": "equipment",
+        "turned": true
+      },
+      {
+        "id": "towerLight",
+        "type": "stackLight",
+        "why": "OK/reject indication to operator",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": "walkway",
+        "turned": null
+      },
+      {
+        "id": "statusDash",
+        "type": "statusMonitor",
+        "why": "Show periodic inspection results and counts",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": "walkway",
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": [
+      {
+        "name": "reject",
+        "machine": "rejectSidePusher",
+        "port": "stop",
+        "direction": "out"
+      }
+    ],
+    "ops": [
+      "decide",
+      "push"
+    ]
+  }
+}

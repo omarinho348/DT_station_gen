@@ -1,0 +1,50 @@
+{
+  "key": "6592513dc1f64a7e57611d195291bc0e6807ec3c189fe84b62b5c0de32245838",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:06:01.431Z",
+  "usage": {
+    "inputTokens": 6331,
+    "cachedInputTokens": 5888,
+    "outputTokens": 387
+  },
+  "output": {
+    "id": "capping",
+    "code": "ST2",
+    "title": "Screw cap",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Screw cap",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "guardFence",
+        "type": "guardFence",
+        "why": "Safety guarding around the capping work area",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "capperPortal",
+        "type": "capper",
+        "why": "Screws the blue cap onto each filled bottle",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": []
+  }
+}

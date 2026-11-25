@@ -1,0 +1,39 @@
+{
+  "key": "2c3028ebd247b9a48dac7cc2e8157c7a57169cc73628b5c0a47736fef7724d2f",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:07:03.132Z",
+  "usage": {
+    "inputTokens": 6797,
+    "cachedInputTokens": 0,
+    "outputTokens": 255
+  },
+  "output": {
+    "params": {
+      "boardPhotoEye": {
+        "span": 0.4
+      },
+      "solderPasteDispenser": {
+        "name": "SOLDER PASTE DISPENSER",
+        "note": null,
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "solderPasteVision": {
+        "length": 2.7,
+        "width": 1.44,
+        "railHeight": 2.05,
+        "archWidth": 1,
+        "archBottom": 1.2
+      },
+      "dispenseNozzleTool": {
+        "jetLength": 0.12,
+        "liquid": "oil"
+      }
+    }
+  }
+}

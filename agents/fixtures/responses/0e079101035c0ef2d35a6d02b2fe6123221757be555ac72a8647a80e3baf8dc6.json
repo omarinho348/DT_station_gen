@@ -1,0 +1,50 @@
+{
+  "key": "0e079101035c0ef2d35a6d02b2fe6123221757be555ac72a8647a80e3baf8dc6",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:01:05.459Z",
+  "usage": {
+    "inputTokens": 6367,
+    "cachedInputTokens": 5888,
+    "outputTokens": 290
+  },
+  "output": {
+    "id": "clipClosingStation",
+    "code": "ST4",
+    "title": "Clip close bag",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST4",
+        "title": "Clip close bag",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "bagClipCloser",
+        "type": "genericMachine",
+        "why": "Closes the plastic bag mouth with a clip at a fixed position",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "clipPresenceEye",
+        "type": "photoEye",
+        "why": "Verifies the clip is seated (presence/position check)",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": []
+  }
+}

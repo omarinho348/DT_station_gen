@@ -1,0 +1,35 @@
+{
+  "key": "d45f1b15ed45a8006286307e6913fb8bcf1ce018d6e0a7ac2449817fe733b0bc",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:01:46.090Z",
+  "usage": {
+    "inputTokens": 6589,
+    "cachedInputTokens": 0,
+    "outputTokens": 260
+  },
+  "output": {
+    "params": {
+      "inPlacePhotoEye": {
+        "span": 0.4
+      },
+      "weighMachine": {
+        "name": "Check Weigher",
+        "note": "Weigh check and PASS/REJECT routing",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 1.9,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "weighVision": {
+        "length": 2.7,
+        "width": 1.44,
+        "railHeight": 2.05,
+        "archWidth": 1,
+        "archBottom": 1.3
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "key": "e54142713c613a29aec0882a0b9ad536409cbe9d74a62cf4c60e1ddfc386daa2",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:03:44.860Z",
+  "usage": {
+    "inputTokens": 6335,
+    "cachedInputTokens": 5888,
+    "outputTokens": 367
+  },
+  "output": {
+    "id": "foldTo250x300",
+    "code": "ST2",
+    "title": "Fold to 250×300 mm",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Fold to 250×300 mm",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "foldingMachine",
+        "type": "genericMachine",
+        "why": "Folds the T-shirt to the target 250×300 mm size.",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

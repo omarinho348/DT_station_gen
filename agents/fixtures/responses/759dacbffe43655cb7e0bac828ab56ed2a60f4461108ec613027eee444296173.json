@@ -1,0 +1,70 @@
+{
+  "key": "759dacbffe43655cb7e0bac828ab56ed2a60f4461108ec613027eee444296173",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:02:32.889Z",
+  "usage": {
+    "inputTokens": 6144,
+    "cachedInputTokens": 4864,
+    "outputTokens": 411
+  },
+  "output": {
+    "id": "cutToSize",
+    "code": "ST1",
+    "title": "Saw: cut to finished size",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Saw: cut to finished size",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "cuttingSaw",
+        "type": "genericMachine",
+        "why": "Cuts the chipboard panel to required finished dimensions",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "cuttingTable",
+        "type": "workTable",
+        "why": "Provides cutting surface and panel stop/clamping area",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "safetyEnclosure",
+        "type": "shutterEnclosure",
+        "why": "Guards the cutting operation for operator safety",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "dustGuardFence",
+        "type": "guardFence",
+        "why": "Additional safety perimeter around the cutting station",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

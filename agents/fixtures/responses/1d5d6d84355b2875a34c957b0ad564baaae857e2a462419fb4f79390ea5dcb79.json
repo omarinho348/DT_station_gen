@@ -1,0 +1,33 @@
+{
+  "key": "1d5d6d84355b2875a34c957b0ad564baaae857e2a462419fb4f79390ea5dcb79",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:00:52.635Z",
+  "usage": {
+    "inputTokens": 6504,
+    "cachedInputTokens": 5888,
+    "outputTokens": 129
+  },
+  "output": {
+    "params": {
+      "baggerCell": {
+        "name": "Bag & settle",
+        "note": "Guide loaf into bag",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 2,
+        "passThrough": true,
+        "carries": "unit"
+      },
+      "loafStop": {
+        "span": 0.58
+      },
+      "safetyFence": {
+        "length": 4.1,
+        "height": 2,
+        "panelWidth": 1.6
+      }
+    }
+  }
+}

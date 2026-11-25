@@ -1,0 +1,40 @@
+{
+  "key": "e868117c1bcecae8a9440de895ab62884453910f84853ac89b37e910c2006c3e",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:02:42.618Z",
+  "usage": {
+    "inputTokens": 6201,
+    "cachedInputTokens": 5888,
+    "outputTokens": 421
+  },
+  "output": {
+    "id": "applyEdgeBand",
+    "code": "ST2",
+    "title": "Edge band gluing & press",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Edge band gluing & press",
+        "color": "#D5B28A"
+      }
+    },
+    "equipment": [
+      {
+        "id": "edgeBandGluingUnit",
+        "type": "genericMachine",
+        "why": "Performs glue application, edge band placement, pressing/hold, and flush trimming within one work cell.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "panelConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

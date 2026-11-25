@@ -1,0 +1,26 @@
+{
+  "key": "14aa47266153fbb20a8963f5c1ab8833c8d599a9ce1e4860b37a843049c29ac6",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:00:31.579Z",
+  "usage": {
+    "inputTokens": 7150,
+    "cachedInputTokens": 0,
+    "outputTokens": 121
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "wait",
+        "seconds": 2.5,
+        "label": "Cooling dwell on accumulation table",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "key": "1dee5ac1ffb20ba5139797e71996987ae957355932245c4a6984c5b8bc145f4a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:02:18.144Z",
+  "usage": {
+    "inputTokens": 6685,
+    "cachedInputTokens": 5888,
+    "outputTokens": 141
+  },
+  "output": {
+    "params": {
+      "dosingHead": {
+        "name": "Dosing head",
+        "note": "Dose tablets into cavities",
+        "length": null,
+        "depth": null,
+        "height": null,
+        "passThrough": null,
+        "carries": "unit"
+      },
+      "cavityIndexStop": {
+        "span": null
+      },
+      "unitConveyor": {
+        "length": null,
+        "beltWidth": 0.34,
+        "guides": null,
+        "guideGap": null,
+        "drive": null,
+        "carries": "unit"
+      }
+    }
+  }
+}

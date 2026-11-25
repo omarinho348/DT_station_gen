@@ -1,0 +1,53 @@
+{
+  "key": "f83c94f3b323f99b89d46077fd3b02c5fd33babe5aa169e006051e88378de324",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:01:32.250Z",
+  "usage": {
+    "inputTokens": 6471,
+    "cachedInputTokens": 5888,
+    "outputTokens": 506
+  },
+  "output": {
+    "id": "checkWeigher",
+    "code": "ST6",
+    "title": "Weigh check and accept/reject",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "inPlacePhotoEye",
+        "type": "photoEye",
+        "why": "Confirms the (bag/pallet carrier) is correctly positioned on the check-weigh platform.",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "weighMachine",
+        "type": "genericMachine",
+        "why": "Performs the weight check and provides a quality verdict used for routing.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "weighVision",
+        "type": "visionScanner",
+        "why": "Scans/inspects at the work place and routes PASS vs REJECT via the reject lane.",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "weighPalletConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

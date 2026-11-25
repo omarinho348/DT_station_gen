@@ -1,0 +1,57 @@
+{
+  "key": "06f90bc7fb1e3d41d99cf17b31172a6c87f6b27020627db54aaffe7a13e12d01",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:01:59.916Z",
+  "usage": {
+    "inputTokens": 7928,
+    "cachedInputTokens": 0,
+    "outputTokens": 249
+  },
+  "output": {
+    "params": {
+      "tabletBlisterPackingConveyor": {
+        "length": null,
+        "beltWidth": null,
+        "guides": null,
+        "guideGap": null,
+        "drive": null,
+        "carries": null
+      },
+      "floorSlab": {
+        "length": null,
+        "depth": null,
+        "walkway": null
+      },
+      "guardFenceForming": {
+        "length": null,
+        "height": null,
+        "panelWidth": null
+      },
+      "shutterEnclosureForming": {
+        "length": null,
+        "width": null,
+        "height": null,
+        "shutterRise": null,
+        "extraction": null
+      },
+      "formingZone": {
+        "name": null,
+        "note": null,
+        "length": null,
+        "depth": null,
+        "height": null,
+        "passThrough": null,
+        "carries": null
+      },
+      "formingHmi": {
+        "height": null
+      },
+      "formingStackLight": {
+        "height": null,
+        "buzzer": null
+      }
+    }
+  }
+}

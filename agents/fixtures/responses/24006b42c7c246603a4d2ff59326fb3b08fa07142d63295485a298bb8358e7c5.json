@@ -1,0 +1,62 @@
+{
+  "key": "24006b42c7c246603a4d2ff59326fb3b08fa07142d63295485a298bb8358e7c5",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:00:49.066Z",
+  "usage": {
+    "inputTokens": 6191,
+    "cachedInputTokens": 5888,
+    "outputTokens": 734
+  },
+  "output": {
+    "id": "baggingStation",
+    "code": "ST3",
+    "title": "Bag sliced loaf",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST3",
+        "title": "Bag sliced loaf",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "baggerCell",
+        "type": "genericMachine",
+        "why": "Open/position the plastic bag mouth, guide the loaf in, and tamp/settle to consistent bag height",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "loafStop",
+        "type": "beltEndStop",
+        "why": "Stops/positions each loaf at the bag-receiving zone",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "safetyFence",
+        "type": "guardFence",
+        "why": "Provides operator safety shielding around the bagging work zone",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "bagConveyor",
+    "ports": null,
+    "ops": [
+      "operate"
+    ]
+  }
+}

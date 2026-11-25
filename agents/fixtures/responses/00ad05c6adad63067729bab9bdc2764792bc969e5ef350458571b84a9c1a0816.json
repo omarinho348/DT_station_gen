@@ -1,0 +1,37 @@
+{
+  "key": "00ad05c6adad63067729bab9bdc2764792bc969e5ef350458571b84a9c1a0816",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:03:27.676Z",
+  "usage": {
+    "inputTokens": 6628,
+    "cachedInputTokens": 0,
+    "outputTokens": 161
+  },
+  "output": {
+    "params": {
+      "infeedBelt": {
+        "length": 4,
+        "beltWidth": 0.34,
+        "guides": true,
+        "guideGap": 0.22,
+        "drive": true,
+        "carries": "unit"
+      },
+      "inputStop": {
+        "span": 0.58
+      },
+      "shirtInPlaceEye": {
+        "span": 0.4
+      },
+      "stationHmi": {
+        "height": 1.2
+      },
+      "stackLight": {
+        "height": 2.1,
+        "buzzer": true
+      }
+    }
+  }
+}

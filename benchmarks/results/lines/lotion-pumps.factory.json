@@ -24,12 +24,13 @@
     {
       "id": "filling",
       "code": "ST1",
-      "title": "Fill 250 mL",
+      "title": "Fill 250 mL body lotion",
       "shell": {
         "type": "assemblyCell",
         "params": {
           "code": "ST1",
-          "title": "Fill 250 mL"
+          "title": "Fill 250 mL",
+          "color": "#1E88E5"
         }
       },
       "equipment": [
@@ -37,9 +38,9 @@
           "id": "filler",
           "type": "filler",
           "params": {
-            "heads": 4,
+            "heads": 1,
             "pitch": 0.4,
-            "tipHeight": 0.3,
+            "tipHeight": 0.15,
             "stroke": 0.25
           },
           "position": [
@@ -58,7 +59,7 @@
             "legHeight": 0.55,
             "pumpOffset": 0.975,
             "tag": "T-101",
-            "contents": "Body lotion · 800 L"
+            "contents": "SAE 15W-40 · 800 L"
           },
           "position": [
             -0.52,
@@ -69,28 +70,95 @@
         }
       ],
       "conveyor": "line",
-      "inputStage": "raw",
+      "inputStage": "processed",
       "process": [
         {
           "op": "fill",
           "machine": "filler",
-          "item": "product",
-          "units": "Bottles",
+          "units": "Unit",
           "liquid": "body lotion",
           "timing": {
             "dispense": 5
           },
           "supply": {
-            "machine": "filler",
-            "draw": 1,
-            "refillBelow": 0.2,
-            "refillTo": 1
-          },
-          "label": "Fill 250 mL",
-          "state": "FILL",
-          "status": {
-            "fillLevel": "100%"
+            "machine": "supplyTank"
           }
+        }
+      ],
+      "feed": {
+        "fromLift": true
+      }
+    },
+    {
+      "id": "pumpHeadPlacement",
+      "code": "ST2",
+      "title": "Place pump head",
+      "shell": {
+        "type": "assemblyCell",
+        "params": {
+          "code": "ST2",
+          "title": "Place pump head"
+        }
+      },
+      "equipment": [
+        {
+          "id": "pumpHeadFeeder",
+          "type": "vibratoryFeeder",
+          "params": {
+            "bowlDiameter": 0.26,
+            "hoseLength": 1.2
+          },
+          "position": [
+            -1.6025,
+            0,
+            -0.54
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "pumpHeadRobot",
+          "type": "scara",
+          "params": {
+            "link1": 0.55,
+            "link2": 0.5,
+            "armHeight": 1.45,
+            "stroke": 0.4,
+            "maxGap": 0.26,
+            "fingerLength": 0.1,
+            "screwdriver": false
+          },
+          "position": [
+            0,
+            0,
+            -0.41
+          ],
+          "rotationY": 0
+        }
+      ],
+      "conveyor": "line",
+      "inputStage": "processed",
+      "process": [
+        {
+          "op": "pickPlace",
+          "machine": "pumpHeadRobot",
+          "item": "product",
+          "clearance": 0.12,
+          "name": "Place pump head onto the bottle",
+          "from": {
+            "item": "product",
+            "ref": "grasp"
+          },
+          "to": {
+            "machine": "pumpHeadFeeder",
+            "port": "outlet",
+            "offset": [
+              0,
+              0.131,
+              0
+            ]
+          },
+          "gap": 0.04,
+          "openGap": 0.09
         }
       ],
       "feed": {
@@ -99,6 +167,16 @@
     }
   ],
   "graph": {
-    "edges": []
+    "edges": [
+      {
+        "from": "filling.output",
+        "to": "pumpHeadPlacement.input",
+        "transport": {
+          "kind": "conveyor",
+          "type": "liftUnit",
+          "params": {}
+        }
+      }
+    ]
   }
 }

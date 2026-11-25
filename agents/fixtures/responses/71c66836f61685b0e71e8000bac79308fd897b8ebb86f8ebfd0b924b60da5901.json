@@ -1,0 +1,24 @@
+{
+  "key": "71c66836f61685b0e71e8000bac79308fd897b8ebb86f8ebfd0b924b60da5901",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:02:20.705Z",
+  "usage": {
+    "inputTokens": 7740,
+    "cachedInputTokens": 0,
+    "outputTokens": 193
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "dosingHead.work",
+        "seconds": 1,
+        "task": "Dose tablets into each blister cavity"
+      }
+    ],
+    "output": null,
+    "inputStage": "raw"
+  }
+}

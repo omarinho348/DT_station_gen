@@ -1,7 +1,7 @@
 // The LLM layer (agents/llm.js, Phase 8 step 1): budget guard, response cache, mock mode, ledger.
 // No network anywhere: live mode runs against a fake client, in a temporary project root.
-import { describe, it, expect, beforeEach } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync } from 'node:fs';
+import { rmSync, describe, it, expect, beforeEach } from 'vitest';
+import { rmSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createLlm, llmConfig, costOf, cacheKey, estimateTokens, LlmError } from '../../agents/llm.js';
@@ -187,6 +187,10 @@ describe('live mode (fake client)', () => {
     const mock = createLlm({ env: { ...LIVE, LLM_MODE: 'mock' }, root: root, client: fakeClient() });
     expect(await ask(mock)).toMatchObject({ output: { stations: 6 }, source: 'mock' });
     expect(() => live.record('f'.repeat(64))).toThrow(/no cached answer with key ffffffffffff/);
+    // An answer replayed from a fixture in a live run (not in the cache): already recorded, no error
+    // (the step 13.3 benchmark run stopped here before).
+    rmSync(join(root, '.agent-cache', 'responses'), { recursive: true, force: true });
+    expect(() => live.record(r.key)).not.toThrow();
   });
 });
 

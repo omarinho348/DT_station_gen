@@ -1,0 +1,25 @@
+{
+  "key": "e7652b65ed9772d92eb4147757dfd3a7a1abf55d23df6726a92d2ed15ec17642",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:06:25.842Z",
+  "usage": {
+    "inputTokens": 7654,
+    "cachedInputTokens": 0,
+    "outputTokens": 153
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "filler.fillUnit",
+        "seconds": 5,
+        "liquid": "body lotion",
+        "supply": "supplyTank"
+      }
+    ],
+    "output": null,
+    "inputStage": "processed"
+  }
+}

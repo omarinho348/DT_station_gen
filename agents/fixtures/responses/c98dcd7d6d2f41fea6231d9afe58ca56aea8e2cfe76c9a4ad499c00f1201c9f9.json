@@ -1,0 +1,80 @@
+{
+  "key": "c98dcd7d6d2f41fea6231d9afe58ca56aea8e2cfe76c9a4ad499c00f1201c9f9",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:04:18.469Z",
+  "usage": {
+    "inputTokens": 9545,
+    "cachedInputTokens": 8960,
+    "outputTokens": 939
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "op": "indexBatches",
+        "seconds": 1,
+        "conveyors": [
+          "capsuleIndexer",
+          "capsuleBuffer"
+        ],
+        "label": "Index capsule positions",
+        "state": null,
+        "status": null
+      },
+      {
+        "op": "accumulate",
+        "items": [
+          {
+            "item": "product",
+            "conveyor": "capsuleBuffer",
+            "to": {
+              "machine": "capsuleBuffer",
+              "port": "slot1",
+              "offset": null
+            }
+          },
+          {
+            "item": "product",
+            "conveyor": "capsuleBuffer",
+            "to": {
+              "machine": "capsuleBuffer",
+              "port": "slot2",
+              "offset": null
+            }
+          },
+          {
+            "item": "product",
+            "conveyor": "capsuleBuffer",
+            "to": {
+              "machine": "capsuleBuffer",
+              "port": "slot3",
+              "offset": null
+            }
+          },
+          {
+            "item": "product",
+            "conveyor": "capsuleBuffer",
+            "to": {
+              "machine": "capsuleBuffer",
+              "port": "slot4",
+              "offset": null
+            }
+          }
+        ],
+        "speed": null,
+        "ramp": null,
+        "blend": 0.06,
+        "alongside": null,
+        "stopping": false,
+        "unitTo": null,
+        "label": "Place/seat empty capsule bodies",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

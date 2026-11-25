@@ -1,0 +1,24 @@
+{
+  "key": "db0a39d95f565086a729ae00f3ce9b689b98ef358e65b7d9cbd39d4d9f7bdb8f",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:00:54.685Z",
+  "usage": {
+    "inputTokens": 7753,
+    "cachedInputTokens": 0,
+    "outputTokens": 89
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "baggerCell.work",
+        "seconds": 2.5,
+        "task": "Bag sliced loaf into plastic bag"
+      }
+    ],
+    "output": null,
+    "inputStage": "processed"
+  }
+}

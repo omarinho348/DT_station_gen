@@ -1,0 +1,536 @@
+{
+  "key": "f8cfc160fe808be116e62f144565078a28c3dab31bf08302c390b15715c3d9bb",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:08:50.452Z",
+  "usage": {
+    "inputTokens": 12425,
+    "cachedInputTokens": 9984,
+    "outputTokens": 3703
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "robotPlaceCells.moveUnit",
+        "clearance": 0.12,
+        "task": "Load frame to work pos",
+        "to": "wtModuleFrame.top"
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 1",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 2",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 3",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 4",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 5",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 6",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 7",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 8",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 9",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 10",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 11",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "pickPlace",
+        "machine": "robotPlaceCells",
+        "item": "product",
+        "from": {
+          "machine": "robotPlaceCells",
+          "port": "vfCellsOutlet",
+          "offset": null,
+          "yaw": null
+        },
+        "to": {
+          "machine": "robotPlaceCells",
+          "port": "wtModuleFrameTop",
+          "offset": null,
+          "yaw": null
+        },
+        "name": "Cell seat 12",
+        "gap": 0.02,
+        "openGap": 0.18,
+        "gripMotion": "grip",
+        "anchor": "tool",
+        "indicator": "holding",
+        "timing": {
+          "approach": 0.6,
+          "descend": 0.35,
+          "grip": 0.2,
+          "lift": 0.35,
+          "transfer": 0.8,
+          "place": 0.5,
+          "release": 0.2
+        },
+        "clearance": 0.12,
+        "clearY": null,
+        "onto": null,
+        "label": null,
+        "state": null,
+        "status": null
+      },
+      {
+        "use": "seatConfirmSensor.detect",
+        "seconds": 0.3
+      },
+      {
+        "op": "wait",
+        "seconds": 2,
+        "label": "All seat confirmations complete",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

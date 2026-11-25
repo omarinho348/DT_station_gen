@@ -21,12 +21,15 @@
 // `maxRetries` times per station; after that the station is handed to the owner with the findings.
 // Every model call goes through the LLM layer (budget guard, cache, mock mode).
 import { readFileSync } from 'node:fs';
-import { z } from 'zod';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { layoutSchema, machinesSchema, processSchema } from './schemas.js';
 import { catalogIndex, catalogDetail } from '../../lib/catalog.js';
+import { recipeLines, stationRecipes, candidatesFor, expandRecipes } from '../../lib/recipes.js';
+import { paramFields } from '../../lib/registry.js';
 import { placeStation, PlacementError } from '../../lib/station/place.js';
+import { measureUnit } from '../../lib/station/unit.js';
+import { reachPose, reachNeeded, workPlaceOf } from '../../lib/station/reach.js';
 import { review, formatFindings } from '../reviewer/deterministic.js';
 import { compileFactory } from '../../compiler/emit.js';
 import { writeCompiled } from '../../compiler/write.js';
@@ -43,6 +46,9 @@ export function phaseOf(finding, stationIndex) {
   if (finding.check === 'geometry') return 'layout';
   if (finding.path?.startsWith(`${base}.equipment`) && /\.params/.test(finding.path)) return 'machines';
   if (finding.path?.startsWith(`${base}.equipment`) || finding.path?.startsWith(`${base}.shell`) || finding.path?.startsWith(`${base}.ports`)) return 'layout';
+  // A station port naming a machine or port that isn't there is the layout's, wherever it is reported
+  // (the station's build reports it at the station's path; it went back to the process phase before).
+  if (/\bport "[^"]+": (unknown )?machine "[^"]+"/.test(finding.message ?? '')) return 'layout';
   return 'process';
 }
 
@@ -55,8 +61,10 @@ export function phaseOf(finding, stationIndex) {
  * @param {boolean} [o.play]      also play the run once a station passes (reach of worked-out targets)
  */
 export function createBuilder({ registry, llm, root = null, maxRetries = 2, play = true }) {
-  // The stable start of every prompt (instructions + catalog): the same bytes for the whole session.
-  const system = `${readFileSync(INSTRUCTIONS, 'utf8').trim()}\n\nCATALOG\n${JSON.stringify(catalogIndex(registry))}`;
+  // The stable start of every prompt (instructions + catalog + the machines' routines): the same bytes
+  // for the whole session. The routines are the Builder's alone, so the other agents' prompts (and
+  // their recorded answers) stay as they were.
+  const system = `${readFileSync(INSTRUCTIONS, 'utf8').trim()}\n\nCATALOG\n${JSON.stringify(catalogIndex(registry))}\n\nROUTINES (type.routine(args) — what it does)\n${JSON.stringify(recipeLines(registry))}`;
   const ctx = (line) => ({ beltHeight: line.conventions?.beltHeight ?? CONVENTIONS.beltHeight });
 
   const ask = async (schemaDef, task) => llm.call({
@@ -133,33 +141,58 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
   /** What a station hands over at its output (its conveyor's output port). */
   const goodsOf = (job, station) => goodsAt(job, conveyorOf(job, station), 'out');
 
-  /** Does a catalog conveyor carry these goods (its in / out ports)? */
-  function carries(type, goods) {
-    try {
-      const ports = Object.values(registry.componentSpec(type, {}, {}).ports ?? {});
-      return !goods || ports.some((p) => p.carries === goods);
-    } catch {
-      return false;
+  /**
+   * Can a catalog type serve as a line conveyor for these goods: a station's conveyor, or the transfer
+   * between two stations? It needs ports named input and output carrying them (a station's input /
+   * output default to those names) and a length (a transfer stretches over the gap). A lift (top /
+   * bottom, fixed size) carries pallets too but is neither: picked by goods alone, it left station 2
+   * with no input port and a void between the stations (owner report, 2026-11-25).
+   */
+  const conveysCache = new Map();
+  function conveys(type, goods) {
+    const k = `${type}|${goods}`;
+    if (!conveysCache.has(k)) {
+      let ok = false;
+      try {
+        const def = registry.getComponent(type);
+        const ports = registry.componentSpec(type, {}, {}).ports ?? {};
+        ok = ['conveyor', 'transport'].includes(def.category)
+          && ports.input?.direction === 'in' && ports.output?.direction === 'out'
+          && (!goods || (ports.input.carries === goods && ports.output.carries === goods))
+          && paramFields(def.params).some((f) => f.key === 'length');
+      } catch { ok = false; }
+      conveysCache.set(k, ok);
     }
+    return conveysCache.get(k);
   }
 
   /**
-   * The transport of the edge after `station`: the plan's, if it carries what the station hands over;
-   * otherwise the first catalog conveyor that does (a station on pallet carriers needs a pallet
-   * conveyor; benchmark tuning set, step 12.2).
+   * A transfer's params from a conveyor's: without `length` (it comes from the layout: the gap it
+   * fills), and without a work place where the type has one to switch off (a transfer only carries;
+   * a pallet conveyor's work stop also wants the conveyor longer than its carrier, which a short
+   * transfer is not: as the printer line's hand-written transfers).
+   */
+  const transferParams = (type, params = {}) => {
+    const out = Object.fromEntries(Object.entries(params).filter(([k]) => k !== 'length'));
+    const field = paramFields(registry.getComponent(type).params).find((f) => f.key === 'workStop');
+    if (field?.kind === 'boolean') out.workStop = false;
+    return out;
+  };
+
+  /**
+   * The transport of the edge after `station`, for the goods it hands over: the plan's, if it conveys
+   * them; else the station's own conveyor type (the same carriers: a pallet station is followed by a
+   * pallet conveyor), with its params of the same name (a carrier length); else the first catalog
+   * conveyor that conveys them. Never a fixed length: the transfer fills the gap.
    */
   function transportAfter(job, station) {
     const planned = job.line.transport.type;
     const goods = goodsOf(job, station);
-    if (carries(planned, goods)) return { kind: 'conveyor', type: planned, params: job.line.transport.params ?? {} };
-    const other = registry.components().filter((d) => ['conveyor', 'transport'].includes(d.category)).map((d) => d.type).sort().find((t) => carries(t, goods));
-    if (!other) return { kind: 'conveyor', type: planned, params: job.line.transport.params ?? {} };
-    // The transfer carries the same carriers as the station's conveyor: its params of the same name
-    // (a carrier length; the length itself comes from the layout).
+    if (conveys(planned, goods)) return { kind: 'conveyor', type: planned, params: transferParams(planned, job.line.transport.params) };
     const own = conveyorOf(job, station);
-    const keys = Object.keys(z.toJSONSchema(registry.getComponent(other).params, { io: 'input', unrepresentable: 'any' }).properties ?? {});
-    const params = own?.type === other ? Object.fromEntries(Object.entries(own.params ?? {}).filter(([k]) => keys.includes(k) && k !== 'length')) : {};
-    return { kind: 'conveyor', type: other, params };
+    if (own && conveys(own.type, goods)) return { kind: 'conveyor', type: own.type, params: transferParams(own.type, own.params) };
+    const other = conveyorFor(job, goods);
+    return { kind: 'conveyor', type: other ?? planned, params: transferParams(other ?? planned, other ? {} : job.line.transport.params) };
   }
 
   /** factory.json of these stations (in flow order), chained output → input over the right transports. */
@@ -228,17 +261,42 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
       layout.conveyor = repairTo;
     }
     if (!ids.has(layout.conveyor) && !shellIds.includes(layout.conveyor)) problems.push(`conveyor: "${layout.conveyor}" is neither a listed machine nor the shell's (${shellIds.join(', ') || 'no shell'})`);
-    for (const p of layout.ports ?? []) if (!ids.has(p.machine) && !shellIds.includes(p.machine)) problems.push(`ports.${p.name}: unknown machine "${p.machine}"`);
-    // What this station takes in must be what the previous one hands over (benchmark tuning set: a
-    // station on pallet carriers followed by one taking loose units).
+    // What this station takes in must be what the previous one hands over. The model was told so, with
+    // the fix spelled out, and still kept choosing pallet carriers after a station handing over loose
+    // units (benchmark step 13.3: 2 of the 5 held-out stops). There is one right answer, so it is
+    // chosen in code: the station's conveyor becomes one that takes those goods.
     const prev = job.stations.at(-1);
-    if (prev && ids.size + shellIds.length) {
+    if (prev && (ids.has(layout.conveyor) || shellIds.includes(layout.conveyor))) {
       const given = goodsOf(job, prev);
-      const shellEq = layout.shell ? (() => { try { return registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)).equipment; } catch { return []; } })() : [];
-      const conv = [...layout.equipment, ...shellEq].find((e) => e.id === layout.conveyor);
+      const conv = [...layout.equipment, ...shellEquipmentOf(job, layout)].find((e) => e.id === layout.conveyor);
       const taken = conv ? goodsAt(job, { type: conv.type, params: conv.params ?? {} }, 'in') : null;
-      if (given && taken && given !== taken) problems.push(`conveyor: this station takes ${taken} at its input ("${layout.conveyor}", ${conv.type}), but "${prev.id}" hands over ${given}: use a conveyor${layout.shell ? ' or shell' : ''} that takes ${given}`);
+      if (given && taken && given !== taken) {
+        const type = conveyorFor(job, given);
+        if (!type) {
+          problems.push(`conveyor: this station takes ${taken} at its input ("${layout.conveyor}", ${conv.type}), but "${prev.id}" hands over ${given}: use a conveyor${layout.shell ? ' or shell' : ''} that takes ${given}`);
+        } else if (shellIds.includes(layout.conveyor)) {
+          // The shell's own conveyor: the shell's furniture is built around it, so the shell is left out
+          // and the station gets its own conveyor under the same id (the machines' hints still hold).
+          const shellType = layout.shell.type;
+          const dropped = (layout.ports ?? []).filter((p) => shellIds.includes(p.machine) && p.machine !== layout.conveyor);
+          delete layout.shell;
+          layout.ports = (layout.ports ?? []).filter((p) => !dropped.includes(p));
+          layout.equipment = [{ id: conv.id, type, why: `the station conveyor (added: the ${shellType} shell's takes ${taken})`, place: 'line', at: 'whole' }, ...layout.equipment];
+          ids.add(conv.id);
+          shellIds = [];
+          shellConveyor = null;
+          repairs.push(`conveyor: "${prev.id}" hands over ${given}, but the ${shellType} shell's conveyor "${conv.id}" (${conv.type}) takes ${taken}: the shell is left out and the station gets its own ${type} "${conv.id}"${dropped.length ? ` (ports on shell machines dropped: ${dropped.map((p) => p.name).join(', ')})` : ''}`);
+        } else {
+          repairs.push(`conveyor: "${prev.id}" hands over ${given}, but "${conv.id}" (${conv.type}) takes ${taken}: it is a ${type} now`);
+          conv.type = type;
+        }
+      }
     }
+    // Extra station ports (a reject port) must be a real port of a station machine. This was found only
+    // when the line played, and that finding went back to the process phase, which can't change the
+    // layout: refused 5 times (benchmark step 13.3: 2 of the 5 held-out stops). Now checked here, and
+    // repaired in code where the answer is clear.
+    fixPorts(job, layout, ids, shellIds, problems, repairs);
     // Every op the process will use needs a machine here that can do it (benchmark tuning set, step
     // 12.2: pick-and-place without a robot that has x / y / z / yaw failed only in the process phase).
     const stationTypes = [...layout.equipment.map((e) => e.type), ...(layout.shell ? registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)).equipment.map((e) => e.type) : [])];
@@ -258,6 +316,70 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
       if (i >= 0) problems.splice(i, 1);
     }
     return { value: layout, cost: r.cost, problems, repairs };
+  }
+
+  /** The shell's machines of a layout ([] without a shell, or when its params are refused). */
+  function shellEquipmentOf(job, layout) {
+    if (!layout.shell) return [];
+    try { return registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)).equipment; } catch { return []; }
+  }
+
+  /**
+   * A line conveyor type for these goods (`conveys`): the line's transport if it is one, else the first
+   * catalog conveyor (then transport) that is. null when none is.
+   */
+  function conveyorFor(job, goods) {
+    if (conveys(job.line.transport.type, goods)) return job.line.transport.type;
+    const of = (category) => registry.components().filter((d) => d.category === category).map((d) => d.type).sort().find((t) => conveys(t, goods));
+    return of('conveyor') ?? of('transport') ?? null;
+  }
+
+  /**
+   * Checks the layout's extra station ports (mutates the layout): each must be a port of a station
+   * machine, in its direction. Where the answer is clear it is repaired in code, in this order:
+   *   1. the port named after a machine of the station (machine and port mixed up): that machine's port
+   *   2. the named machine has exactly one port that way: that one
+   *   3. exactly one other conveyor of the station has a port that way (the lane units leave on): that one
+   *   4. an out port and no lane at all: a lane is added (beside the line, turned away from it)
+   * Otherwise it is a refusal listing the ports there are.
+   */
+  function fixPorts(job, layout, ids, shellIds, problems, repairs) {
+    const machines = [...layout.equipment, ...shellEquipmentOf(job, layout)];
+    const portsOf = (m) => { try { return registry.componentSpec(m.type, m.params ?? {}, ctx(job.line)).ports ?? {}; } catch { return {}; } };
+    const that = (m, direction) => Object.entries(portsOf(m)).filter(([, q]) => q.direction === direction).map(([n]) => n);
+    const conveying = (m) => ['conveyor', 'transport'].includes(registry.getComponent(m.type)?.category);
+    const byId = (id) => machines.find((m) => m.id === id);
+    for (const p of layout.ports ?? []) {
+      const m = byId(p.machine);
+      if (m && portsOf(m)[p.port]) continue;
+      const was = `"${p.machine}.${p.port}" is no port of the station`;
+      const fix = (machine, port, why) => {
+        repairs.push(`ports.${p.name}: ${was}; "${machine}.${port}" is used (${why})`);
+        p.machine = machine;
+        p.port = port;
+      };
+      const named = byId(p.port);
+      if (named && that(named, p.direction).length === 1) { fix(named.id, that(named, p.direction)[0], `"${p.port}" is a machine: its ${p.direction} port`); continue; }
+      if (m && that(m, p.direction).length === 1) { fix(m.id, that(m, p.direction)[0], `its only ${p.direction} port`); continue; }
+      const lanes = machines.filter((x) => x.id !== layout.conveyor && conveying(x)).flatMap((x) => that(x, p.direction).map((n) => `${x.id}.${n}`));
+      if (lanes.length === 1) { const [mid, port] = lanes[0].split('.'); fix(mid, port, `the station's only lane ${p.direction === 'out' ? 'out' : 'in'}`); continue; }
+      if (!lanes.length && p.direction === 'out') {
+        const conv = byId(layout.conveyor);
+        const goods = (conv && goodsAt(job, { type: conv.type, params: conv.params ?? {} }, 'out')) ?? 'unit';
+        const type = conveyorFor(job, goods);
+        const out = type ? that({ type }, 'out')[0] : null;
+        if (out) {
+          let id = `${p.name}Lane`;
+          for (let k = 2; ids.has(id) || shellIds.includes(id); k += 1) id = `${p.name}Lane${k}`;
+          layout.equipment.push({ id, type, why: `takes the units leaving at the ${p.name} port (added: the station had no lane for it)`, place: 'besideLine', at: 'work', turned: true });
+          ids.add(id);
+          machines.push({ id, type });
+          fix(id, out, `the station had no lane for it: a ${type} "${id}" is added beside the line, turned away from it`);
+          continue;
+        }
+      }
+      problems.push(`ports.${p.name}: ${was}${lanes.length ? ` (ports that way: ${lanes.join(', ')})` : ''}: name a port of one of the station's machines`);
+    }
   }
 
   /** Can a catalog type (at its default params) do what an op needs? A composite can be anything. */
@@ -300,7 +422,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
     const r = await ask(def, taskText('machines', { ...lineContext(job), plan: job.plan, layout, detail: detail.components, previousAnswer: feedback ? state.params : null, feedback }));
     const params = def.decode(r.output).params;
     const problems = [];
-    const repairs = singleUnitParams(layout, params);
+    const repairs = [...singleUnitParams(layout, params), ...fitParams(job, layout, params)];
     for (const [j, e] of layout.equipment.entries()) {
       try { registry.componentSpec(e.type, params[e.id] ?? {}, ctx(job.line)); } catch (error) { problems.push(`equipment[${j}].params (${e.id}): ${error.message}`); }
     }
@@ -324,16 +446,126 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
     return notes;
   }
 
+  /** The line's unit, measured once per product (lib/station/unit.js): what machines are fitted to. */
+  const units = new Map();
+  const unitOf = (job) => {
+    const key = JSON.stringify([job.product, ctx(job.line)]);
+    if (!units.has(key)) units.set(key, measureUnit(registry, job.product, ctx(job.line)));
+    return units.get(key);
+  };
+
+  /**
+   * Params a machine fits to the unit it works on (`fit` in the component contract: a nozzle height at
+   * the neck, a seat height at the cap seat), in code: the model can't measure the product. Mutates
+   * params; returns notes. Values the fit gives that the params' ranges refuse are left as they were.
+   */
+  function fitParams(job, layout, params) {
+    const unit = unitOf(job);
+    const notes = [];
+    if (!unit) return notes;
+    for (const e of layout.equipment) {
+      const def = registry.getComponent(e.type);
+      if (!def?.fit) continue;
+      const before = params[e.id] ?? {};
+      let current;
+      try { current = registry.componentSpec(e.type, before, ctx(job.line)).params; } catch { continue; }
+      const patch = def.fit({ unit, params: current, ctx: ctx(job.line) }) ?? {};
+      const changed = Object.entries(patch).filter(([k, v]) => Math.abs((current[k] ?? 0) - v) > 1e-4);
+      if (!changed.length) continue;
+      const next = { ...before, ...Object.fromEntries(changed) };
+      try { registry.componentSpec(e.type, next, ctx(job.line)); } catch { continue; }
+      params[e.id] = next;
+      notes.push(`${e.id}: ${changed.map(([k, v]) => `${k} ${current[k]} → ${v}`).join(', ')} (fitted to the unit)`);
+    }
+    return notes;
+  }
+
   function place(job, state) {
-    const { layout, params } = state;
+    const { layout } = state;
+    const params = { ...(state.params ?? {}) };
     const shell = layout.shell ? registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)) : null;
-    const r = placeStation(registry, {
+    const run = () => placeStation(registry, {
       conveyor: layout.conveyor,
       fixed: shell?.equipment ?? [],
       equipment: layout.equipment.map((e) => ({ ...e, params: params[e.id] ?? {} })),
       ctx: ctx(job.line),
     });
-    return { placed: r.equipment, notes: [...(state.notes ?? []).filter((n) => n.repair), ...r.notes], machines: [...(shell?.equipment ?? []).map((e) => e.id), ...layout.equipment.map((e) => e.id)] };
+    let r = run();
+    // A reach-in tool (a tamp pad, a plug) that can't reach the unit from where it stands gets the
+    // stroke it needs, and the station is placed again (its retracted tool stays at the conveyor's edge).
+    const reachNotes = reachFit(job, layout, params, r.equipment, shell);
+    if (reachNotes.length) r = run();
+    return {
+      params,
+      placed: r.equipment,
+      notes: [...(state.notes ?? []).filter((n) => n.repair && !n.reach), ...reachNotes.map((message) => ({ repair: true, reach: true, message })), ...r.notes],
+      machines: [...(shell?.equipment ?? []).map((e) => e.id), ...layout.equipment.map((e) => e.id)],
+    };
+  }
+
+  /**
+   * A machine of the station that hits the shell's furniture (a rear fence) can't be fixed by the model:
+   * it only gives hints, and the furniture stands where the shell puts it. So the shell is made deeper
+   * on that side, in code, by what the clash needs (the shell's `deepen`), and the station is placed
+   * again. Mutates build (layout.shell.params, placement); returns notes. Stops when the shell can't
+   * grow, has no `deepen`, or a deeper cell doesn't help.
+   */
+  function deepenShell(job, build) {
+    const layout = build.layout;
+    const def = layout.shell ? registry.getShell(layout.shell.type) : null;
+    if (!def?.deepen) return [];
+    const notes = [];
+    const tried = new Map(); // pair → depth before
+    for (let k = 0; k < 6; k += 1) {
+      const shell = registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line));
+      // Furniture off the line's centre: behind it (rear) or in front (front). The conveyor and what
+      // stands in line with it (lifts) don't move with the cell's depth.
+      const side = new Map(shell.equipment.filter((e) => Math.abs(e.position?.[2] ?? 0) > 0.3).map((e) => [e.id, e.position[2] < 0 ? 'rear' : 'front']));
+      const result = review(registry, factoryWith(job, assemble(job, build)), { play: false, geometry: true });
+      const hit = result.findings.find((f) => f.clash && f.clash.stations.every((s) => s === layout.id) && f.clash.ids.filter((id) => side.has(id)).length === 1);
+      if (!hit) break;
+      const furniture = hit.clash.ids.find((id) => side.has(id));
+      const machine = hit.clash.ids.find((id) => id !== furniture);
+      const pair = `${furniture}|${machine}`;
+      if (tried.has(pair) && hit.clash.depth >= tried.get(pair) - 1e-3) break; // deeper didn't help
+      tried.set(pair, hit.clash.depth);
+      const by = hit.clash.depth + 0.05;
+      const next = def.deepen(shell.params, { side: side.get(furniture), by });
+      if (!next) break;
+      const before = layout.shell.params ?? {};
+      layout.shell = { ...layout.shell, params: Object.fromEntries(Object.entries(next).filter(([key, v]) => before[key] !== undefined || v !== shell.params[key])) };
+      notes.push(`shell: "${machine}" hit the shell's "${furniture}" (${Math.round(hit.clash.depth * 1000)} mm); the cell is ${Math.round(by * 100)} cm deeper at the ${side.get(furniture)}`);
+      Object.assign(build, place(job, build));
+    }
+    return notes;
+  }
+
+  /** place(), then the shell deepened where a machine hits its furniture (notes kept with the build's). */
+  function placeAndFit(job, build) {
+    Object.assign(build, place(job, build));
+    const notes = deepenShell(job, build);
+    if (notes.length) build.notes = [...(build.notes ?? []).filter((n) => !n.shell), ...notes.map((message) => ({ repair: true, shell: true, message }))];
+  }
+
+  /** Lengthens reach-in strokes the unit is beyond (mutates params); returns notes. */
+  function reachFit(job, layout, params, placed, shell) {
+    const unit = unitOf(job);
+    const notes = [];
+    const conveyor = [...(shell?.equipment ?? []), ...placed].find((e) => e.id === layout.conveyor);
+    if (!unit || !conveyor) return notes;
+    const workAt = workPlaceOf(registry, conveyor, ctx(job.line));
+    for (const e of placed) {
+      const pose = (() => { try { return reachPose(registry, e, ctx(job.line)); } catch { return null; } })();
+      if (!pose?.param) continue;
+      const needed = reachNeeded(pose, unit, workAt);
+      if (needed === null || needed <= pose.max) continue;
+      const field = paramFields(registry.getComponent(e.type).params).find((f) => f.key === pose.param);
+      const want = Math.round((needed + 0.005) * 1000) / 1000;
+      const value = field?.max !== undefined ? Math.min(field.max, want) : want;
+      params[e.id] = { ...(params[e.id] ?? {}), [pose.param]: value };
+      notes.push(`${e.id}: ${pose.param} ${pose.max} → ${value} (to reach the unit${value < want ? `; it needs ${want}, more than the most it has` : ''})`);
+    }
+    return notes;
   }
 
   async function processPhase(job, state, feedback) {
@@ -347,16 +579,42 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
         info[e.id] = { ops: registry.getComponent(e.type).ops ?? [], motions: Object.keys(spec.motions ?? {}), valueMotions: Object.entries(spec.motions ?? {}).filter(([, m]) => m.values).map(([k]) => k) };
       } catch { /* the checks report it */ }
     }
-    const def = processSchema(registry, { ops: layout.ops, machines, info, items: ['product'] });
-    const types = [...new Set([...placed.map((e) => e.type), ...(layout.shell ? registry.expandShell(layout.shell.type, layout.shell.params ?? {}, ctx(job.line)).equipment.map((e) => e.type) : [])])];
+    // The machines' routines (their standard processes) the product allows, each station arg limited
+    // to the machines that fit it; a routine whose required station arg nothing here can fill is left out.
+    const all = [...shellEquipment, ...placed];
+    const productDef = registry.getProduct(productType(job));
+    const recipes = stationRecipes(registry, all, { productDef }).map((r) => ({
+      ...r,
+      candidates: Object.fromEntries(Object.entries(r.def.stationArgs ?? {}).map(([k, rule]) => [k, candidatesFor(registry, rule, all, ctx(job.line), { exclude: r.machine })])),
+    })).filter((r) => Object.entries(r.def.stationArgs ?? {}).every(([k, rule]) => rule.optional || r.candidates[k].length));
+    const def = processSchema(registry, { ops: layout.ops, machines, info, items: ['product'], recipes });
+    const types = [...new Set(all.map((e) => e.type))];
     const detail = catalogDetail(registry, { types, ops: layout.ops });
     const station = { id: layout.id, conveyor: layout.conveyor, machines: placed.map((e) => ({ id: e.id, type: e.type, position: e.position })), ports: layout.ports ?? [] };
-    const r = await ask(def, taskText('process', { ...lineContext(job), plan: job.plan, station, detail, previousAnswer: feedback ? state.process : null, feedback }));
-    return { value: def.decode(r.output), cost: r.cost, problems: [] };
+    const routines = recipes.length ? recipes.map((r) => ({
+      use: r.use,
+      does: r.def.summary,
+      args: Object.fromEntries(paramFields(r.def.args).map((f) => [f.key, [f.kind, f.min !== undefined ? `${f.min}–${f.max}` : null, f.default !== undefined ? `default ${f.default}` : null, f.label !== f.key ? f.label : null].filter(Boolean).join(', ')])),
+      ...(Object.keys(r.candidates).length ? { machinesFor: r.candidates } : {}),
+    })) : null;
+    const r = await ask(def, taskText('process', { ...lineContext(job), plan: job.plan, station, routines, detail, previousAnswer: feedback ? (state.processAnswer ?? state.process) : null, feedback }));
+    const answer = def.decode(r.output);
+    // Routine calls become the plain ops they stand for: factory.json only ever holds ops.
+    const expandCtx = { ctx: ctx(job.line), productDef, unit: unitOf(job) };
+    const stationInfo = { conveyor: layout.conveyor, machines: all.map((e) => ({ id: e.id, type: e.type, params: e.params ?? {}, position: e.position, rotationY: e.rotationY ?? 0 })) };
+    const problems = [];
+    const value = { ...answer };
+    for (const part of ['intake', 'process', 'output']) {
+      if (!answer[part]) continue;
+      const x = expandRecipes(registry, answer[part], stationInfo, { ...expandCtx, path: part });
+      value[part] = x.ops;
+      problems.push(...x.problems);
+    }
+    return { value, answer, cost: r.cost, problems };
   }
 
   /** A fresh build of one station: where it starts, what was refused, what it cost. Plain JSON. */
-  const newBuild = () => ({ from: 'layout', feedback: null, attempts: [], cost: 0, layout: null, params: null, placed: null, notes: [], machines: null, process: null });
+  const newBuild = () => ({ from: 'layout', feedback: null, attempts: [], cost: 0, layout: null, params: null, placed: null, notes: [], machines: null, process: null, processAnswer: null });
 
   /**
    * Runs a build on from where it stands (`build.from`) until the phase `stopAfter` has passed its
@@ -399,8 +657,9 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
           // The preview: default params, placed from the hints. A hint that can't be placed is refused.
           build.params = {};
           singleUnitParams(build.layout, build.params);
+          fitParams(job, build.layout, build.params);
           try {
-            Object.assign(build, place(job, build));
+            placeAndFit(job, build);
           } catch (error) {
             if (!(error instanceof PlacementError)) throw error;
             refuse('layout', [`placement: ${error.message}`]);
@@ -417,13 +676,14 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
         build.notes = [...(build.notes ?? []).filter((n) => !n.single), ...(r.repairs ?? []).map((message) => ({ repair: true, single: true, message }))];
         if (r.problems.length) { refuse('machines', r.problems); continue; }
         try {
-          Object.assign(build, place(job, build));
+          placeAndFit(job, build);
         } catch (error) {
           if (!(error instanceof PlacementError)) throw error;
           refuse('layout', [`placement: ${error.message}`]);
           continue;
         }
         build.process = null;
+        build.processAnswer = null;
         // Clashes are known now: refused before the process call is paid for.
         const result = review(registry, factoryWith(job, assemble(job, build)), { play: false });
         const clashes = blockingOf(result.findings, 'geometry');
@@ -434,6 +694,8 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
       const r = await processPhase(job, build, build.feedback);
       build.cost += r.cost;
       build.process = r.value;
+      build.processAnswer = r.answer;
+      if (r.problems.length) { refuse('process', r.problems); continue; }
 
       // The deterministic reviewer on the line so far (fast checks and geometry; play once it passes).
       const factory = factoryWith(job, assemble(job, build));
@@ -465,7 +727,7 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
     build.attempts = [];
     build.feedback = `The owner rejected your ${phase} answer with this comment: "${String(comment).trim()}". Change what the comment asks and keep the rest.`;
     if (phase === 'layout') { build.params = null; build.placed = null; }
-    if (phase !== 'process') build.process = null;
+    if (phase !== 'process') { build.process = null; build.processAnswer = null; }
     return build;
   }
 

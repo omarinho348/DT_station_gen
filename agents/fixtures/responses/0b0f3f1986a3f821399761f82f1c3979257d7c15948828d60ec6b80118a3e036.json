@@ -1,0 +1,60 @@
+{
+  "key": "0b0f3f1986a3f821399761f82f1c3979257d7c15948828d60ec6b80118a3e036",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:02:50.094Z",
+  "usage": {
+    "inputTokens": 6202,
+    "cachedInputTokens": 5888,
+    "outputTokens": 475
+  },
+  "output": {
+    "id": "drillHingeAndDowelHoles",
+    "code": "ST3",
+    "title": "Drill hinge & dowel holes",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST3",
+        "title": "Drill hinge & dowel holes",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "drillNestFixture",
+        "type": "partCradle",
+        "why": "Provides fixture reference points for the panel during drilling",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "drillZoneEnclosure",
+        "type": "shutterEnclosure",
+        "why": "Guards the drilling zone for operator safety and dust control",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "drillMachining",
+        "type": "genericMachine",
+        "why": "Performs the programmed drilling of hinge cup and dowel holes",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "panelConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

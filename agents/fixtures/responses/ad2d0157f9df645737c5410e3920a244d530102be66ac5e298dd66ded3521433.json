@@ -1,0 +1,30 @@
+{
+  "key": "ad2d0157f9df645737c5410e3920a244d530102be66ac5e298dd66ded3521433",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:06:08.657Z",
+  "usage": {
+    "inputTokens": 6155,
+    "cachedInputTokens": 4864,
+    "outputTokens": 187
+  },
+  "output": {
+    "params": {
+      "guardFence": {
+        "length": 4.1,
+        "height": 2,
+        "panelWidth": 1.6
+      },
+      "capperPortal": {
+        "heads": 4,
+        "pitch": 0.4,
+        "seatHeight": 0.388,
+        "stroke": 0.26,
+        "capRadius": 0.027,
+        "capHeight": 0.032,
+        "capColor": "blue"
+      }
+    }
+  }
+}

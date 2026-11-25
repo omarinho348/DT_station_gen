@@ -1,0 +1,95 @@
+{
+  "key": "602725ec4812fc9ececce5b6dba12409ebd38c79dd27115f1e7a7cc525402110",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:07:30.885Z",
+  "usage": {
+    "inputTokens": 6171,
+    "cachedInputTokens": 4864,
+    "outputTokens": 1347
+  },
+  "output": {
+    "id": "batteryModuleAssemblyLoadCells",
+    "code": "ST1",
+    "title": "Load 12 cells",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Load 12 cells",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "vfCells",
+        "type": "vibratoryFeeder",
+        "why": "Present loose cylindrical cells to the robot",
+        "place": "besideLine",
+        "at": "input",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "wtModuleFrame",
+        "type": "workTable",
+        "why": "Hold the battery module frame carrier during cell loading",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "camCarrierOrientation",
+        "type": "visionCamera",
+        "why": "Confirm incoming carrier ID/orientation before loading",
+        "place": "front",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "robotPlaceCells",
+        "type": "abbIrb6760",
+        "why": "Pick and place 12 cylindrical cells into the 12 cell seats",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "gripperFinger",
+        "type": "fingerGripper",
+        "why": "Grasp cylindrical cells for transfer into the seats",
+        "place": "overLine",
+        "at": "work",
+        "on": "robotPlaceCells",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "seatConfirmSensor",
+        "type": "photoEye",
+        "why": "Confirm seat-stop contact (seated depth) for pass/fail",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": [
+      "replenish",
+      "pickPlace",
+      "decide",
+      "wait"
+    ]
+  }
+}

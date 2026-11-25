@@ -1,0 +1,24 @@
+{
+  "key": "6f7d91565ad1f62cf337cd7bb226b0d8f24226f7a98cd0ad93d2964f614d0491",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:02:46.321Z",
+  "usage": {
+    "inputTokens": 7284,
+    "cachedInputTokens": 0,
+    "outputTokens": 112
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "edgeBandGluingUnit.work",
+        "seconds": 40,
+        "task": "Gluing edge banding (adhesive + press)"
+      }
+    ],
+    "output": null,
+    "inputStage": "processed"
+  }
+}

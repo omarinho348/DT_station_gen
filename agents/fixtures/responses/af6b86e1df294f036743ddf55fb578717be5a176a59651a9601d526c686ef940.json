@@ -1,0 +1,60 @@
+{
+  "key": "af6b86e1df294f036743ddf55fb578717be5a176a59651a9601d526c686ef940",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:00:35.027Z",
+  "usage": {
+    "inputTokens": 6180,
+    "cachedInputTokens": 5888,
+    "outputTokens": 399
+  },
+  "output": {
+    "id": "slicingStation",
+    "code": "ST2",
+    "title": "Slice loaves to sandwiches",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST2",
+        "title": "Slice loaves to sandwiches",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "hygienicGuardFence",
+        "type": "guardFence",
+        "why": "Create a guarded safety zone around the slicing area",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "slicerUnit",
+        "type": "genericMachine",
+        "why": "Clamp loaf and execute slicing cycle to cut sandwich slices",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "slicerInfeedWorkTable",
+        "type": "workTable",
+        "why": "Provide an in-feed clamping surface at the slicer work position",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "slicedBreadPackingConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

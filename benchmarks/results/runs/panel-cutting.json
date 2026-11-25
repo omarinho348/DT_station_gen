@@ -3,12 +3,12 @@
   "stage": "builder",
   "ok": false,
   "cost": {
-    "spec": 0.00301006,
-    "builder": 0.01166932,
+    "spec": 0,
+    "builder": 0,
     "editor": 0,
     "reviewer": 0
   },
-  "seconds": 122.606,
+  "seconds": 50,
   "brief": {
     "status": "draft",
     "retries": 0,
@@ -39,19 +39,72 @@
       "kind": "placeholder",
       "types": [
         "genericMachine",
-        "beltEndStop",
-        "workTable"
+        "workTable",
+        "shutterEnclosure",
+        "guardFence"
       ],
       "problems": []
+    },
+    {
+      "id": "applyEdgeBand",
+      "title": "Edge band gluing & press",
+      "ok": true,
+      "refusals": 0,
+      "phases": [],
+      "kind": "placeholder",
+      "types": [
+        "genericMachine"
+      ],
+      "problems": []
+    },
+    {
+      "id": "drillHingeAndDowelHoles",
+      "title": "Drill hinge & dowel holes",
+      "ok": true,
+      "refusals": 0,
+      "phases": [],
+      "kind": "placeholder",
+      "types": [
+        "partCradle",
+        "shutterEnclosure",
+        "genericMachine"
+      ],
+      "problems": []
+    },
+    {
+      "id": "inspectDimensions",
+      "title": "Periodic dimension inspection",
+      "ok": false,
+      "refusals": 5,
+      "phases": [
+        "machines",
+        "layout",
+        "process",
+        "process",
+        "process"
+      ],
+      "kind": "placeholder",
+      "types": [
+        "hmi",
+        "photoEye",
+        "genericMachine",
+        "sidePusher",
+        "stackLight",
+        "statusMonitor"
+      ],
+      "problems": [
+        "stations[3]: station \"inspectDimensions\": station \"inspectDimensions\" port \"reject\": machine \"rejectSidePusher\" has no port \"stop\" (ports: none)"
+      ]
     }
   ],
-  "reason": "LlmError: the model stopped early (incomplete: max_output_tokens); raise LLM_MAX_OUTPUT_TOKENS or shorten the request",
-  "totalCost": 0.01467938,
+  "reason": "station \"inspectDimensions\" still failing after the retries: stations[3]: station \"inspectDimensions\": station \"inspectDimensions\" port \"reject\": machine \"rejectSidePusher\" has no port \"stop\" (ports: none)",
+  "totalCost": 0.0208,
   "mode": "live",
   "models": {
     "builder": "gpt-5.4-nano",
     "others": "gpt-5.4-nano"
   },
   "retries": 4,
-  "time": "2026-11-25T02:25:57.286Z"
+  "time": "2026-11-25T14:05:03.926Z",
+  "costNote": "cost and time of the live run (step 13.3); the run file was rewritten by a $0 rerun from the cache that recorded the answers"
 }

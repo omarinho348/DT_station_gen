@@ -1,0 +1,83 @@
+{
+  "key": "4283e26902b64600bf67d867615ed81310bbfb8fce86e81f6ca289acf326de3c",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:01:57.459Z",
+  "usage": {
+    "inputTokens": 6125,
+    "cachedInputTokens": 4864,
+    "outputTokens": 1108
+  },
+  "output": {
+    "id": "formBlisterCavities",
+    "code": "ST1",
+    "title": "Form PVC blister cavities",
+    "shell": null,
+    "equipment": [
+      {
+        "id": "floorSlab",
+        "type": "floorSlab",
+        "why": "Provide cell floor slab for the forming zone safety and mounting",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "guardFenceForming",
+        "type": "guardFence",
+        "why": "Guard the heat-forming area",
+        "place": "besideLine",
+        "at": "whole",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      },
+      {
+        "id": "shutterEnclosureForming",
+        "type": "shutterEnclosure",
+        "why": "Enclose the forming process over the belt area",
+        "place": "overLine",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "formingZone",
+        "type": "genericMachine",
+        "why": "Heat-form the PVC web to create 10-up blister cavities and perform strip-length advancement",
+        "place": "overLine",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "formingHmi",
+        "type": "hmi",
+        "why": "Operator controls and status for forming parameters",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "formingStackLight",
+        "type": "stackLight",
+        "why": "Visual station status during forming",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "tabletBlisterPackingConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "key": "5b54a1a14194d6bd0f042e07fb541fac95fdf3a70f16428f94cd60c07bf13eb4",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:02:44.563Z",
+  "usage": {
+    "inputTokens": 5794,
+    "cachedInputTokens": 0,
+    "outputTokens": 97
+  },
+  "output": {
+    "params": {
+      "edgeBandGluingUnit": {
+        "name": "Edge band gluing & press",
+        "note": "Glue → apply band → press/trim",
+        "length": 1.6,
+        "depth": 1.2,
+        "height": 2,
+        "passThrough": true,
+        "carries": "unit"
+      }
+    }
+  }
+}

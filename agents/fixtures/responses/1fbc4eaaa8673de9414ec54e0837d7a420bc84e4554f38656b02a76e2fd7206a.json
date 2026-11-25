@@ -1,0 +1,25 @@
+{
+  "key": "1fbc4eaaa8673de9414ec54e0837d7a420bc84e4554f38656b02a76e2fd7206a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T13:59:52.628Z",
+  "usage": {
+    "inputTokens": 7972,
+    "cachedInputTokens": 0,
+    "outputTokens": 168
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "bottleFiller.fillUnit",
+        "seconds": 6,
+        "liquid": null,
+        "supply": "juiceSupply"
+      }
+    ],
+    "output": null,
+    "inputStage": "filled"
+  }
+}

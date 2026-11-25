@@ -3,12 +3,12 @@
   "stage": "builder",
   "ok": false,
   "cost": {
-    "spec": 0.0036433100000000003,
-    "builder": 0.006787500000000001,
+    "spec": 0,
+    "builder": 0,
     "editor": 0,
     "reviewer": 0
   },
-  "seconds": 37.727,
+  "seconds": 25,
   "brief": {
     "status": "draft",
     "retries": 0,
@@ -33,31 +33,51 @@
     {
       "id": "loadFlatShirt",
       "title": "Manual shirt load",
+      "ok": true,
+      "refusals": 1,
+      "phases": [
+        "layout"
+      ],
+      "kind": "placeholder",
+      "types": [
+        "beltConveyor",
+        "beltEndStop",
+        "photoEye",
+        "hmi",
+        "stackLight",
+        "genericMachine"
+      ],
+      "problems": []
+    },
+    {
+      "id": "foldTo250x300",
+      "title": "Fold to 250\u00d7300 mm",
       "ok": false,
       "refusals": 5,
       "phases": [
         "layout",
-        "process",
-        "process",
-        "process",
-        "process"
+        "layout",
+        "layout",
+        "layout",
+        "layout"
       ],
       "kind": "placeholder",
       "types": [
         "genericMachine"
       ],
       "problems": [
-        "stations[0].process[0]: station \"loadFlatShirt\": process › op #1 (grip): machine \"foldInputStopMachine\" has no anchor \"tool\" (anchors: none)"
+        "conveyor: this station takes pallet at its input (\"line\", palletConveyor), but \"loadFlatShirt\" hands over unit: use a conveyor or shell that takes unit"
       ]
     }
   ],
-  "reason": "station \"loadFlatShirt\" still failing after the retries: stations[0].process[0]: station \"loadFlatShirt\": process › op #1 (grip): machine \"foldInputStopMachine\" has no anchor \"tool\" (anchors: none)",
-  "totalCost": 0.010430810000000002,
+  "reason": "station \"foldTo250x300\" still failing after the retries: conveyor: this station takes pallet at its input (\"line\", palletConveyor), but \"loadFlatShirt\" hands over unit: use a conveyor or shell that takes unit",
+  "totalCost": 0.0089,
   "mode": "live",
   "models": {
     "builder": "gpt-5.4-nano",
     "others": "gpt-5.4-nano"
   },
   "retries": 4,
-  "time": "2026-11-25T02:26:35.025Z"
+  "time": "2026-11-25T14:05:04.200Z",
+  "costNote": "cost and time of the live run (step 13.3); the run file was rewritten by a $0 rerun from the cache that recorded the answers"
 }

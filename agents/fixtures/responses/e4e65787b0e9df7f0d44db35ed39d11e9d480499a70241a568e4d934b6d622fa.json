@@ -1,0 +1,25 @@
+{
+  "key": "e4e65787b0e9df7f0d44db35ed39d11e9d480499a70241a568e4d934b6d622fa",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:06:48.182Z",
+  "usage": {
+    "inputTokens": 7603,
+    "cachedInputTokens": 6912,
+    "outputTokens": 95
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "pumpHeadRobot.moveUnit",
+        "clearance": 0.12,
+        "task": "Place pump head on neck",
+        "to": "pumpHeadFeeder.outlet"
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

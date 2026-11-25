@@ -29,11 +29,25 @@
       },
       "equipment": [
         {
-          "id": "partCradle",
+          "id": "screwdriverMount",
+          "type": "screwdriver",
+          "params": {
+            "fingerLength": 0.12,
+            "offsetX": 0.13
+          },
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0
+        },
+        {
+          "id": "regulatorCradle",
           "type": "partCradle",
           "params": {
-            "length": 0.9,
-            "width": 0.45,
+            "length": 0.6,
+            "width": 0.5,
             "height": 0.75,
             "lanes": [
               -0.17,
@@ -46,14 +60,14 @@
             "saddleSpacing": 0.3
           },
           "position": [
-            -1.6,
+            -0.875,
             0,
-            -0.635
+            -0.66
           ],
           "rotationY": 0
         },
         {
-          "id": "guideRails",
+          "id": "carrierGuideRails",
           "type": "guideRails",
           "params": {
             "length": 1.6,
@@ -61,175 +75,110 @@
             "gap": 0.2
           },
           "position": [
-            -3,
+            0.375,
             0,
-            0
+            -0.71
           ],
           "rotationY": 0
         },
         {
-          "id": "screwdriver",
-          "type": "screwdriver",
+          "id": "pickRobot",
+          "type": "scara",
           "params": {
-            "fingerLength": 0.12,
-            "offsetX": 0.13
+            "link1": 0.55,
+            "link2": 0.5,
+            "armHeight": 1.45,
+            "stroke": 0.4,
+            "maxGap": 0.26,
+            "fingerLength": 0.1,
+            "screwdriver": false
           },
           "position": [
-            0.0425,
             0,
-            0.625
+            0,
+            -0.41
           ],
           "rotationY": 0
         }
       ],
       "conveyor": "line",
-      "inputStage": "raw",
       "process": [
         {
           "op": "stopConveyors",
           "conveyors": [
             "line"
           ],
-          "label": "Stop carrier at station",
-          "state": "ST1"
+          "label": "Index pallet carrier to ST1"
         },
         {
-          "op": "grip",
-          "machine": "screwdriver",
+          "op": "pickPlace",
+          "machine": "pickRobot",
           "item": "product",
-          "motion": "driver",
-          "to": 1,
-          "anchor": "bit",
-          "indicator": "holding",
-          "seconds": 0.3,
-          "label": "Engage screwdriver",
-          "state": "ST1"
-        },
-        {
-          "op": "move",
-          "machine": "screwdriver",
+          "clearance": 0.12,
+          "name": "Pick window regulator",
+          "from": {
+            "item": "product",
+            "ref": "grasp"
+          },
           "to": {
-            "driver": 1,
-            "driverSpin": 1
+            "machine": "regulatorCradle",
+            "port": "lane1",
+            "offset": [
+              0,
+              0.1,
+              0
+            ]
           },
-          "seconds": 30,
-          "profile": "smooth",
-          "label": "Drive 4 screws",
-          "state": "ST1"
+          "gap": 0.26,
+          "openGap": 0.26
         },
         {
-          "op": "release",
-          "machine": "screwdriver",
+          "op": "pickPlace",
+          "machine": "pickRobot",
           "item": "product",
+          "clearance": 0.12,
+          "name": "Place regulator on carrier",
+          "from": {
+            "item": "product",
+            "ref": "grasp"
+          },
+          "to": {
+            "machine": "regulatorCradle",
+            "port": "lane3",
+            "offset": [
+              0,
+              0.1,
+              0
+            ]
+          },
+          "gap": 0.26,
+          "openGap": 0.26
+        },
+        {
+          "op": "toolOn",
+          "machine": "screwdriverMount",
           "motion": "driver",
-          "to": 0,
-          "indicator": "holding",
-          "seconds": 0.3,
-          "label": "Release product",
-          "state": "ST1"
+          "value": "1",
+          "then": "0",
+          "seconds": 12,
+          "label": "Drive 4 screws (assisted)"
+        },
+        {
+          "op": "toolOn",
+          "machine": "screwdriverMount",
+          "motion": "driverSpin",
+          "value": "1",
+          "then": "0",
+          "seconds": 2,
+          "label": "Confirm drive completion (torque/sensor)"
         }
       ],
-      "feed": {
-        "fromLift": true
-      }
-    },
-    {
-      "id": "fitSpeaker",
-      "code": "ST2",
-      "title": "Install speaker",
-      "shell": {
-        "type": "assemblyCell",
-        "params": {
-          "code": "ST2",
-          "title": "Install speaker"
-        }
-      },
-      "equipment": [
-        {
-          "id": "partNest",
-          "type": "partNest",
-          "params": {
-            "length": 0.34,
-            "width": 0.34,
-            "height": 0.72,
-            "guides": "locators",
-            "guideX": 0.13,
-            "guideZ": 0.13,
-            "postHeight": 0.2
-          },
-          "position": [
-            -1.6,
-            0,
-            0
-          ],
-          "rotationY": 0
-        },
-        {
-          "id": "pickRobot",
-          "type": "abbIrb6760",
-          "params": {
-            "padLength": 0.5,
-            "padWidth": 0.34
-          },
-          "position": [
-            0,
-            0,
-            -4.31
-          ],
-          "rotationY": 0
-        },
-        {
-          "id": "processUnit",
-          "type": "genericMachine",
-          "params": {
-            "name": "SPEAKER CHECK",
-            "note": "timed assembly confirmation",
-            "length": 1.6,
-            "depth": 1.2,
-            "height": 1.9,
-            "passThrough": false,
-            "carries": "unit"
-          },
-          "position": [
-            0,
-            0,
-            1.2
-          ],
-          "rotationY": 0
-        },
-        {
-          "id": "screwdriver",
-          "type": "screwdriver",
-          "params": {
-            "fingerLength": 0.12,
-            "offsetX": 0.13
-          },
-          "position": [
-            0.0425,
-            0,
-            -0.435
-          ],
-          "rotationY": 0
-        }
-      ],
-      "conveyor": "line",
-      "process": [],
       "feed": {
         "fromLift": true
       }
     }
   ],
   "graph": {
-    "edges": [
-      {
-        "from": "placeRegulator.output",
-        "to": "fitSpeaker.input",
-        "transport": {
-          "kind": "conveyor",
-          "type": "palletConveyor",
-          "params": {}
-        }
-      }
-    ]
+    "edges": []
   }
 }

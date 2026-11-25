@@ -1,0 +1,24 @@
+{
+  "key": "a9873a2c253d08b16af79895667761880bedf66077b89f0f6db5ca9d5ee01bc5",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:00:43.728Z",
+  "usage": {
+    "inputTokens": 7533,
+    "cachedInputTokens": 0,
+    "outputTokens": 172
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "slicerUnit.work",
+        "seconds": 2.8,
+        "task": "Slice loaves (cycle)"
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

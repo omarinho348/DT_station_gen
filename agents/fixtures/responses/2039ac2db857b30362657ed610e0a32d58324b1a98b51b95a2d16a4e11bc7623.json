@@ -1,0 +1,64 @@
+{
+  "key": "2039ac2db857b30362657ed610e0a32d58324b1a98b51b95a2d16a4e11bc7623",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:03:55.837Z",
+  "usage": {
+    "inputTokens": 6386,
+    "cachedInputTokens": 5888,
+    "outputTokens": 273
+  },
+  "output": {
+    "id": "capsuleLoading",
+    "code": "ST1",
+    "title": "Load capsule bodies",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Load capsule bodies",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "capsuleFeeder",
+        "type": "vibratoryFeeder",
+        "why": "Feed empty aluminium capsule bodies into the station flow",
+        "place": "upstream",
+        "at": "input",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "capsuleIndexer",
+        "type": "accumulationTable",
+        "why": "Index and hold the next empty capsules in filling/tamping positions",
+        "place": "onTop",
+        "at": "work",
+        "on": "line",
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "capsuleBuffer",
+        "type": "bufferLane",
+        "why": "Accumulate extra empty capsules to keep the indexer supplied",
+        "place": "besideLine",
+        "at": "work",
+        "on": null,
+        "side": "equipment",
+        "turned": null
+      }
+    ],
+    "conveyor": "line",
+    "ports": null,
+    "ops": [
+      "replenish",
+      "indexBatches",
+      "accumulate"
+    ]
+  }
+}

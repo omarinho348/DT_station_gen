@@ -1,0 +1,60 @@
+{
+  "key": "9877b888adab0e7f701315dbf6bdbfa28a37ebc9478f3bed1a1c6bd1a46efff4",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationLayout",
+  "recordedAt": "2026-11-25T14:00:18.329Z",
+  "usage": {
+    "inputTokens": 6185,
+    "cachedInputTokens": 4864,
+    "outputTokens": 465
+  },
+  "output": {
+    "id": "coolingBuffer",
+    "code": "ST1",
+    "title": "Cool loaves by dwell",
+    "shell": {
+      "type": "assemblyCell",
+      "params": {
+        "code": "ST1",
+        "title": "Cool loaves by dwell",
+        "color": null
+      }
+    },
+    "equipment": [
+      {
+        "id": "dwellTable",
+        "type": "accumulationTable",
+        "why": "Accumulates loaves to provide the required cooling dwell time",
+        "place": "line",
+        "at": "work",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "safetyFence",
+        "type": "guardFence",
+        "why": "Provides operator safety around the dwell/circulation area",
+        "place": "rear",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      },
+      {
+        "id": "stationSign",
+        "type": "stationSign",
+        "why": "Displays the station identity to operators",
+        "place": "front",
+        "at": "whole",
+        "on": null,
+        "side": null,
+        "turned": null
+      }
+    ],
+    "conveyor": "stationConveyor",
+    "ports": null,
+    "ops": []
+  }
+}

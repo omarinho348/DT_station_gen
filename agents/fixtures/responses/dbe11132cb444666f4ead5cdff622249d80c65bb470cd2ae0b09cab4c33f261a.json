@@ -1,0 +1,67 @@
+{
+  "key": "dbe11132cb444666f4ead5cdff622249d80c65bb470cd2ae0b09cab4c33f261a",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationProcess",
+  "recordedAt": "2026-11-25T14:03:14.878Z",
+  "usage": {
+    "inputTokens": 9139,
+    "cachedInputTokens": 0,
+    "outputTokens": 448
+  },
+  "output": {
+    "intake": null,
+    "process": [
+      {
+        "use": "photoInPlace.detect",
+        "seconds": null
+      },
+      {
+        "use": "dimensionBench.work",
+        "seconds": 40,
+        "task": "Working"
+      },
+      {
+        "op": "decide",
+        "on": "quality",
+        "cases": [
+          {
+            "key": "pass",
+            "value": []
+          },
+          {
+            "key": "reject",
+            "value": [
+              {
+                "op": "push",
+                "machine": "rejectSidePusher",
+                "items": [
+                  "unit"
+                ],
+                "motion": "face",
+                "anchor": "face",
+                "to": 0.22,
+                "rest": null,
+                "seconds": 0.7,
+                "retract": {
+                  "seconds": 0.45,
+                  "label": "Pusher retracting"
+                },
+                "label": "Divert out-of-tolerance panel",
+                "state": null,
+                "status": null
+              }
+            ]
+          }
+        ],
+        "otherwise": null,
+        "planAs": "ST4",
+        "label": "Route by dimension inspection result",
+        "state": null,
+        "status": null
+      }
+    ],
+    "output": null,
+    "inputStage": null
+  }
+}

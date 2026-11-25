@@ -259,6 +259,8 @@ export function createLlm({ env, root, session = null, client = null, now = () =
   /** Copies a cached live answer into the committed fixtures, so mock mode can replay it (step 8.6). */
   function record(key) {
     const path = join(cacheDir, `${key}.json`);
+    // Answered from a fixture already (a recorded answer replayed in a live run): nothing to record.
+    if (!existsSync(path) && existsSync(join(fixtureDir, `${key}.json`))) return;
     if (!existsSync(path)) throw new LlmError(`no cached answer with key ${key.slice(0, 12)} to record`, { code: 'mock', key });
     writeJson(join(fixtureDir, `${key}.json`), JSON.parse(readFileSync(path, 'utf8')));
   }

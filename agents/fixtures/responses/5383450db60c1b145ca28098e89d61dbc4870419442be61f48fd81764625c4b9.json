@@ -1,0 +1,34 @@
+{
+  "key": "5383450db60c1b145ca28098e89d61dbc4870419442be61f48fd81764625c4b9",
+  "model": "gpt-5.4-nano",
+  "agent": "builder",
+  "schemaName": "stationMachines",
+  "recordedAt": "2026-11-25T14:00:29.698Z",
+  "usage": {
+    "inputTokens": 6274,
+    "cachedInputTokens": 4864,
+    "outputTokens": 226
+  },
+  "output": {
+    "params": {
+      "dwellTable": {
+        "radius": 0.6,
+        "openingWidth": 0.25,
+        "color": "machineGrey"
+      },
+      "safetyFence": {
+        "length": 4.1,
+        "height": 2,
+        "panelWidth": 1.6
+      },
+      "stationSign": {
+        "code": "ST1",
+        "title": "Cool loaves by dwell",
+        "color": "#2c5d8f",
+        "width": 2,
+        "height": 3.1,
+        "scale": 1
+      }
+    }
+  }
+}
