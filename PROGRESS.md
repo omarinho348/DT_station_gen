@@ -3801,7 +3801,7 @@ Step 13.2 approved by the owner (2026-11-25: "go ahead with 13.3 and spend that 
 2. deterministic fixes for the two layout stops (reject port, goods continuity)
 3. more named machines for the held-out industries
 
-### Step 13.4: the two common layout stops, repaired in code (done, waiting for the owner)
+### Step 13.4: the two common layout stops, repaired in code (done; pushed)
 
 Asked 2026-11-25: "Fix the two common layout failures in code". These were 4 of the 5 held-out stops in step 13.3.
 
@@ -3827,3 +3827,25 @@ Asked 2026-11-25: "Fix the two common layout failures in code". These were 4 of 
 **Checked against the recordings ($0, mock mode):** replaying the held-out answers, the stations that stopped (bread-loaves checkWeigher, tshirt-folding foldTo250x300, pharma-blister) now pass the layout with the model's first answer and need a new, unrecorded machines answer: measuring the effect needs a live run (about $0.05–0.10). Results folder restored afterwards (mock runs rewrite it).
 
 **Results:** `npm test` (`--testTimeout=180000`): 86 files, **2223 passed, 0 failed**, 3 skipped. Spent: $0.
+
+### Fix: station 2 "no input port" and a void between the stations (owner report, 2026-11-25)
+
+**Symptoms (owner):** the process of station 2 always failed with "no input port"; the stations' conveyors had a void between them.
+
+**Cause:** two places picked "the first catalog conveyor that carries these goods" by goods alone. For pallets, that is `liftUnit` (alphabetically before `palletConveyor`): a lift with ports top / bottom and no length.
+- **The void:** the transfer after a pallet station (the assembly cell, the model's usual choice) was a lift, standing in the middle of the gap. 6 of the 10 benchmark lines had lift transfers.
+- **"No input port":** my step 13.4 goods repair turned station 2's belt into that lift after a pallet station, so station 2 had no `input` port. Reproduced exactly: `station "second" port "input": machine "belt" has no port "input" (ports: top, bottom)`. It was found only by the process-phase review, and the layout redo repeated the same repair until the retries ran out.
+
+**Fix**
+- One rule for a line conveyor (`conveys` in `agents/builder/builder.js`): ports named `input` and `output` carrying the goods, and a `length` param. Used for both the station conveyor repair and the transfer.
+- The transfer after a station:
+  - is the plan's transport if it conveys the goods, else the station's own conveyor type (a pallet station → a pallet conveyor with its carriers), else the first catalog one that conveys them
+  - never has a fixed length
+  - has no work stop (as the printer line's hand-written transfers: a pallet conveyor with a work stop must be longer than its carrier, which a 1.2 m transfer is not)
+- The reviewer refuses a transfer without input / output ports or a length (`edgeFindings` in `agents/reviewer/deterministic.js`), so this can't pass silently again.
+
+**Checked:** a 2-station line (assembly cell, then a belt station) built, played and screenshot: one continuous pallet line, units through both stations. The Builder-built belt line has continuous belts.
+
+**Tests:** 3 new in `tests/agents/builder-layout-repairs.test.js`. `npm test`: 86 files, **2226 passed, 0 failed**.
+
+**Note:** lines built before this fix keep their lift transfers. Rebuild them (Start over in the panel), or patch the edge's transport type.

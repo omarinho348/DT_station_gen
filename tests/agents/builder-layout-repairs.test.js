@@ -119,3 +119,44 @@ describe('2. the conveyor takes what the previous station hands over', () => {
     expect(r.findings.find((f) => f.check === 'play').message).toMatch(/^played a run of 4: every unit left the line/);
   }, 60000);
 });
+
+describe('3. after a pallet station: line conveyors, never a lift (owner report: station 2 "no input port", a void between the stations)', () => {
+  const box = { kind: 'parametric', params: { shape: 'box', length: 0.3, width: 0.2, height: 0.15 } };
+  const cell = (id) => ({ id, title: id, shell: { type: 'assemblyCell', params: { code: 'S', title: id } }, equipment: [{ id: 'm', type: 'genericMachine', why: 'w', place: 'overLine', at: 'work' }], conveyor: 'line', ops: [] });
+  const beltStation = (id) => ({ id, title: id, equipment: [{ id: 'belt', type: 'beltConveyor', why: 'b', place: 'line', at: 'whole' }, { id: 'm', type: 'genericMachine', why: 'w', place: 'overLine', at: 'work' }], conveyor: 'belt', ops: [] });
+  const build = async (layouts) => {
+    const stations = [];
+    let last = null;
+    for (const layout of layouts) {
+      const llm = scripted(answers(layout, { process: [{ use: 'm.work', seconds: 3 }] }));
+      last = await createBuilder({ registry, llm }).buildStation({ line, product: box, stations, plan: { id: layout.id, title: layout.id, does: 'x', steps: [] } });
+      if (!last.ok) throw new Error(JSON.stringify(last.attempts.map((a) => a.problems)));
+      stations.push(last.station);
+    }
+    return last;
+  };
+
+  it('a belt station after an assembly cell: its belt becomes a pallet conveyor (it has an input port); the transfer is a pallet conveyor too; plays', async () => {
+    const r = await build([cell('first'), beltStation('second')]);
+    expect(r.attempts).toEqual([]);
+    expect(r.station.equipment.find((e) => e.id === 'belt').type).toBe('palletConveyor');
+    expect(r.notes.map((n) => n.message)).toContain('conveyor: "first" hands over pallet, but "belt" (beltConveyor) takes unit: it is a palletConveyor now');
+    expect(r.factory.graph.edges).toEqual([{ from: 'first.output', to: 'second.input', transport: { kind: 'conveyor', type: 'palletConveyor', params: { carrierLength: 1.2, workStop: false } } }]);
+    expect(r.findings.find((f) => f.check === 'play').message).toMatch(/^played a run of 4: every unit left the line/);
+  }, 120000);
+
+  it('two assembly cells: the transfer is a pallet conveyor with their carriers, no work stop, its length left to the gap', async () => {
+    const r = await build([cell('first'), cell('second')]);
+    expect(r.factory.graph.edges[0].transport).toEqual({ kind: 'conveyor', type: 'palletConveyor', params: { carrierLength: 1.2, workStop: false } });
+    expect(r.findings.find((f) => f.check === 'play').message).toMatch(/^played a run of 4: every unit left the line/);
+  }, 120000);
+
+  it('the reviewer refuses a transfer that can\'t fill the gap (a lift: no input / output, no length)', async () => {
+    const r = await build([cell('first'), cell('second')]);
+    const factory = structuredClone(r.factory);
+    factory.graph.edges[0].transport = { kind: 'conveyor', type: 'liftUnit', params: {} };
+    const { review } = await import('../../agents/reviewer/deterministic.js');
+    const found = review(registry, factory, { play: false }).findings.find((f) => f.path === 'graph.edges[0].transport.type');
+    expect(found).toMatchObject({ severity: 'error', message: 'transport "liftUnit" can\'t fill the gap between the stations: a transfer needs input and output ports and a length (it has ports top, bottom, no length)' });
+  }, 120000);
+});

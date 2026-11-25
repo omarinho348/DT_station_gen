@@ -21,7 +21,6 @@
 // `maxRetries` times per station; after that the station is handed to the owner with the findings.
 // Every model call goes through the LLM layer (budget guard, cache, mock mode).
 import { readFileSync } from 'node:fs';
-import { z } from 'zod';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { layoutSchema, machinesSchema, processSchema } from './schemas.js';
@@ -142,33 +141,58 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
   /** What a station hands over at its output (its conveyor's output port). */
   const goodsOf = (job, station) => goodsAt(job, conveyorOf(job, station), 'out');
 
-  /** Does a catalog conveyor carry these goods (its in / out ports)? */
-  function carries(type, goods) {
-    try {
-      const ports = Object.values(registry.componentSpec(type, {}, {}).ports ?? {});
-      return !goods || ports.some((p) => p.carries === goods);
-    } catch {
-      return false;
+  /**
+   * Can a catalog type serve as a line conveyor for these goods: a station's conveyor, or the transfer
+   * between two stations? It needs ports named input and output carrying them (a station's input /
+   * output default to those names) and a length (a transfer stretches over the gap). A lift (top /
+   * bottom, fixed size) carries pallets too but is neither: picked by goods alone, it left station 2
+   * with no input port and a void between the stations (owner report, 2026-11-25).
+   */
+  const conveysCache = new Map();
+  function conveys(type, goods) {
+    const k = `${type}|${goods}`;
+    if (!conveysCache.has(k)) {
+      let ok = false;
+      try {
+        const def = registry.getComponent(type);
+        const ports = registry.componentSpec(type, {}, {}).ports ?? {};
+        ok = ['conveyor', 'transport'].includes(def.category)
+          && ports.input?.direction === 'in' && ports.output?.direction === 'out'
+          && (!goods || (ports.input.carries === goods && ports.output.carries === goods))
+          && paramFields(def.params).some((f) => f.key === 'length');
+      } catch { ok = false; }
+      conveysCache.set(k, ok);
     }
+    return conveysCache.get(k);
   }
 
   /**
-   * The transport of the edge after `station`: the plan's, if it carries what the station hands over;
-   * otherwise the first catalog conveyor that does (a station on pallet carriers needs a pallet
-   * conveyor; benchmark tuning set, step 12.2).
+   * A transfer's params from a conveyor's: without `length` (it comes from the layout: the gap it
+   * fills), and without a work place where the type has one to switch off (a transfer only carries;
+   * a pallet conveyor's work stop also wants the conveyor longer than its carrier, which a short
+   * transfer is not: as the printer line's hand-written transfers).
+   */
+  const transferParams = (type, params = {}) => {
+    const out = Object.fromEntries(Object.entries(params).filter(([k]) => k !== 'length'));
+    const field = paramFields(registry.getComponent(type).params).find((f) => f.key === 'workStop');
+    if (field?.kind === 'boolean') out.workStop = false;
+    return out;
+  };
+
+  /**
+   * The transport of the edge after `station`, for the goods it hands over: the plan's, if it conveys
+   * them; else the station's own conveyor type (the same carriers: a pallet station is followed by a
+   * pallet conveyor), with its params of the same name (a carrier length); else the first catalog
+   * conveyor that conveys them. Never a fixed length: the transfer fills the gap.
    */
   function transportAfter(job, station) {
     const planned = job.line.transport.type;
     const goods = goodsOf(job, station);
-    if (carries(planned, goods)) return { kind: 'conveyor', type: planned, params: job.line.transport.params ?? {} };
-    const other = registry.components().filter((d) => ['conveyor', 'transport'].includes(d.category)).map((d) => d.type).sort().find((t) => carries(t, goods));
-    if (!other) return { kind: 'conveyor', type: planned, params: job.line.transport.params ?? {} };
-    // The transfer carries the same carriers as the station's conveyor: its params of the same name
-    // (a carrier length; the length itself comes from the layout).
+    if (conveys(planned, goods)) return { kind: 'conveyor', type: planned, params: transferParams(planned, job.line.transport.params) };
     const own = conveyorOf(job, station);
-    const keys = Object.keys(z.toJSONSchema(registry.getComponent(other).params, { io: 'input', unrepresentable: 'any' }).properties ?? {});
-    const params = own?.type === other ? Object.fromEntries(Object.entries(own.params ?? {}).filter(([k]) => keys.includes(k) && k !== 'length')) : {};
-    return { kind: 'conveyor', type: other, params };
+    if (own && conveys(own.type, goods)) return { kind: 'conveyor', type: own.type, params: transferParams(own.type, own.params) };
+    const other = conveyorFor(job, goods);
+    return { kind: 'conveyor', type: other ?? planned, params: transferParams(other ?? planned, other ? {} : job.line.transport.params) };
   }
 
   /** factory.json of these stations (in flow order), chained output → input over the right transports. */
@@ -301,20 +325,12 @@ export function createBuilder({ registry, llm, root = null, maxRetries = 2, play
   }
 
   /**
-   * A conveyor type that takes these goods in and hands them out: the line's transport if it does,
-   * else the first catalog conveyor (then transport) that does. null when none does.
+   * A line conveyor type for these goods (`conveys`): the line's transport if it is one, else the first
+   * catalog conveyor (then transport) that is. null when none is.
    */
   function conveyorFor(job, goods) {
-    const conveys = (type) => {
-      try {
-        const ports = Object.values(registry.componentSpec(type, {}, ctx(job.line)).ports ?? {});
-        return ports.some((p) => p.direction === 'in' && p.carries === goods) && ports.some((p) => p.direction === 'out' && p.carries === goods);
-      } catch {
-        return false;
-      }
-    };
-    if (conveys(job.line.transport.type)) return job.line.transport.type;
-    const of = (category) => registry.components().filter((d) => d.category === category).map((d) => d.type).sort().find(conveys);
+    if (conveys(job.line.transport.type, goods)) return job.line.transport.type;
+    const of = (category) => registry.components().filter((d) => d.category === category).map((d) => d.type).sort().find((t) => conveys(t, goods));
     return of('conveyor') ?? of('transport') ?? null;
   }
 
